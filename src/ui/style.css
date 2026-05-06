@@ -902,14 +902,12 @@ body {
   line-height: 1.4;
 }
 
-.day-deadline-item .item-kind svg {
-  width: 0.96rem;
-  height: 0.96rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.day-deadline-item .item-kind::before {
+  content: "";
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 /* ── Someday section (bottom of agenda) ──────────────────────────── */
