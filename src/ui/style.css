@@ -832,7 +832,7 @@ body {
 /* ── Day deadline items (deadlines within day cards) ─────────────── */
 
 .day-deadline-item {
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto 1fr auto;
   font-size: 0.90625rem;
 }
 
@@ -841,42 +841,34 @@ body {
 }
 
 .day-deadline-item.has-time {
-  grid-template-columns: auto auto auto 1fr auto;
-}
-
-.day-deadline-item .item-kind {
-  grid-column: 1;
+  grid-template-columns: auto auto 1fr auto;
 }
 
 .day-deadline-item .item-state {
-  grid-column: 2;
+  grid-column: 1;
 }
 
 .day-deadline-item .item-title {
-  grid-column: 3;
+  grid-column: 2;
   min-width: 0;
   font-weight: 500;
 }
 
 .day-deadline-item .tag-badges {
-  grid-column: 4;
+  grid-column: 3;
   justify-self: end;
 }
 
-.day-deadline-item.has-time .item-kind {
+.day-deadline-item.has-time .item-state {
   grid-column: 2;
 }
 
-.day-deadline-item.has-time .item-state {
+.day-deadline-item.has-time .item-title {
   grid-column: 3;
 }
 
-.day-deadline-item.has-time .item-title {
-  grid-column: 4;
-}
-
 .day-deadline-item.has-time .tag-badges {
-  grid-column: 5;
+  grid-column: 4;
 }
 
 .day-deadline-item.has-checkbox-list {
@@ -888,26 +880,8 @@ body {
   padding-top: 0;
 }
 
-.day-deadline-item .item-kind {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1rem;
-  height: 1rem;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  color: var(--accent-deadline);
-  border-radius: 0.25rem;
-  padding: 0;
-  line-height: 1.4;
-}
-
-.day-deadline-item .item-kind::before {
-  content: "";
-  width: 0.58rem;
-  height: 0.58rem;
-  border-radius: 999px;
-  background: currentColor;
+.day-deadline-item .item-state-ring {
+  border-color: var(--accent-deadline);
 }
 
 /* ── Someday section (bottom of agenda) ──────────────────────────── */
@@ -1261,11 +1235,11 @@ body {
 }
 
 .checkbox-list-day-deadline {
-  grid-template-columns: 5.1rem 2.35rem 1fr auto;
+  grid-template-columns: 2.35rem 1fr auto;
 }
 
 .checkbox-list-day-deadline-time {
-  grid-template-columns: auto 5.1rem 2.35rem 1fr auto;
+  grid-template-columns: auto 2.35rem 1fr auto;
 }
 
 .checkbox-list-scheduled {
@@ -1278,11 +1252,11 @@ body {
 }
 
 .checkbox-list-ring-state.checkbox-list-day-deadline {
-  grid-template-columns: 5.1rem 1.45rem 1fr auto;
+  grid-template-columns: 1.45rem 1fr auto;
 }
 
 .checkbox-list-ring-state.checkbox-list-day-deadline-time {
-  grid-template-columns: auto 5.1rem 1.45rem 1fr auto;
+  grid-template-columns: auto 1.45rem 1fr auto;
 }
 
 .checkbox-list-ring-state.checkbox-list-scheduled {
@@ -1319,14 +1293,13 @@ body {
 }
 
 .checkbox-list-deadline .checkbox-list-items,
-.checkbox-list-day-deadline .checkbox-list-items,
 .checkbox-list-scheduled-time .checkbox-list-items,
 .checkbox-list-timed-state .checkbox-list-items {
   grid-column: 3;
 }
 
 .checkbox-list-day-deadline-time .checkbox-list-items {
-  grid-column: 4;
+  grid-column: 3;
 }
 
 .checkbox-list-toggle-inline {

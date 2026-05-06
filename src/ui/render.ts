@@ -674,17 +674,9 @@ function renderItemForCategory(
     return renderItem(item, "scheduled-item", renderStateBadge(item.entry, "TODO"), "optional", true, checkboxListId, checkboxListKey);
   }
 
-  const kind = renderDeadlineMarker();
-  const row = renderItem(item, "day-deadline-item", [kind, renderStateBadge(item.entry, "TODO")], "optional", true, checkboxListId, checkboxListKey);
+  const row = renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional", true, checkboxListId, checkboxListKey);
   if (item.entry.checkboxItems.length > 0) row.classList.add("has-checkbox-list");
   return row;
-}
-
-function renderDeadlineMarker(): HTMLElement {
-  const marker = el("span", "item-kind");
-  marker.title = t("deadline");
-  marker.setAttribute("aria-label", t("deadline"));
-  return marker;
 }
 
 function renderAllDayMarker(): HTMLElement {

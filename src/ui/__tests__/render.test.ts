@@ -559,17 +559,14 @@ describe("renderAgenda", () => {
     const row = container.querySelector(".day-deadline-item") as HTMLElement | null;
     expect(row).not.toBeNull();
     const state = row?.querySelector(".item-state") as HTMLElement | null;
-    const kind = row?.querySelector(".item-kind") as HTMLElement | null;
     const title = row?.querySelector(".item-title") as HTMLElement | null;
     expect(state?.textContent).toBe("TODO");
     expect(state?.getAttribute("data-action")).toBe("toggle-done");
     expect(state?.getAttribute("data-line")).toBe("42");
-    expect(kind?.textContent).toBe("");
-    expect(kind?.getAttribute("aria-label")).toBe("DEADLINE");
-    expect(kind?.querySelector("svg")).toBeNull();
+    expect(row?.querySelector(".item-kind")).toBeNull();
     expect(title?.textContent).toContain("Due today");
     expect(title?.previousElementSibling).toBe(state);
-    expect(state?.previousElementSibling).toBe(kind);
+    expect(state?.previousElementSibling?.classList.contains("item-time")).toBe(true);
   });
 
   it("can render todo badges as rings with done items filled", () => {
