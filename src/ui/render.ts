@@ -674,11 +674,18 @@ function renderItemForCategory(
     return renderItem(item, "scheduled-item", renderStateBadge(item.entry, "TODO"), "optional", true, checkboxListId, checkboxListKey);
   }
 
-  const kind = el("span", "item-kind");
-  kind.textContent = t("deadline");
+  const kind = renderDeadlineMarker();
   const row = renderItem(item, "day-deadline-item", [kind, renderStateBadge(item.entry, "TODO")], "optional", true, checkboxListId, checkboxListKey);
   if (item.entry.checkboxItems.length > 0) row.classList.add("has-checkbox-list");
   return row;
+}
+
+function renderDeadlineMarker(): HTMLElement {
+  const marker = el("span", "item-kind");
+  marker.title = t("deadline");
+  marker.setAttribute("aria-label", t("deadline"));
+  marker.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 21V4"/><path d="M6 5h10l-1.5 4L16 13H6"/></svg>`;
+  return marker;
 }
 
 function renderAllDayMarker(): HTMLElement {

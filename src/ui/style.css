@@ -889,12 +889,27 @@ body {
 }
 
 .day-deadline-item .item-kind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
   font-size: 0.6875rem;
   font-weight: 500;
   color: var(--accent-deadline);
   border-radius: 0.25rem;
-  padding: 0 0.25rem;
+  padding: 0;
   line-height: 1.4;
+}
+
+.day-deadline-item .item-kind svg {
+  width: 0.96rem;
+  height: 0.96rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ── Someday section (bottom of agenda) ──────────────────────────── */

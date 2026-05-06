@@ -564,7 +564,9 @@ describe("renderAgenda", () => {
     expect(state?.textContent).toBe("TODO");
     expect(state?.getAttribute("data-action")).toBe("toggle-done");
     expect(state?.getAttribute("data-line")).toBe("42");
-    expect(kind?.textContent).toBe("DEADLINE");
+    expect(kind?.textContent).toBe("");
+    expect(kind?.getAttribute("aria-label")).toBe("DEADLINE");
+    expect(kind?.querySelector("svg")).not.toBeNull();
     expect(title?.textContent).toContain("Due today");
     expect(title?.previousElementSibling).toBe(state);
     expect(state?.previousElementSibling).toBe(kind);
