@@ -798,9 +798,11 @@ function renderCheckboxItems(
   if (hasPriority) list.classList.add("checkbox-list-has-priority");
   if (ringState) list.classList.add("checkbox-list-ring-state");
 
+  const hideCompleted = currentRenderOptions.hideCompletedAndSkipped === true;
   const rows = el("div", "checkbox-list-items");
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
+    if (hideCompleted && item.checked) continue;
     const row = el("div", "checkbox-item");
     if (item.checked) row.classList.add("checkbox-checked");
     row.dataset.action = "toggle-checkbox";
@@ -887,7 +889,7 @@ function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "tagCo
   return currentRenderOptions;
 }
 
-let currentRenderOptions: Pick<RenderAgendaOptions, "activeTagFilters" | "tagColorEditMode" | "hideTags" | "todoBadgeRings"> = {};
+let currentRenderOptions: Pick<RenderAgendaOptions, "activeTagFilters" | "tagColorEditMode" | "hideTags" | "todoBadgeRings" | "hideCompletedAndSkipped"> = {};
 
 function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, "activeTagFilters" | "tagColorEditMode" | "hideTags">): HTMLElement {
   const badges = el("span", "tag-badges");
@@ -968,6 +970,7 @@ export function renderAgenda(
     tagColorEditMode: options.tagColorEditMode ?? false,
     hideTags: options.hideTags ?? false,
     todoBadgeRings: options.todoBadgeRings ?? false,
+    hideCompletedAndSkipped: options.hideCompletedAndSkipped ?? false,
   };
   renderAgendaBase(container, week, deadlines, overdue, someday, today, options);
   currentRenderOptions = {};
