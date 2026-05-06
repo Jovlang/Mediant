@@ -2431,23 +2431,6 @@ body {
     width: 2.35rem;
   }
 
-  .checkbox-list,
-  .checkbox-list-deadline,
-  .checkbox-list-someday,
-  .checkbox-list-day-deadline,
-  .checkbox-list-day-deadline-time,
-  .checkbox-list-scheduled,
-  .checkbox-list-scheduled-time,
-  .checkbox-list-timed-state,
-  .checkbox-list-timed {
-    grid-template-columns: 1fr;
-    padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
-  }
-
-  .checkbox-list .checkbox-list-items {
-    grid-column: 1;
-  }
-
   .timed-item .item-time,
   .scheduled-item .item-time,
   .day-deadline-item .item-time {
