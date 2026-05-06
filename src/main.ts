@@ -347,6 +347,9 @@ function buildAddPanel(): void {
     updateDateTimePreview(deadInput.input, deadInput.preview);
   };
   typeRadios.forEach(r => r.addEventListener("change", () => {
+    if (r.checked && r.value === "todo" && whenInput.input.value && !schedInput.input.value) {
+      schedInput.input.value = whenInput.input.value;
+    }
     syncVisibility();
     scheduleEditAutosave();
   }));
