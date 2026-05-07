@@ -623,14 +623,6 @@ body {
   opacity: 0.86;
 }
 
-.deadline-item:has(+ .checkbox-list) {
-  padding-bottom: 0.22rem;
-}
-
-.deadlines-section > .checkbox-list:last-child {
-  padding-bottom: 0.78rem;
-}
-
 /* ── Scheduled items ──────────────────────────────────────────────── */
 
 .scheduled-item {
@@ -666,10 +658,6 @@ body {
 .day-deadline-item > .item-title {
   min-width: 0;
   font-weight: 500;
-}
-
-.day-deadline-item:has(+ .checkbox-list) {
-  padding-bottom: 0.28rem;
 }
 
 .day-deadline-item .item-state-ring {
@@ -960,25 +948,8 @@ body {
 .checkbox-list {
   display: block;
   position: relative;
-  padding: 0 var(--section-padding-x) 0 calc(var(--section-padding-x) + var(--checklist-indent));
-  margin-bottom: 0.5rem;
-  border-left: 3px solid transparent;
-  --checklist-indent: 1.5rem;
-}
-
-.checkbox-list-ring-state {
-  --checklist-indent: 1rem;
-}
-
-.checkbox-list-deadline {
-  border-left: 0;
-  padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width) + var(--checklist-indent));
-  padding-top: 0.16rem;
-}
-
-.someday-section .checkbox-list {
-  border-left: 0;
-  padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width) + var(--checklist-indent));
+  padding: 0;
+  margin-top: 0.2rem;
 }
 
 .item-progress-toggle {
@@ -1006,8 +977,7 @@ body {
 }
 
 .checkbox-list.is-collapsed {
-  padding-top: 0;
-  margin-bottom: 0;
+  margin-top: 0;
 }
 
 .checkbox-item {

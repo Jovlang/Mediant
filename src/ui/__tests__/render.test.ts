@@ -149,7 +149,7 @@ describe("renderAgenda", () => {
     const deadlineCheckboxes = Array.from(container.querySelectorAll<HTMLElement>(".deadlines-section .checkbox-item"));
     expect(deadlineCheckboxes.map((item) => item.textContent)).toEqual(["Confirm time", "Send notes"]);
     expect(deadlineCheckboxes[0]?.classList.contains("checkbox-checked")).toBe(true);
-    expect(container.querySelector(".deadlines-section .checkbox-list")?.classList.contains("checkbox-list-deadline")).toBe(true);
+    expect(container.querySelector(".deadlines-section .item-title-stack > .checkbox-list")).not.toBeNull();
     const deadlineChecklistToggle = container.querySelector<HTMLElement>(".deadlines-section .item-title .item-progress");
     const deadlineChecklist = container.querySelector<HTMLElement>(".deadlines-section .checkbox-list");
     expect(deadlineChecklist?.classList.contains("is-collapsed")).toBe(true);
@@ -649,7 +649,7 @@ describe("renderAgenda", () => {
     expect(states.map(state => state.dataset.state)).toEqual(["TODO", "TODO", "DONE", "TODO", "TODO"]);
     expect(states.every(state => state.querySelector(".item-state-ring") !== null)).toBe(true);
     expect(states[2]?.closest(".item-done")).not.toBeNull();
-    expect(container.querySelector<HTMLElement>(".checkbox-list")?.classList.contains("checkbox-list-ring-state")).toBe(true);
+    expect(container.querySelector<HTMLElement>(".item-title-stack > .checkbox-list")).not.toBeNull();
     expect(container.querySelector<HTMLButtonElement>(".todo-badge-style-toggle")).toBeNull();
   });
 

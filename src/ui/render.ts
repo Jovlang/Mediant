@@ -296,19 +296,18 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
       ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
       : false;
 
-    row.append(time, renderStateBadge(dl.entry), renderTitleWithTags(title, dl.entry.tags, dl.instanceNote));
-    section.appendChild(row);
-    if (dl.entry.checkboxItems.length > 0) {
-      section.appendChild(renderCheckboxItems(
+    const checklist = dl.entry.checkboxItems.length > 0
+      ? renderCheckboxItems(
         dl.entry.checkboxItems,
         dl.entry.sourceLineNumber,
-        "checkbox-list-deadline",
         checkboxListId ?? undefined,
         checkboxListKey ?? undefined,
-        usesRingState(dl.entry),
         collapsible,
-      ));
-    }
+      )
+      : null;
+
+    row.append(time, renderStateBadge(dl.entry), renderTitleWithTags(title, dl.entry.tags, dl.instanceNote, checklist));
+    section.appendChild(row);
   }
 
   return section;
@@ -358,19 +357,18 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
       ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
       : false;
 
-    row.append(state, renderTitleWithTags(title, item.entry.tags));
-    section.appendChild(row);
-    if (item.entry.checkboxItems.length > 0) {
-      section.appendChild(renderCheckboxItems(
+    const checklist = item.entry.checkboxItems.length > 0
+      ? renderCheckboxItems(
         item.entry.checkboxItems,
         item.entry.sourceLineNumber,
-        "checkbox-list-badge",
         checkboxListId ?? undefined,
         checkboxListKey ?? undefined,
-        row.classList.contains("has-ring-state"),
         collapsible,
-      ));
-    }
+      )
+      : null;
+
+    row.append(state, renderTitleWithTags(title, item.entry.tags, null, checklist));
+    section.appendChild(row);
   }
 
   return section;
@@ -450,18 +448,6 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
         section.appendChild(body);
       }
 
-      // Checkbox items
-      if (item.entry.checkboxItems.length > 0) {
-        section.appendChild(renderCheckboxItems(
-          item.entry.checkboxItems,
-          item.entry.sourceLineNumber,
-          getCheckboxLayoutClass(item),
-          checkboxListId ?? undefined,
-          checkboxListKey ?? undefined,
-          itemRow.classList.contains("has-ring-state"),
-          item.entry.progress !== null,
-        ));
-      }
     }
 
     // If all items are before now, append the line at the end
@@ -530,8 +516,19 @@ function renderItem(
     title.insertBefore(document.createTextNode(" "), title.firstChild);
     title.insertBefore(renderOverrideChip(item.override, moveDirection(item)), title.firstChild);
   }
-  if (checkboxListId && checkboxListKey) wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey);
-  children.push(renderTitleWithTags(title, item.entry.tags, item.instanceNote));
+  const collapsible = checkboxListId && checkboxListKey
+    ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
+    : false;
+  const checklist = item.entry.checkboxItems.length > 0
+    ? renderCheckboxItems(
+      item.entry.checkboxItems,
+      item.entry.sourceLineNumber,
+      checkboxListId ?? undefined,
+      checkboxListKey ?? undefined,
+      item.entry.progress !== null && collapsible,
+    )
+    : null;
+  children.push(renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist));
   row.append(...children);
   return row;
 }
@@ -666,10 +663,8 @@ function renderTitle(
 function renderCheckboxItems(
   items: readonly { text: string; checked: boolean }[],
   parentSourceLine: number,
-  layoutClass?: string,
   listId?: string,
   listKey?: string,
-  ringState: boolean = false,
   collapsible: boolean = true,
 ): HTMLElement {
   const list = el("div", "checkbox-list");
@@ -681,9 +676,6 @@ function renderCheckboxItems(
     renderedCheckboxListKeys.add(listKey);
     if (collapsible && isCheckboxListCollapsed(listKey)) list.classList.add("is-collapsed");
   }
-  if (layoutClass) list.classList.add(layoutClass);
-  if (ringState) list.classList.add("checkbox-list-ring-state");
-
   const hideCompleted = currentRenderOptions.hideCompletedAndSkipped === true;
   const rows = el("div", "checkbox-list-items");
   if (listKey) rows.dataset.listKey = listKey;
@@ -777,11 +769,6 @@ function wireProgressBadgeAsToggle(title: HTMLElement, listId: string, listKey: 
   return true;
 }
 
-function getCheckboxLayoutClass(item: AgendaItem): string {
-  if (item.entry.todo) return "checkbox-list-badge";
-  return item.startTime ? "checkbox-list-time" : "checkbox-list-badge";
-}
-
 function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags"> {
   return currentRenderOptions;
 }
@@ -802,9 +789,14 @@ function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, 
   return badges;
 }
 
-function renderTitleWithTags(title: HTMLElement, tags: readonly string[], instanceNote: string | null = null): HTMLElement {
-  if (currentRenderOptions.hideTags && !instanceNote) return title;
-  if (tags.length === 0 && !instanceNote) return title;
+function renderTitleWithTags(
+  title: HTMLElement,
+  tags: readonly string[],
+  instanceNote: string | null = null,
+  checklist: HTMLElement | null = null,
+): HTMLElement {
+  if (currentRenderOptions.hideTags && !instanceNote && !checklist) return title;
+  if (tags.length === 0 && !instanceNote && !checklist) return title;
 
   const stack = el("span", "item-title-stack");
   stack.appendChild(title);
@@ -814,6 +806,7 @@ function renderTitleWithTags(title: HTMLElement, tags: readonly string[], instan
     note.textContent = instanceNote;
     stack.appendChild(note);
   }
+  if (checklist) stack.appendChild(checklist);
   return stack;
 }
 
