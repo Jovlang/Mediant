@@ -14,9 +14,8 @@ import {
 } from "./org/sourceEdit.ts";
 import { stepDate } from "./org/timestamp.ts";
 import { generateAgenda, collectDeadlines, collectOverdueItems, collectSomedayItems } from "./agenda/generate.ts";
-import { renderAgenda, openTagColorPicker } from "./ui/render.ts";
+import { renderAgenda } from "./ui/render.ts";
 import type { AgendaDay } from "./agenda/model.ts";
-import { getTagColor } from "./ui/tagColors.ts";
 import { scheduleNotifications } from "./ui/notifications.ts";
 import { DAY_ABBREVS, MONTH_ABBREVS, formatDayNumber } from "./dateLabels.ts";
 import { t } from "./i18n.ts";
@@ -35,7 +34,6 @@ let serverMode = false;
 let serverVersion: string | null = null;
 let agendaLoaded = false;
 let activeTagFilters = new Set<string>();
-let tagColorEditMode = false;
 let hideTags = localStorage.getItem("mediant-hide-tags") === "true";
 let hideEmptyDays = localStorage.getItem("mediant-hide-empty-days") === "true";
 let hideCompletedAndSkipped = localStorage.getItem("mediant-hide-completed") === "true";
@@ -701,10 +699,9 @@ function makeTagPicker(label: string, id: string): TagPicker {
     for (const tag of selected) {
       const pill = document.createElement("span");
       pill.className = "tag-picker-pill";
-      pill.style.setProperty("--tag-color", getTagColor(tag));
 
       const text = document.createElement("span");
-      text.textContent = tag;
+      text.textContent = `#${tag}`;
 
       const remove = document.createElement("button");
       remove.className = "tag-picker-pill-x";
@@ -734,11 +731,7 @@ function makeTagPicker(label: string, id: string): TagPicker {
     for (const tag of matches) {
       const opt = document.createElement("div");
       opt.className = "tag-picker-option";
-      opt.textContent = tag;
-      const swatch = document.createElement("span");
-      swatch.className = "tag-picker-swatch";
-      swatch.style.setProperty("--tag-color", getTagColor(tag));
-      opt.prepend(swatch);
+      opt.textContent = `#${tag}`;
       const select = (): void => {
         selected.push(tag);
         input.value = "";
@@ -2124,14 +2117,8 @@ function clearTagFilters(): void {
   render();
 }
 
-function toggleTagColorMode(): void {
-  tagColorEditMode = !tagColorEditMode;
-  render();
-}
-
 function toggleHideTags(): void {
   hideTags = !hideTags;
-  if (hideTags) tagColorEditMode = false;
   localStorage.setItem("mediant-hide-tags", hideTags ? "true" : "false");
   render();
 }
@@ -2161,7 +2148,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return Boolean(el.closest("input, textarea, select, [contenteditable='true']"));
 }
 
-type ShortcutAction = "next" | "prev" | "today" | "add" | "quick-capture" | "color-mode" | "hide-empty-days" | "hide-completed" | "month-ahead" | "clear-filters";
+type ShortcutAction = "next" | "prev" | "today" | "add" | "quick-capture" | "hide-empty-days" | "hide-completed" | "month-ahead" | "clear-filters";
 
 const SHORTCUT_ACTIONS: Record<string, ShortcutAction> = {
   n: "next",
@@ -2169,7 +2156,6 @@ const SHORTCUT_ACTIONS: Record<string, ShortcutAction> = {
   t: "today",
   a: "add",
   q: "quick-capture",
-  c: "color-mode",
   h: "hide-empty-days",
   d: "hide-completed",
   m: "month-ahead",
@@ -2220,9 +2206,6 @@ async function init(): Promise<void> {
     } else if (action === "quick-capture") {
       e.preventDefault();
       openQuickCapture();
-    } else if (action === "color-mode") {
-      e.preventDefault();
-      toggleTagColorMode();
     } else if (action === "hide-empty-days") {
       e.preventDefault();
       toggleHideEmptyDays();
@@ -2452,7 +2435,6 @@ function render(): void {
 
   renderAgenda(container, filteredWeek, filteredDeadlines, filteredOverdue, filteredSomeday, today, {
     activeTagFilters: [...activeTagFilters].sort(),
-    tagColorEditMode,
     hideTags,
     hideEmptyDays,
     hideCompletedAndSkipped,
@@ -2495,18 +2477,6 @@ function setupNavigation(): void {
     closeSettingsMenusForClick(e.target);
 
     const targetEl = e.target instanceof HTMLElement ? e.target : null;
-    const tagEl = targetEl?.closest<HTMLElement>(".tag[data-tag]");
-    if (tagEl) {
-      const tag = tagEl.dataset.tag;
-      if (!tag) return;
-      if (tagColorEditMode || e.altKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        openTagColorPicker(tagEl);
-        return;
-      }
-    }
-
     const btn = targetEl?.closest<HTMLElement>("[data-action]");
     if (!btn) return;
     const action = btn.dataset.action;
@@ -2526,8 +2496,6 @@ function setupNavigation(): void {
         btn.blur();
         lastPanelFocusEl = null;
       }
-    } else if (action === "toggle-tag-color-mode") {
-      toggleTagColorMode();
     } else if (action === "toggle-hide-tags") {
       toggleHideTags();
     } else if (action === "toggle-hide-empty-days") {

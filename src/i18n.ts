@@ -22,8 +22,6 @@ const messages = {
     toggleNotifications: "Toggle notifications",
     enableNotifications: "Enable notifications",
     disableNotifications: "Disable notifications",
-    clickTagToFilter: "Click tag to filter",
-    clickTagToChangeColor: "Click tag to change color",
     hideEmptyDays: "Hide empty days",
     showEmptyDays: "Show empty days",
     hideTags: "Hide tags",
@@ -43,7 +41,6 @@ const messages = {
     clear: "Clear",
     filterByTag: "Filter by tag {tag}",
     removeTagFilter: "Remove tag filter {tag}",
-    changeColorForTag: "Change color for tag {tag}",
 
     // Day rows
     addEventOn: "Add event on {date}",
@@ -143,8 +140,6 @@ const messages = {
     toggleNotifications: "Slå av/på varsler",
     enableNotifications: "Slå på varsler",
     disableNotifications: "Slå av varsler",
-    clickTagToFilter: "Trykk på etikett for å filtrere",
-    clickTagToChangeColor: "Trykk på etikett for å endre farge",
     hideEmptyDays: "Skjul tomme dager",
     showEmptyDays: "Vis tomme dager",
     hideTags: "Skjul etiketter",
@@ -163,7 +158,6 @@ const messages = {
     clear: "Tøm",
     filterByTag: "Filtrer på etikett {tag}",
     removeTagFilter: "Fjern etikettfilter {tag}",
-    changeColorForTag: "Endre farge for etikett {tag}",
 
     addEventOn: "Legg til hendelse {date}",
     weekAbbrev: "U",

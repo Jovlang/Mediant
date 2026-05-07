@@ -15,26 +15,12 @@ const notificationFns = vi.hoisted(() => ({
   }),
 }));
 
-const tagFns = vi.hoisted(() => ({
-  setTagColor: vi.fn(),
-}));
-
 vi.mock("../notifications.ts", () => ({
   notificationsEnabled: () => notificationsState.enabled,
   setNotificationsEnabled: notificationFns.setNotificationsEnabled,
   requestPermission: notificationFns.requestPermission,
   clearScheduled: notificationFns.clearScheduled,
   scheduleNotifications: vi.fn(),
-}));
-
-vi.mock("../tagColors.ts", () => ({
-  getTagColor: (tag: string) => {
-    if (tag === "work") return "#3366ff";
-    if (tag === "music") return "#00aa88";
-    return "#999999";
-  },
-  setTagColor: tagFns.setTagColor,
-  TAG_DEFAULT_COLOR: "#999999",
 }));
 
 import { createNotificationToggle, renderAgenda } from "../render.ts";
@@ -48,7 +34,6 @@ describe("renderAgenda", () => {
     notificationFns.clearScheduled.mockClear();
     notificationFns.requestPermission.mockClear();
     notificationFns.setNotificationsEnabled.mockClear();
-    tagFns.setTagColor.mockClear();
     setLocale("en");
   });
 
@@ -150,8 +135,7 @@ describe("renderAgenda", () => {
     expect(overdueNote?.textContent).toBe("Call before paying");
     expect(overdueNote?.classList.contains("overdue-note")).toBe(true);
     const firstOverdueRow = container.querySelectorAll<HTMLElement>(".overdue-section .overdue-item")[0];
-    expect(firstOverdueRow?.classList.contains("has-tag-fringe")).toBe(true);
-    expect(firstOverdueRow?.style.getPropertyValue("--global-row-fringe-color")).toBe("#3366ff");
+    expect(firstOverdueRow?.querySelector(".tag[data-tag='work']")?.textContent).toBe("#work");
     const secondOverdueRow = container.querySelectorAll<HTMLElement>(".overdue-section .overdue-item")[1];
     expect(secondOverdueRow?.classList.contains("has-priority")).toBe(false);
     expect(secondOverdueRow?.querySelector(".item-title .item-priority")).toBeNull();
@@ -163,9 +147,8 @@ describe("renderAgenda", () => {
     expect(deadlineNote?.textContent).toBe("Bring receipt");
     expect(deadlineNote?.classList.contains("deadline-note")).toBe(true);
     const firstDeadlineRow = container.querySelectorAll<HTMLElement>(".deadlines-section .deadline-item")[0];
-    expect(firstDeadlineRow?.classList.contains("has-tag-fringe")).toBe(true);
     expect(firstDeadlineRow?.classList.contains("has-priority")).toBe(false);
-    expect(firstDeadlineRow?.style.getPropertyValue("--global-row-fringe-color")).toBe("#00aa88");
+    expect(firstDeadlineRow?.querySelector(".tag[data-tag='music']")?.textContent).toBe("#music");
     const deadlineCheckboxes = Array.from(container.querySelectorAll<HTMLElement>(".deadlines-section .checkbox-item"));
     expect(deadlineCheckboxes.map((item) => item.textContent)).toEqual(["Confirm time", "Send notes"]);
     expect(deadlineCheckboxes[0]?.classList.contains("checkbox-checked")).toBe(true);
@@ -184,9 +167,8 @@ describe("renderAgenda", () => {
     deadlineChecklistToggle!.click();
     expect(deadlineChecklist?.classList.contains("is-collapsed")).toBe(true);
     const timedRow = container.querySelector<HTMLElement>(".timed-item");
-    expect(timedRow?.classList.contains("has-tag-fringe")).toBe(true);
-    expect(timedRow?.style.getPropertyValue("--tag-fringe-color")).toBe("#3366ff");
     expect(timedRow?.querySelector(".tag[data-tag='work']")?.closest(".item-title-stack")).not.toBeNull();
+    expect(timedRow?.querySelector(".tag[data-tag='work']")?.textContent).toBe("#work");
     expect(timedRow?.querySelector(":scope > .tag-badges")).toBeNull();
     const secondDeadlineRow = container.querySelectorAll<HTMLElement>(".deadlines-section .deadline-item")[1];
     expect(secondDeadlineRow?.classList.contains("has-priority")).toBe(false);
@@ -379,7 +361,7 @@ describe("renderAgenda", () => {
     expect(toggle?.classList.contains("is-on")).toBe(true);
   });
 
-  it("hides agenda tag badges and tag fringes when requested", () => {
+  it("hides agenda tag labels when requested", () => {
     const container = document.createElement("div");
     const week = makeWeek([
       [makeItem({ title: "Tagged event", date: new Date(2026, 3, 20, 14, 0), startTime: "14:00", tags: ["work"] })],
@@ -397,14 +379,12 @@ describe("renderAgenda", () => {
     });
 
     expect(container.querySelector(".timed-item .tag[data-tag='work']")).toBeNull();
-    expect(container.querySelector(".timed-item")?.classList.contains("has-tag-fringe")).toBe(false);
     expect(container.querySelector(".active-tag-filters .tag[data-tag='work']")).not.toBeNull();
 
     const toggle = container.querySelector<HTMLButtonElement>(".hide-tags-toggle");
     expect(toggle?.textContent).toBe("Show tags");
     expect(toggle?.getAttribute("aria-pressed")).toBe("true");
     expect(toggle?.classList.contains("is-on")).toBe(true);
-    expect(container.querySelector(".agenda-settings-menu .tag-color-mode-toggle")).toBeNull();
   });
 
   it("hides the days card when every day is hidden", () => {
@@ -715,68 +695,7 @@ describe("renderAgenda", () => {
     expect(row?.querySelector(".item-title")?.textContent).toContain("Pay bills");
   });
 
-  it("updates all rendered tag pills when the color picker changes", () => {
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    const sharedEntry = makeEntry({ title: "Shared tag", tags: ["work"] });
-    const week = makeWeek([
-      [makeItem({ entry: sharedEntry, date: new Date(2026, 3, 20, 9, 0), startTime: "09:00", tags: ["work"] })],
-      [makeItem({ entry: sharedEntry, date: new Date(2026, 3, 21, 10, 0), startTime: "10:00", tags: ["work"] })],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ]);
-
-    renderAgenda(container, week, [], [], [], new Date(2026, 3, 20, 8, 0));
-
-    const pickers = Array.from(container.querySelectorAll<HTMLInputElement>(".tag-color-picker"));
-    expect(pickers.length).toBeGreaterThan(1);
-    const tagsBefore = Array.from(container.querySelectorAll<HTMLElement>(".tag[data-tag='work']"));
-    const beforeValues = tagsBefore.map((tag) => tag.style.getPropertyValue("--tag-color"));
-    pickers[0].value = "#123456";
-    pickers[0].dispatchEvent(new Event("input", { bubbles: true }));
-
-    expect(tagFns.setTagColor).toHaveBeenCalledWith("work", "#123456");
-    const tags = Array.from(container.querySelectorAll<HTMLElement>(".tag[data-tag='work']"));
-    const afterValues = tags.map((tag) => tag.style.getPropertyValue("--tag-color"));
-    expect(new Set(afterValues).size).toBe(1);
-    expect(afterValues[0]).not.toBe(beforeValues[0]);
-  });
-
-  it("recolors selector-unfriendly tag names without throwing", () => {
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    const oddTag = 'quote"tag';
-    const sharedEntry = makeEntry({ title: "Shared odd tag", tags: [oddTag] });
-    const week = makeWeek([
-      [makeItem({ entry: sharedEntry, date: new Date(2026, 3, 20, 9, 0), startTime: "09:00", tags: [oddTag] })],
-      [makeItem({ entry: sharedEntry, date: new Date(2026, 3, 21, 10, 0), startTime: "10:00", tags: [oddTag] })],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ]);
-
-    renderAgenda(container, week, [], [], [], new Date(2026, 3, 20, 8, 0));
-
-    const pickers = Array.from(container.querySelectorAll<HTMLInputElement>(".tag-color-picker"));
-    expect(pickers.length).toBeGreaterThan(1);
-    expect(() => {
-      pickers[0].value = "#654321";
-      pickers[0].dispatchEvent(new Event("input", { bubbles: true }));
-    }).not.toThrow();
-
-    expect(tagFns.setTagColor).toHaveBeenCalledWith(oddTag, "#654321");
-    const tags = Array.from(container.querySelectorAll<HTMLElement>(".tag"))
-      .filter(tag => tag.dataset.tag === oddTag);
-    expect(tags.length).toBeGreaterThan(1);
-    expect(new Set(tags.map(tag => tag.style.background)).size).toBe(1);
-  });
-
-  it("renders active tag filters and color-edit mode state in the header", () => {
+  it("renders active tag filters in the header", () => {
     const container = document.createElement("div");
     const week = makeWeek([
       [makeItem({ title: "Tagged", date: new Date(2026, 3, 20, 9, 0), startTime: "09:00", tags: ["work"] })],
@@ -790,7 +709,6 @@ describe("renderAgenda", () => {
 
     renderAgenda(container, week, [], [], [], new Date(2026, 3, 20, 8, 0), {
       activeTagFilters: ["work"],
-      tagColorEditMode: true,
       monthAhead: true,
     });
 
@@ -798,9 +716,7 @@ describe("renderAgenda", () => {
     expect(filterRow).not.toBeNull();
     expect(filterRow?.textContent).toContain("Filtering:");
     expect(filterRow?.querySelector(".tag[data-tag='work']")?.classList.contains("is-selected")).toBe(true);
-    expect(container.querySelector(".tag-color-mode-toggle")?.classList.contains("is-on")).toBe(true);
-    expect(container.querySelector(".timed-item .tag[data-tag='work']")?.classList.contains("is-color-editable")).toBe(true);
-    expect(container.querySelector(".timed-item .tag[data-tag='work'] .tag-color-edit-icon")?.textContent).toBe("🖌");
+    expect(filterRow?.querySelector(".tag[data-tag='work']")?.textContent).toBe("#work");
     expect(container.querySelector(".agenda-settings-menu .agenda-settings-summary")?.textContent).toBe("Settings");
     expect(container.querySelector(".agenda-settings-menu .month-ahead-toggle")?.textContent).toBe("Show fewer days");
     expect(container.querySelector(".agenda-settings-menu .month-ahead-toggle")?.classList.contains("is-on")).toBe(true);

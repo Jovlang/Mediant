@@ -148,7 +148,6 @@ src/
     __tests__/         — Agenda generation tests
   ui/
     render.ts          — DOM rendering from AgendaDay[] + DeadlineItem[] + OverdueItem[]
-    tagColors.ts       — Dynamic tag color management (auto-assign, localStorage)
     notifications.ts   — Browser notification preference and timer scheduling
     style.css          — All styles (CSS grid layout, responsive)
   i18n.ts              — English/Norwegian UI strings and locale persistence
@@ -164,10 +163,9 @@ index.html             — Minimal shell with #agenda container
 - **Upcoming deadlines** section below overdue (global, sorted by due date), labeled as `Today` or compact day counts like `12d`, with urgency colors that progress from red to orange to yellow to a calmer tone as the due date gets farther away
 - **Day cards** (7 consecutive days by default, or 30 days with the month-ahead toggle) each containing:
   - All-day events (holidays, birthdays) in a subtle grouped section
-  - Timed events with a monospace, content-width time column, tag-colored left border, tag badges (colors auto-assigned from a palette, persisted in localStorage)
+  - Timed events with a monospace, content-width time column and plain `#tag` labels under the title
   - Scheduled tasks inline (time → TODO/DONE badge → title)
 - **Tag filtering** — clicking a tag filters the agenda, overdue, deadlines, and someday sections. Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible. Active filters are shown in the header and can be cleared in one click.
-- **Tag color mode** — a `Color tags` toggle switches tag clicks from filtering to recoloring. `Alt`-clicking a tag opens its color picker directly without switching modes. This is hidden while tags are hidden.
 - **Tag picker keyboard support** — in the add/edit panel, `ArrowUp`/`ArrowDown` move through tag suggestions, `Enter` selects the highlighted suggestion, and `Backspace` on an empty tag field removes the last selected tag pill.
 - **Priority badges** — A/B/C priority cookies rendered as small colored badges (red/amber/blue) before the item title, including overdue and upcoming deadline rows
 - **Progress badges** — `[2/3]` shown as a small badge next to the title (green when complete, gray otherwise)
@@ -178,7 +176,7 @@ index.html             — Minimal shell with #agenda container
 - **Quick capture** — press `q` to open a fixed one-line capture overlay. `Enter` appends the text as an undated `TODO` under `* Tasks`, clears the field, and keeps focus ready for the next task. `Escape` or clicking outside the field closes it.
 - **DONE items** rendered at reduced opacity in muted text
 - **Today** indicated by blue card border and small dot marker
-- **Hide tags** — the `Hide tags` toggle removes agenda tag badges and tag-colored row fringes while preserving active tag filters in the header. The tag color-mode setting is hidden while tags are hidden. The preference is stored in `localStorage`.
+- **Hide tags** — the `Hide tags` toggle removes agenda tag labels while preserving active tag filters in the header. The preference is stored in `localStorage`.
 - **Hide empty days** — the `Hide empty days` toggle removes days with no visible agenda items from the active range. This is useful with tag filters; if every day is hidden, the day-card container is hidden too. The preference is stored in `localStorage`.
 - **Hide completed & skipped** — the `Hide completed & skipped` toggle drops DONE entries and skipped recurrence occurrences from the day cards and the someday section. Pairs naturally with `Hide empty days` to collapse the view down to outstanding work. The preference is stored in `localStorage`.
 - **TODO badges** — TODO/DONE badges render as compact rings: open TODO items show an empty ring and DONE items show a filled ring, with the same click/keyboard toggle behavior and accessible labels.
@@ -186,7 +184,7 @@ index.html             — Minimal shell with #agenda container
 - **Notifications** — a settings toggle requests browser notification permission and schedules reminders for timed events happening today, 1 hour before their start time. The preference is stored in `localStorage`.
 - **Language** — a settings toggle switches the UI between English and Norwegian, with the chosen locale stored in `localStorage`.
 - **Range navigation** with prev/next/today buttons
-- **Keyboard shortcuts** — `n` next range, `p` previous range, `t` jump to today, `a` open the add-item panel, `q` open quick capture, `c` toggle tag color mode, `h` toggle hide empty days, `d` toggle hide completed & skipped, `m` toggle month-ahead view, `x` clear active tag filters. Shortcuts are disabled while typing in form fields.
+- **Keyboard shortcuts** — `n` next range, `p` previous range, `t` jump to today, `a` open the add-item panel, `q` open quick capture, `h` toggle hide empty days, `d` toggle hide completed & skipped, `m` toggle month-ahead view, `x` clear active tag filters. Shortcuts are disabled while typing in form fields.
 - **Now line** on today's timed section
 - **Add-item panel** for creating TODO tasks and events from the UI. New TODOs are appended under `* Tasks`; new events are appended under `* Events`.
 - **Edit-item panel** for updating an existing entry in place (preserves body text). Edits autosave as fields change; there is no separate Save step. Clicking a recurring occurrence reveals a "This occurrence" section alongside the series fields, where skip/stop-repeat toggles, the move date/time field, the note field, and Clear override write exception properties keyed on the unshifted base date.
@@ -219,8 +217,7 @@ Mediant uses your browser's `localStorage` for the following:
 | Key | Purpose |
 |---|---|
 | `mediant-org-source` | Pasted Org content (static mode only — ignored in server mode) |
-| `mediant-tag-colors` | Tag-to-color assignments, so tag colors stay consistent |
-| `mediant-hide-tags` | Whether agenda tag badges and tag-colored row fringes are hidden |
+| `mediant-hide-tags` | Whether agenda tag labels are hidden |
 | `mediant-hide-empty-days` | Whether empty days are hidden in the agenda view |
 | `mediant-hide-completed` | Whether DONE entries and skipped occurrences are hidden in day cards and someday |
 | `mediant-month-ahead` | Whether the agenda shows 30 days instead of 7 |
@@ -228,7 +225,7 @@ Mediant uses your browser's `localStorage` for the following:
 | `mediant-locale` | Selected UI locale (`en` or `no`) |
 | `theme` | Light/dark mode preference |
 
-In static mode all data stays in the browser. In server mode the Org source lives in the file you passed to the CLI; tag colors and theme are still browser-local.
+In static mode all data stays in the browser. In server mode the Org source lives in the file you passed to the CLI; UI preferences are still browser-local.
 
 ## License
 

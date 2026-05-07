@@ -6,14 +6,12 @@
  */
 
 import type { AgendaDay, AgendaItem, DeadlineItem, OverdueItem, SomedayItem } from "../agenda/model.ts";
-import { getTagColor, setTagColor, TAG_DEFAULT_COLOR } from "./tagColors.ts";
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, clearScheduled, scheduleNotifications } from "./notifications.ts";
 import { DAY_NAMES, MONTH_NAMES, formatDayMonth, formatDayNumber } from "../dateLabels.ts";
 import { t, type Locale, getLocale, setLocale, SUPPORTED_LOCALES } from "../i18n.ts";
 
 export interface RenderAgendaOptions {
   readonly activeTagFilters?: readonly string[];
-  readonly tagColorEditMode?: boolean;
   readonly hideTags?: boolean;
   readonly hideEmptyDays?: boolean;
   readonly hideCompletedAndSkipped?: boolean;
@@ -170,17 +168,6 @@ function renderHeader(startDate: Date, endDate: Date, options: RenderAgendaOptio
   return header;
 }
 
-function createColorModeToggle(options: RenderAgendaOptions): HTMLButtonElement {
-  const colorModeBtn = el("button", "tag-color-mode-toggle");
-  const label = options.tagColorEditMode ? t("clickTagToFilter") : t("clickTagToChangeColor");
-  colorModeBtn.textContent = label;
-  colorModeBtn.dataset.action = "toggle-tag-color-mode";
-  colorModeBtn.setAttribute("aria-label", label);
-  colorModeBtn.setAttribute("aria-pressed", options.tagColorEditMode ? "true" : "false");
-  if (options.tagColorEditMode) colorModeBtn.classList.add("is-on");
-  return colorModeBtn;
-}
-
 function createHideEmptyDaysToggle(options: RenderAgendaOptions): HTMLButtonElement {
   const hideEmptyDaysBtn = el("button", "hide-empty-days-toggle");
   const label = options.hideEmptyDays ? t("showEmptyDays") : t("hideEmptyDays");
@@ -249,9 +236,6 @@ function renderSettingsMenu(options: RenderAgendaOptions): HTMLElement {
   menu.appendChild(summary);
 
   const panel = el("div", "agenda-settings-panel");
-  if (!options.hideTags) {
-    panel.appendChild(createColorModeToggle(options));
-  }
   panel.append(
     createHideTagsToggle(options),
     createHideEmptyDaysToggle(options),
@@ -301,8 +285,6 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
     if (dl.entry.todo === "DONE") row.classList.add("item-done");
     if (dl.entry.checkboxItems.length > 0) row.classList.add("has-checkbox-list");
     if (usesRingState(dl.entry)) row.classList.add("has-ring-state");
-    applyPrimaryTagFringe(row, dl.entry.tags, "compact");
-
     const meta = el("span", "deadline-meta");
     const time = el("span", "item-time");
     time.textContent = formatDeadlineDueText(dl.daysUntil);
@@ -355,8 +337,6 @@ function renderOverdue(items: OverdueItem[]): HTMLElement {
   for (const item of items) {
     const row = el("div", "overdue-item");
     if (item.instanceNote) row.classList.add("has-instance-note");
-    applyPrimaryTagFringe(row, item.entry.tags, "compact");
-
     const meta = el("span", "overdue-meta");
     const time = el("span", "item-time");
     time.textContent = `-${item.daysOverdue}d`;
@@ -387,8 +367,6 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
     const row = el("div", "someday-item");
     if (item.entry.todo === "DONE") row.classList.add("item-done");
     if (usesRingState(item.entry)) row.classList.add("has-ring-state");
-    applyPrimaryTagFringe(row, item.entry.tags, "compact");
-
     const state = renderStateBadge(item.entry, "TODO");
     const checkboxListId = item.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
     const checkboxListKey = checkboxListId ? `someday:${item.entry.sourceLineNumber}` : null;
@@ -545,8 +523,6 @@ function renderItem(
   if (item.entry.todo === "DONE") row.classList.add("item-done");
   if (item.skipped) row.classList.add("item-skipped");
 
-  applyPrimaryTagFringe(row, item.entry.tags);
-
   const children: HTMLElement[] = [];
   const badges = badge ? (Array.isArray(badge) ? badge : [badge]) : [];
 
@@ -679,20 +655,6 @@ function renderAllDayMarker(): HTMLElement {
   marker.setAttribute("aria-label", t("allDay"));
   marker.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>`;
   return marker;
-}
-
-function applyPrimaryTagFringe(row: HTMLElement, tags: readonly string[], mode: "border" | "compact" = "border"): void {
-  if (currentRenderOptions.hideTags) return;
-  const primaryTag = tags[0];
-  if (!primaryTag) return;
-
-  const color = getTagColor(primaryTag);
-  row.classList.add("has-tag-fringe");
-  if (mode === "compact") {
-    row.style.setProperty("--global-row-fringe-color", color);
-    return;
-  }
-  row.style.setProperty("--tag-fringe-color", color);
 }
 
 // ── State badge ─────────────────────────────────────────────────────
@@ -896,13 +858,13 @@ function getCheckboxLayoutClass(item: AgendaItem): string {
   return item.entry.todo ? "checkbox-list-timed-state" : "checkbox-list-timed";
 }
 
-function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "tagColorEditMode" | "hideTags"> {
+function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags"> {
   return currentRenderOptions;
 }
 
-let currentRenderOptions: Pick<RenderAgendaOptions, "activeTagFilters" | "tagColorEditMode" | "hideTags" | "hideCompletedAndSkipped"> = {};
+let currentRenderOptions: Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags" | "hideCompletedAndSkipped"> = {};
 
-function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, "activeTagFilters" | "tagColorEditMode" | "hideTags">): HTMLElement {
+function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags">): HTMLElement {
   const badges = el("span", "tag-badges");
   if (options.hideTags) {
     badges.hidden = true;
@@ -911,7 +873,6 @@ function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, 
   for (const tag of tags) {
     badges.appendChild(renderTag(tag, {
       selected: (options.activeTagFilters ?? []).includes(tag),
-      colorEditMode: options.tagColorEditMode ?? false,
     }));
   }
   return badges;
@@ -927,51 +888,22 @@ function renderTitleWithTags(title: HTMLElement, tags: readonly string[]): HTMLE
 
 function renderTag(
   tag: string,
-  options: { selected?: boolean; colorEditMode?: boolean } = {},
+  options: { selected?: boolean } = {},
 ): HTMLElement {
   const span = el("span", "tag");
   span.dataset.tag = tag;
   span.dataset.action = "toggle-tag-filter";
-  span.style.setProperty("--tag-color", getTagColor(tag));
-  span.textContent = tag;
+  span.textContent = `#${tag}`;
   span.setAttribute("role", "button");
   span.setAttribute("tabindex", "0");
   span.setAttribute("aria-pressed", options.selected ? "true" : "false");
   span.setAttribute(
     "aria-label",
-    options.colorEditMode
-      ? t("changeColorForTag", { tag })
-      : options.selected
-        ? t("removeTagFilter", { tag })
-        : t("filterByTag", { tag }),
+    options.selected
+      ? t("removeTagFilter", { tag })
+      : t("filterByTag", { tag }),
   );
   if (options.selected) span.classList.add("is-selected");
-  if (options.colorEditMode) span.classList.add("is-color-editable");
-
-  if (options.colorEditMode) {
-    const icon = el("span", "tag-color-edit-icon");
-    icon.textContent = "🖌";
-    icon.setAttribute("aria-hidden", "true");
-    span.appendChild(icon);
-  }
-
-  const picker = document.createElement("input");
-  picker.type = "color";
-  picker.className = "tag-color-picker";
-  picker.value = getTagColor(tag);
-
-  picker.addEventListener("click", (e) => {
-    e.stopPropagation();
-  });
-
-  picker.addEventListener("input", () => {
-    setTagColor(tag, picker.value);
-    document.querySelectorAll<HTMLElement>(".tag[data-tag]").forEach((el) => {
-      if (el.dataset.tag === tag) el.style.setProperty("--tag-color", picker.value);
-    });
-  });
-
-  span.appendChild(picker);
   return span;
 }
 
@@ -986,17 +918,11 @@ export function renderAgenda(
 ): void {
   currentRenderOptions = {
     activeTagFilters: options.activeTagFilters ?? [],
-    tagColorEditMode: options.tagColorEditMode ?? false,
     hideTags: options.hideTags ?? false,
     hideCompletedAndSkipped: options.hideCompletedAndSkipped ?? false,
   };
   renderAgendaBase(container, week, deadlines, overdue, someday, today, options);
   currentRenderOptions = {};
-}
-
-export function openTagColorPicker(tagEl: HTMLElement): void {
-  const picker = tagEl.querySelector<HTMLInputElement>(".tag-color-picker");
-  picker?.click();
 }
 
 function formatTimeRange(start: string | null, end: string | null): string {

@@ -81,23 +81,16 @@ describe("main.ts integration", () => {
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(settingsMenu!.open).toBe(false);
 
-    document.querySelector<HTMLButtonElement>(".tag-color-mode-toggle")!.click();
-    await flush();
-    expect(document.querySelector(".tag-color-mode-toggle")?.classList.contains("is-on")).toBe(true);
-
     const hideTagsBtn = document.querySelector<HTMLButtonElement>(".hide-tags-toggle");
     expect(hideTagsBtn).not.toBeNull();
     hideTagsBtn!.click();
     await flush();
     expect(localStorage.getItem("mediant-hide-tags")).toBe("true");
     expect(document.querySelector(".hide-tags-toggle")?.classList.contains("is-on")).toBe(true);
-    expect(document.querySelector(".tag-color-mode-toggle")).toBeNull();
     expect(document.querySelector(".scheduled-item .tag[data-tag='work']")).toBeNull();
-    expect(document.querySelector(".scheduled-item")?.classList.contains("has-tag-fringe")).toBe(false);
     document.querySelector<HTMLButtonElement>(".hide-tags-toggle")!.click();
     await flush();
     expect(localStorage.getItem("mediant-hide-tags")).toBe("false");
-    expect(document.querySelector(".tag-color-mode-toggle")?.classList.contains("is-on")).toBe(false);
     expect(document.querySelector(".scheduled-item .tag[data-tag='work']")).not.toBeNull();
 
     const hideEmptyDaysBtn = document.querySelector<HTMLButtonElement>(".hide-empty-days-toggle");
@@ -190,14 +183,6 @@ describe("main.ts integration", () => {
     clearFiltersBtn!.click();
     await flush();
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Inbox"))).toBe(true);
-
-    const colorModeBtn = document.querySelector<HTMLButtonElement>(".tag-color-mode-toggle");
-    expect(colorModeBtn).not.toBeNull();
-    colorModeBtn!.click();
-    await flush();
-    expect(document.querySelector(".tag[data-tag='work']")?.classList.contains("is-color-editable")).toBe(true);
-    colorModeBtn!.click();
-    await flush();
 
     const inboxTitle = Array.from(document.querySelectorAll<HTMLElement>(".item-title"))
       .find(el => el.textContent?.includes("Inbox"));
@@ -340,10 +325,9 @@ describe("main.ts integration", () => {
     const selectedTags = selectedPills.flatMap(pill =>
       Array.from(pill.querySelectorAll<HTMLElement>("span")).map(el => el.textContent).filter((text): text is string => Boolean(text)),
     );
-    const workPill = selectedPills.find(pill => pill.textContent?.includes("work")) ?? null;
-    expect(workPill?.style.getPropertyValue("--tag-color")).toMatch(/^#[0-9a-f]{6}$/i);
+    const workPill = selectedPills.find(pill => pill.textContent?.includes("#work")) ?? null;
     expect(workPill?.style.background).toBe("");
-    expect(selectedTags).toContain("work");
+    expect(selectedTags).toContain("#work");
 
     titleInput!.value = "Yoga deluxe";
     schedInput!.value = "2";
