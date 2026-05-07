@@ -1,7 +1,7 @@
 # TODO
 
 ## General
-- [ ] Multilingual support
+- [x] Multilingual support
 - [ ] Mobile notifications
 - [ ] ICS import/export
 - [ ] Subscribe to ICS URLs
@@ -29,12 +29,12 @@ Goal: support Org's `<DATE …>--<DATE …>` spanning timestamps so multi-day ev
 
 ### Data model
 
-- [ ] Extend `OrgTimestamp` with `endDate: string | null` (parallel to `endTime`); single-day timestamps keep `endDate: null`
+- [x] Extend `OrgTimestamp` with `endDate: string | null` (parallel to `endTime`); single-day timestamps keep `endDate: null`
 - [ ] At parse time, drop the range and fall back to body text if `endDate < date` or if the two endpoints carry different repeaters
 
 ### Parser
 
-- [ ] Recognize `<DATE …>--<DATE …>` in `TIMESTAMP_RE` (or a sibling regex driven from the same parser entry point) and emit a single `OrgTimestamp` with `endDate` set
+- [x] Recognize `<DATE …>--<DATE …>` in `TIMESTAMP_RE` (or a sibling regex driven from the same parser entry point) and emit a single `OrgTimestamp` with `endDate` set
 - [ ] Carry the repeater from the opening endpoint; require the closing endpoint's repeater (if present) to match
 
 ### Agenda generation
