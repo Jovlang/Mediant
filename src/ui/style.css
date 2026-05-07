@@ -957,7 +957,7 @@ body {
   border-radius: 3px;
   font-weight: 500;
   line-height: 1.15;
-  color: var(--text-dim);
+  color: #5E7296;
   background: transparent;
   white-space: nowrap;
   cursor: pointer;
