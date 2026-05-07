@@ -280,10 +280,8 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
 
   for (const dl of deadlines) {
     const row = el("div", "deadline-item");
-    if (dl.instanceNote) row.classList.add("has-instance-note");
     row.classList.add(getDeadlineUrgencyClass(dl.daysUntil));
     if (dl.entry.todo === "DONE") row.classList.add("item-done");
-    if (dl.entry.checkboxItems.length > 0) row.classList.add("has-checkbox-list");
     if (usesRingState(dl.entry)) row.classList.add("has-ring-state");
     const meta = el("span", "deadline-meta");
     const time = el("span", "item-time");
@@ -336,7 +334,6 @@ function renderOverdue(items: OverdueItem[]): HTMLElement {
 
   for (const item of items) {
     const row = el("div", "overdue-item");
-    if (item.instanceNote) row.classList.add("has-instance-note");
     const meta = el("span", "overdue-meta");
     const time = el("span", "item-time");
     time.textContent = `-${item.daysOverdue}d`;
@@ -645,9 +642,7 @@ function renderItemForCategory(
     return renderItem(item, "scheduled-item", renderStateBadge(item.entry, "TODO"), "optional", true, checkboxListId, checkboxListKey);
   }
 
-  const row = renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional", true, checkboxListId, checkboxListKey);
-  if (item.entry.checkboxItems.length > 0) row.classList.add("has-checkbox-list");
-  return row;
+  return renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional", true, checkboxListId, checkboxListKey);
 }
 
 function renderAllDayMarker(): HTMLElement {

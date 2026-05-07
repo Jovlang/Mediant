@@ -593,7 +593,7 @@ body {
   padding-inline: 0.08rem;
 }
 
-.overdue-item.has-instance-note {
+.overdue-item:has(+ .item-instance-note) {
   padding-bottom: 0.18rem;
 }
 
@@ -601,7 +601,8 @@ body {
   grid-template-columns: 4.1ch 4.35rem 2.35rem 1fr;
 }
 
-.item-instance-note.overdue-note {
+.item-instance-note.overdue-note,
+.item-instance-note.deadline-note {
   padding-top: 0;
   padding-bottom: 0.78rem;
 }
@@ -693,11 +694,11 @@ body {
   opacity: 0.86;
 }
 
-.deadline-item.has-instance-note {
+.deadline-item:has(+ .item-instance-note) {
   padding-bottom: 0.18rem;
 }
 
-.deadline-item.has-checkbox-list {
+.deadline-item:has(+ .checkbox-list) {
   padding-bottom: 0.22rem;
 }
 
@@ -708,11 +709,6 @@ body {
 .deadline-note {
   grid-template-columns: 4.35ch minmax(0, 1fr) auto;
   column-gap: 0.72rem;
-}
-
-.item-instance-note.deadline-note {
-  padding-top: 0;
-  padding-bottom: 0.78rem;
 }
 
 .deadline-note .item-instance-note-text {
@@ -795,12 +791,8 @@ body {
   grid-column: 3;
 }
 
-.day-deadline-item.has-checkbox-list {
+.day-deadline-item:has(+ .checkbox-list) {
   padding-bottom: 0.28rem;
-}
-
-.has-checkbox-list + .checkbox-list {
-  padding-top: 0;
 }
 
 .day-deadline-item .item-state-ring {
@@ -1131,7 +1123,7 @@ body {
   grid-template-columns: auto 1fr auto;
   align-items: start;
   position: relative;
-  padding: 0.48rem var(--section-padding-x) 0;
+  padding: 0 var(--section-padding-x);
   margin-bottom: 0.5rem;
   border-left: 3px solid transparent;
   gap: 0.35rem 0.8rem;
@@ -1176,7 +1168,6 @@ body {
 
 .someday-section .checkbox-list {
   border-left: 0;
-  padding-top: 0;
   padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
 }
 
