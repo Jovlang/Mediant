@@ -2,6 +2,7 @@
 
 ## General
 - [x] Multilingual support
+- [x] Browser notifications
 - [ ] Mobile notifications
 - [ ] ICS import/export
 - [ ] Subscribe to ICS URLs

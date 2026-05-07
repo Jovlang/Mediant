@@ -140,6 +140,7 @@ src/
     timestamp.ts       — Timestamp parsing, Date conversion, recurrence expansion, per-occurrence exception application
     parser.ts          — Line-by-line Org file parser (including exception properties inside PROPERTIES drawers)
     drawer.ts          — Property-drawer mutation helpers (upsertProperty / removeProperty)
+    sourceEdit.ts      — Raw Org source mutation helpers for UI writes
     __tests__/         — Timestamp, parser, and drawer tests
   agenda/
     model.ts           — Render types (AgendaItem, AgendaDay, AgendaWeek, DeadlineItem, OverdueItem, SomedayItem)
@@ -148,7 +149,9 @@ src/
   ui/
     render.ts          — DOM rendering from AgendaDay[] + DeadlineItem[] + OverdueItem[]
     tagColors.ts       — Dynamic tag color management (auto-assign, localStorage)
+    notifications.ts   — Browser notification preference and timer scheduling
     style.css          — All styles (CSS grid layout, responsive)
+  i18n.ts              — English/Norwegian UI strings and locale persistence
   main.ts              — Entry point: probes server, hydrates, wires parse → generate → render
 server/
   cli.mjs              — Node CLI + HTTP server (no deps). Serves dist/ and exposes /api/source + /api/events.
@@ -168,7 +171,7 @@ index.html             — Minimal shell with #agenda container
 - **Tag picker keyboard support** — in the add/edit panel, `ArrowUp`/`ArrowDown` move through tag suggestions, `Enter` selects the highlighted suggestion, and `Backspace` on an empty tag field removes the last selected tag pill.
 - **Priority badges** — A/B/C priority cookies rendered as small colored badges (red/amber/blue) before the item title, including overdue and upcoming deadline rows
 - **Progress badges** — `[2/3]` shown as a small badge next to the title (green when complete, gray otherwise)
-- **Checkbox lists** — `- [ ]`/`- [X]` items rendered as a mini checklist under agenda items; toggleable in the edit panel for TODO tasks. Events never show or write checklist state. Lists are collapsed by default — a small `>`/`<` disclosure control next to the item title expands or collapses the list, with state preserved across rerenders and independent per duplicate rendering of the same entry.
+- **Checkbox lists** — `- [ ]`/`- [X]` items rendered as a mini checklist under agenda items. The checkbox icon toggles completion, the label opens inline text editing, and an inline add control creates new subtasks; the edit panel also exposes the full checklist editor for TODO tasks. Events never show or write checklist state. Lists are collapsed by default — a small `>`/`<` disclosure control next to the item title expands or collapses the list, with state preserved across rerenders and independent per duplicate rendering of the same entry.
 - **Recurrence exceptions** — per-occurrence deviations on a repeating entry (skip, shift by `±N(m|h|d)`, reschedule to another date/time, attach a one-off note). Shifted/rescheduled occurrences show a `← Moved` or `→ Moved` chip (arrow points to the direction of the move); skipped occurrences are de-emphasised — a small `•` prefixes the title, the row dims, and the title shifts to muted text. Notes render as an italic line under the item. Exceptions are stored in the entry's `:PROPERTIES:` drawer keyed by the unshifted base date (e.g. `:EXCEPTION-2026-05-04: shift +45m`), so they round-trip cleanly.
 - **Series truncation** — `:SERIES-UNTIL: YYYY-MM-DD` stops a repeating series at an exclusive end date, evaluated on the unshifted base slots. This lets one heading end on a handoff date while a successor heading starts on that same date without overlap, and still allows older valid slots to be moved past the cutoff.
 - **Someday section** at the bottom — undated TODO items (no timestamps, no SCHEDULED/DEADLINE), shown in source order so quick captures stay in capture order
@@ -180,6 +183,8 @@ index.html             — Minimal shell with #agenda container
 - **Hide completed & skipped** — the `Hide completed & skipped` toggle drops DONE entries and skipped recurrence occurrences from the day cards and the someday section. Pairs naturally with `Hide empty days` to collapse the view down to outstanding work. The preference is stored in `localStorage`.
 - **TODO badge style** — the `Show TODO rings` / `Show TODO text` toggle switches TODO/DONE badges between text badges and compact rings. In ring mode, open TODO items show an empty ring and DONE items show a filled ring. The preference is stored in `localStorage`.
 - **Month-ahead view** — a settings toggle expands the day cards from 7 days to 30 days. Prev/next navigation moves by the active range length, and the preference is stored in `localStorage`.
+- **Notifications** — a settings toggle requests browser notification permission and schedules reminders for timed events happening today, 1 hour before their start time. The preference is stored in `localStorage`.
+- **Language** — a settings toggle switches the UI between English and Norwegian, with the chosen locale stored in `localStorage`.
 - **Range navigation** with prev/next/today buttons
 - **Keyboard shortcuts** — `n` next range, `p` previous range, `t` jump to today, `a` open the add-item panel, `q` open quick capture, `c` toggle tag color mode, `h` toggle hide empty days, `d` toggle hide completed & skipped, `m` toggle month-ahead view, `x` clear active tag filters. Shortcuts are disabled while typing in form fields.
 - **Now line** on today's timed section
@@ -192,7 +197,7 @@ index.html             — Minimal shell with #agenda container
 
 - **TypeScript** — parser, data model, agenda generation, rendering
 - **Vite** — dev server and bundling
-- **Vitest** — 210 tests across parser, timestamp, agenda, and drawer suites
+- **Vitest** — 356 tests across parser, timestamp, source-edit, agenda, UI, notification, i18n, main, and server suites
 - **HTML/CSS** — responsive agenda view with CSS grid
 - **Node** (built-ins only) — optional local server with no runtime npm dependencies
 
@@ -220,6 +225,8 @@ Mediant uses your browser's `localStorage` for the following:
 | `mediant-hide-completed` | Whether DONE entries and skipped occurrences are hidden in day cards and someday |
 | `mediant-todo-badge-rings` | Whether TODO/DONE badges render as rings instead of text |
 | `mediant-month-ahead` | Whether the agenda shows 30 days instead of 7 |
+| `mediant-notifications` | Whether browser reminders are enabled |
+| `mediant-locale` | Selected UI locale (`en` or `no`) |
 | `theme` | Light/dark mode preference |
 
 In static mode all data stays in the browser. In server mode the Org source lives in the file you passed to the CLI; tag colors and theme are still browser-local.

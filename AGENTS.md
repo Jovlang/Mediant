@@ -29,15 +29,16 @@ Three clearly separated stages — do not collapse them:
 | `src/org/parser.ts` | Line-by-line Org parser → `OrgEntry[]`. Delegates all timestamp work to `timestamp.ts`. Reads `:EXCEPTION-<date>:`, `:EXCEPTION-NOTE-<date>:`, and `:SERIES-UNTIL:` keys inside `:PROPERTIES:` drawers; every other drawer and every other property key is skipped. |
 | `src/org/model.ts` | Parser output types: `OrgEntry` (including `seriesUntil`), `OrgPlanning`, `TodoState`, `Priority`, `CheckboxItem`, `RecurrenceOverride`, `RecurrenceException`. |
 | `src/org/drawer.ts` | Property-drawer text mutation helpers (`upsertProperty`, `removeProperty`). Operate on raw source strings; preserve key order and other drawer content; used by the edit panel to write exception properties. |
-| `src/org/sourceEdit.ts` | Pure raw-source mutation helpers used by UI actions: replace an entry block while preserving body text, toggle TODO/DONE, advance repeating timestamps when marking done, toggle checkbox state, and update progress cookies. |
+| `src/org/sourceEdit.ts` | Pure raw-source mutation helpers used by UI actions: replace an entry block while preserving body text, toggle TODO/DONE, advance repeating timestamps when marking done, toggle/edit/insert/remove checkbox rows, and update progress cookies. |
 | `src/agenda/model.ts` | Agenda/render types: `AgendaItem`, `AgendaDay`, `AgendaWeek`, `DeadlineItem`, `OverdueItem`, `SomedayItem`, `RenderCategory`, `AgendaItemOverride`. |
 | `src/agenda/generate.ts` | Range generation from a start date, recurrence expansion with exceptions (bounded to requested range), classification, sorting, overdue/someday collection. |
 | `src/dateLabels.ts` | Shared English day/month labels for agenda headers and date formatting. Keep display labels centralized here instead of duplicating arrays. |
 | `src/ui/render.ts` | DOM rendering from `AgendaDay[]` + `DeadlineItem[]` + `OverdueItem[]`. Renders the per-occurrence override chip, instance note, active tag-filter state, and tag color-mode UI. |
 | `src/ui/tagColors.ts` | Dynamic tag color management. Auto-assigns from palette, persists in localStorage. |
 | `src/ui/notifications.ts` | Browser notification preference, permission request, and timer scheduling for timed events happening today. Notifications fire 1 hour before the start time and are rescheduled on render. |
+| `src/i18n.ts` | English/Norwegian UI strings, locale detection, and locale persistence (`mediant-locale`). |
 | `src/ui/style.css` | All styles. CSS grid layout with content-width time column. |
-| `src/main.ts` | Entry point. Probes `/api/source` on boot; if present, enters server mode (hydrates from the server, subscribes to `/api/events` for external file changes). Otherwise shows the textarea input screen backed by localStorage. Owns global keyboard shortcuts, tag-filter state, tag color mode, quick-capture overlay, add-item & edit-item panels, and the "This occurrence" section that writes exception properties via the drawer helpers. |
+| `src/main.ts` | Entry point. Probes `/api/source` on boot; if present, enters server mode (hydrates from the server, subscribes to `/api/events` for external file changes). Otherwise shows the textarea input screen backed by localStorage. Owns global keyboard shortcuts, tag-filter state, tag color mode, quick-capture overlay, inline checkbox edits, add-item & edit-item panels, and the "This occurrence" section that writes exception properties via the drawer helpers. |
 | `server/cli.mjs` | Node CLI + HTTP server. `mediant <file.org> [--port N] [--daemon]`. Serves `dist/` plus `GET/PUT /api/source` (with `If-Match` version checks) and `GET /api/events` SSE backed by `fs.watch`. Node built-ins only, no deps. |
 | `elisp/mediant-org-agenda.el` | Optional Emacs Org agenda integration. Global minor mode that runs on `org-agenda-finalize-hook`, reads Mediant exception properties from source headings, filters cancelled/cutoff occurrences, inserts moved synthetic agenda lines, and renders exception notes. |
 | `elisp/mediant-org-agenda-test.el` | ERT tests for the optional Org agenda integration. Uses temporary Org files and real `org-agenda-list` generation to verify exception display behavior. |
@@ -122,12 +123,13 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 - **TODO badge style** — settings toggle switches TODO/DONE badges between text badges and compact rings. Ring mode renders TODO as an empty ring and DONE as a filled ring while keeping the same click/keyboard toggle behavior and accessible labels. Preference persists in localStorage (`mediant-todo-badge-rings`).
 - **Priority badges** — `[#A]`/`[#B]`/`[#C]` rendered as small colored badges (red/amber/blue) nested inside the item title so the row grid templates stay fixed. Do not duplicate priority in metadata rows; it should appear before the title everywhere.
 - **Progress badges** — `[2/3]` rendered as a small badge next to the title (green when complete, gray otherwise)
-- **Checkbox lists** — `- [ ]`/`- [X]` items rendered as a mini checklist under the agenda item; checked items dimmed. The checklist editor is available for TODO tasks, including repeating tasks, and hidden for events. Events never write checklist state. Lists are collapsed by default; a small disclosure control inside the item title (`>` collapsed, `<` expanded) toggles visibility per list. Collapse state is keyed by a stable per-list identity so it survives full agenda rerenders, and duplicate renderings of the same entry (e.g. an upcoming-deadlines row and the matching day-card row) keep independent state.
+- **Checkbox lists** — `- [ ]`/`- [X]` items rendered as a mini checklist under the agenda item; checked items dimmed. The checkbox icon toggles completion, the label opens inline text editing, and an inline add affordance inserts new rows. The edit-panel checklist editor is available for TODO tasks, including repeating tasks, and hidden for events. Events never write checklist state. Lists are collapsed by default; a small disclosure control inside the item title (`>` collapsed, `<` expanded) toggles visibility per list. Collapse state is keyed by a stable per-list identity so it survives full agenda rerenders, and duplicate renderings of the same entry (e.g. an upcoming-deadlines row and the matching day-card row) keep independent state.
 - **Recurrence-exception chip** — shifted or rescheduled occurrences show a small muted chip nested before the title: `← Moved` / `→ Moved` (arrow direction reflects whether the occurrence moved earlier or later than the base slot). Skipped occurrences are de-emphasised instead of badged: a `•` glyph prefixes the title, the row drops to opacity 0.55, and the title shifts to muted text; the word "Skipped" lives only in the tooltip / aria-label. Tooltip carries the detail (`+45m`, `from 2026-05-11 17:00-18:00`, `Skipped occurrence`).
 - **Instance note** — `:EXCEPTION-NOTE-<date>:` renders as an italic one-liner directly under the occurrence, aligned with the row's title column.
 - **Now line** on today's card — orange line positioned proportionally within the timed section
 - **Navigation** — prev/next by the active range length, "Today" button returns to today as start date
 - **Notifications** — toolbar toggle requests browser notification permission and persists `mediant-notifications`. When enabled, the client schedules notifications for timed events that occur today, 1 hour before their start time; timers are cleared and rebuilt on render.
+- **Language** — settings toggle switches between English and Norwegian UI strings. Preference persists in localStorage (`mediant-locale`); initial locale follows stored preference, then browser language when supported, then English.
 - **Keyboard shortcuts** — `n` next range, `p` previous range, `t` jump to today, `a` open add-item panel, `q` open quick capture, `c` toggle tag color mode, `h` toggle hide empty days, `d` toggle hide completed & skipped, `m` toggle month-ahead view, `x` clear active tag filters. Disabled while focus is inside text inputs, textareas, selects, or other editable controls.
 - **Someday section** at the bottom — undated TODO items (no timestamps, no SCHEDULED/DEADLINE), shown in source order so quick captures stay in capture order
 - **Quick capture** — fixed one-line overlay opened with `q`. Placeholder text is `Quick task capture`; `Enter` appends the text as an undated `TODO` child under top-level `* Tasks`, clears the field, and keeps focus ready for repeated capture. `Escape` or clicking outside the input exits. Captured Org-looking text is sanitized so priority cookies, trailing tags, progress cookies, and timestamps remain plain title text instead of changing agenda classification.
@@ -138,20 +140,21 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 
 ## Testing
 
-Tests across ten suites:
+Vitest currently covers ten suites (356 tests), plus optional ERT coverage for the Emacs integration:
 
 - `src/org/__tests__/timestamp.test.ts` — parsing, helpers, recurrence expansion edge cases (month boundaries, leap years), per-occurrence exception application (cancelled / shift / reschedule, including midnight rollover in both directions)
 - `src/org/__tests__/parser.test.ts` — headings, states, tags, planning, timestamps, body text, drawers, checkbox items, progress cookies, `parseOverride` grammar, exception-key scanning inside PROPERTIES drawers, full integration
 - `src/org/__tests__/drawer.test.ts` — `upsertProperty` / `removeProperty` round-trips (create drawer in correct position, append/update/remove keys, drop empty drawer, idempotent writes)
-- `src/org/__tests__/sourceEdit.test.ts` — raw Org source rewrites for edit-panel saves, TODO/DONE toggles including repeater advancement, checkbox toggles, and progress-cookie updates
+- `src/org/__tests__/sourceEdit.test.ts` — raw Org source rewrites for edit-panel saves, TODO/DONE toggles including repeater advancement, checkbox toggles/edits/inserts/removals, and progress-cookie updates
 - `src/agenda/__tests__/generate.test.ts` — classification, recurrence, sorting, day-range structure, exception threading onto `AgendaItem`, full integration
 - `src/ui/__tests__/render.test.ts` — DOM structure, global sections, badges, tags, checklist collapse behavior, recurrence chips/notes, tag filtering state, and toolbar controls
 - `src/ui/__tests__/notifications.test.ts` — notification preference, permission handling, and scheduling behavior
+- `src/__tests__/i18n.test.ts` — locale detection, stored locale preference, string lookup, and fallback behavior
 - `src/__tests__/main.test.ts` — browser-level integration for static mode, TODO toggles, series editing, occurrence exceptions, and persistence
 - `server/cli.test.ts` — CLI/server behavior for static serving, source API versioning, SSE behavior, and daemon plumbing
 - `elisp/mediant-org-agenda-test.el` — ERT coverage for the optional Org agenda integration using real temporary Org agenda generation
 
-Always run tests after changes to parser, timestamp, drawer, source-edit, agenda, rendering, notification, main integration, server logic, or the optional Elisp integration.
+Always run tests after changes to parser, timestamp, drawer, source-edit, agenda, rendering, notification, i18n, main integration, server logic, or the optional Elisp integration.
 
 ## Conventions
 
