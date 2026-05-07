@@ -2454,3 +2454,26 @@ body {
   text-decoration: underline;
   text-decoration-color: var(--text-dim);
 }
+
+/* ── iOS focus-zoom suppression ────────────────────────────────────── */
+
+/*
+ * Safari/iOS WebKit auto-zooms when a text field with computed font-size
+ * below 16px gains focus. Bump inputs and textareas to 16px on iOS only,
+ * gated by a Safari/iOS-only @supports query so desktop sizing is unchanged.
+ */
+@supports (-webkit-touch-callout: none) {
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  textarea {
+    font-size: 16px;
+  }
+}
