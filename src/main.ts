@@ -272,22 +272,6 @@ function buildAddPanel(): void {
   ]);
   form.appendChild(typeGroup.container);
 
-  // Priority
-  const priorityGroup = makeRadioGroup(t("priority"), "add-priority", [
-    { value: "A", label: "A" },
-    { value: "B", label: "B" },
-    { value: "C", label: "C" },
-    { value: "", label: t("priorityNone"), checked: true },
-  ]);
-  form.appendChild(priorityGroup.container);
-
-  // Wire priority radios to editingPriority
-  const priorityRadios = priorityGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-priority']");
-  priorityRadios.forEach(r => r.addEventListener("change", () => {
-    editingPriority = (r.value === "A" || r.value === "B" || r.value === "C") ? r.value : null;
-    scheduleEditAutosave();
-  }));
-
   // Title
   const titleInput = makeTextInput(t("title"), "add-title");
   form.appendChild(titleInput.container);
@@ -328,6 +312,22 @@ function buildAddPanel(): void {
   // Tags
   const tagPicker = makeTagPicker(t("tags"), "add-tags");
   form.appendChild(tagPicker.container);
+
+  // Priority
+  const priorityGroup = makeRadioGroup(t("priority"), "add-priority", [
+    { value: "A", label: "A" },
+    { value: "B", label: "B" },
+    { value: "C", label: "C" },
+    { value: "", label: t("priorityNone"), checked: true },
+  ]);
+  form.appendChild(priorityGroup.container);
+
+  // Wire priority radios to editingPriority
+  const priorityRadios = priorityGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-priority']");
+  priorityRadios.forEach(r => r.addEventListener("change", () => {
+    editingPriority = (r.value === "A" || r.value === "B" || r.value === "C") ? r.value : null;
+    scheduleEditAutosave();
+  }));
 
   // Show/hide fields based on type
   const typeRadios = typeGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-type']");
