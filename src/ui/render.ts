@@ -283,10 +283,8 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
     row.classList.add(getDeadlineUrgencyClass(dl.daysUntil));
     if (dl.entry.todo === "DONE") row.classList.add("item-done");
     if (usesRingState(dl.entry)) row.classList.add("has-ring-state");
-    const meta = el("span", "deadline-meta");
     const time = el("span", "item-time");
     time.textContent = formatDeadlineDueText(dl.daysUntil);
-    meta.append(time);
 
     const checkboxListId = dl.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
     const checkboxListKey = checkboxListId
@@ -298,20 +296,13 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
       ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
       : false;
 
-    const main = el("span", "deadline-main");
-    main.append(renderStateBadge(dl.entry), renderTitleWithTags(title, dl.entry.tags));
-
-    row.append(meta, main);
+    row.append(time, renderStateBadge(dl.entry), renderTitleWithTags(title, dl.entry.tags, dl.instanceNote));
     section.appendChild(row);
-    if (dl.instanceNote) {
-      section.appendChild(renderGlobalInstanceNote(dl.instanceNote, "deadline-note"));
-    }
     if (dl.entry.checkboxItems.length > 0) {
       section.appendChild(renderCheckboxItems(
         dl.entry.checkboxItems,
         dl.entry.sourceLineNumber,
         "checkbox-list-deadline",
-        dl.entry.priority !== null,
         checkboxListId ?? undefined,
         checkboxListKey ?? undefined,
         usesRingState(dl.entry),
@@ -334,22 +325,17 @@ function renderOverdue(items: OverdueItem[]): HTMLElement {
 
   for (const item of items) {
     const row = el("div", "overdue-item");
-    const meta = el("span", "overdue-meta");
     const time = el("span", "item-time");
     time.textContent = `-${item.daysOverdue}d`;
     const kind = el("span", "item-kind");
     kind.textContent = item.kind === "deadline" ? t("deadline") : t("overdueScheduled");
     const state = renderStateBadge(item.entry);
-    meta.append(time, kind, state);
 
     const title = renderTitle(item.entry);
     if (item.baseDate) title.dataset.baseDate = item.baseDate;
 
-    row.append(meta, renderTitleWithTags(title, item.entry.tags));
+    row.append(time, kind, state, renderTitleWithTags(title, item.entry.tags, item.instanceNote));
     section.appendChild(row);
-    if (item.instanceNote) {
-      section.appendChild(renderGlobalInstanceNote(item.instanceNote, "overdue-note"));
-    }
   }
 
   return section;
@@ -379,7 +365,6 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
         item.entry.checkboxItems,
         item.entry.sourceLineNumber,
         "checkbox-list-badge",
-        item.entry.priority !== null,
         checkboxListId ?? undefined,
         checkboxListKey ?? undefined,
         row.classList.contains("has-ring-state"),
@@ -429,9 +414,6 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
     const section = el("div", "allday-section");
     for (const item of allDay) {
       section.appendChild(renderItemForCategory(item));
-      if (item.instanceNote) {
-        section.appendChild(renderInstanceNote(item));
-      }
     }
     card.appendChild(section);
   }
@@ -461,11 +443,6 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
       const itemRow = renderItemForCategory(item, checkboxListId, checkboxListKey);
       section.appendChild(itemRow);
 
-      // Instance note (per-occurrence)
-      if (item.instanceNote) {
-        section.appendChild(renderInstanceNote(item));
-      }
-
       // Body text
       if (item.entry.body) {
         const body = el("div", "item-body");
@@ -479,7 +456,6 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
           item.entry.checkboxItems,
           item.entry.sourceLineNumber,
           getCheckboxLayoutClass(item),
-          item.entry.priority !== null,
           checkboxListId ?? undefined,
           checkboxListKey ?? undefined,
           itemRow.classList.contains("has-ring-state"),
@@ -513,7 +489,6 @@ function renderItem(
   className: string,
   badge?: HTMLElement | HTMLElement[],
   showTime?: "always" | "optional",
-  showPriority: boolean = true,
   checkboxListId: string | null = null,
   checkboxListKey: string | null = null,
 ): HTMLElement {
@@ -549,21 +524,14 @@ function renderItem(
     children.push(stateBadge);
   }
 
-  if (!showPriority && item.entry.priority) {
-    row.classList.add("has-priority");
-    const pri = el("span", `item-priority priority-${item.entry.priority}`);
-    pri.textContent = item.entry.priority;
-    children.push(pri);
-  }
-
-  const title = renderTitle(item.entry, { showPriority });
+  const title = renderTitle(item.entry);
   if (item.baseDate) title.dataset.baseDate = item.baseDate;
   if (item.override) {
     title.insertBefore(document.createTextNode(" "), title.firstChild);
     title.insertBefore(renderOverrideChip(item.override, moveDirection(item)), title.firstChild);
   }
   if (checkboxListId && checkboxListKey) wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey);
-  children.push(renderTitleWithTags(title, item.entry.tags));
+  children.push(renderTitleWithTags(title, item.entry.tags, item.instanceNote));
   row.append(...children);
   return row;
 }
@@ -595,38 +563,6 @@ function moveDirection(item: AgendaItem): "earlier" | "later" {
   return item.date.getTime() < baseInstantMs ? "earlier" : "later";
 }
 
-function renderInstanceNote(item: AgendaItem): HTMLElement {
-  const row = el("div", buildInstanceNoteClassName(item));
-  const text = el("div", "item-instance-note-text");
-  text.textContent = item.instanceNote ?? "";
-  row.appendChild(text);
-  return row;
-}
-
-function renderGlobalInstanceNote(note: string, layoutClass: string): HTMLElement {
-  const row = el("div", `item-instance-note ${layoutClass}`);
-  const text = el("div", "item-instance-note-text");
-  text.textContent = note;
-  row.appendChild(text);
-  return row;
-}
-
-function buildInstanceNoteClassName(item: AgendaItem): string {
-  const byCategory = {
-    "all-day": item.entry.todo
-      ? ["note-layout-allday-with-state", "note-title-col-3"]
-      : ["note-layout-allday", "note-title-col-2"],
-    timed: ["note-layout-timed", item.entry.todo ? "note-title-col-3" : "note-title-col-2"],
-    scheduled: item.startTime
-      ? ["note-layout-with-time", "note-title-col-3"]
-      : ["note-layout-compact", "note-title-col-2"],
-    deadline: item.startTime
-      ? ["note-layout-with-time", "note-title-col-3"]
-      : ["note-layout-compact", "note-title-col-2"],
-  } satisfies Record<AgendaItem["category"], string[]>;
-  return ["item-instance-note", ...byCategory[item.category]].join(" ");
-}
-
 function renderItemForCategory(
   item: AgendaItem,
   checkboxListId: string | null = null,
@@ -637,12 +573,12 @@ function renderItemForCategory(
     if (item.entry.todo) badges.push(renderStateBadge(item.entry));
     return renderItem(item, "allday-item", badges);
   }
-  if (item.category === "timed") return renderItem(item, "timed-item", undefined, "always", true, checkboxListId, checkboxListKey);
+  if (item.category === "timed") return renderItem(item, "timed-item", undefined, "always", checkboxListId, checkboxListKey);
   if (item.category === "scheduled") {
-    return renderItem(item, "scheduled-item", renderStateBadge(item.entry, "TODO"), "optional", true, checkboxListId, checkboxListKey);
+    return renderItem(item, "scheduled-item", renderStateBadge(item.entry, "TODO"), "optional", checkboxListId, checkboxListKey);
   }
 
-  return renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional", true, checkboxListId, checkboxListKey);
+  return renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional", checkboxListId, checkboxListKey);
 }
 
 function renderAllDayMarker(): HTMLElement {
@@ -702,14 +638,13 @@ function renderNowLine(today: Date): HTMLElement {
 
 function renderTitle(
   entry: { title: string; priority: "A" | "B" | "C" | null; progress?: { done: number; total: number } | null; sourceLineNumber: number },
-  options: { showPriority?: boolean } = {},
 ): HTMLElement {
   const title = el("span", "item-title");
   title.dataset.action = "edit";
   title.dataset.line = String(entry.sourceLineNumber);
   title.setAttribute("role", "button");
   title.setAttribute("tabindex", "0");
-  if (entry.priority && options.showPriority !== false) {
+  if (entry.priority) {
     const badge = el("span", `item-priority priority-${entry.priority}`);
     badge.textContent = entry.priority;
     title.appendChild(badge);
@@ -732,7 +667,6 @@ function renderCheckboxItems(
   items: readonly { text: string; checked: boolean }[],
   parentSourceLine: number,
   layoutClass?: string,
-  hasPriority: boolean = false,
   listId?: string,
   listKey?: string,
   ringState: boolean = false,
@@ -748,7 +682,6 @@ function renderCheckboxItems(
     if (collapsible && isCheckboxListCollapsed(listKey)) list.classList.add("is-collapsed");
   }
   if (layoutClass) list.classList.add(layoutClass);
-  if (hasPriority) list.classList.add("checkbox-list-has-priority");
   if (ringState) list.classList.add("checkbox-list-ring-state");
 
   const hideCompleted = currentRenderOptions.hideCompletedAndSkipped === true;
@@ -845,10 +778,8 @@ function wireProgressBadgeAsToggle(title: HTMLElement, listId: string, listKey: 
 }
 
 function getCheckboxLayoutClass(item: AgendaItem): string {
-  if (item.category === "timed") {
-    return item.entry.todo ? "checkbox-list-time-badge" : "checkbox-list-time";
-  }
-  return item.startTime ? "checkbox-list-time-badge" : "checkbox-list-badge";
+  if (item.entry.todo) return "checkbox-list-badge";
+  return item.startTime ? "checkbox-list-time" : "checkbox-list-badge";
 }
 
 function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags"> {
@@ -871,11 +802,18 @@ function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, 
   return badges;
 }
 
-function renderTitleWithTags(title: HTMLElement, tags: readonly string[]): HTMLElement {
-  if (currentRenderOptions.hideTags || tags.length === 0) return title;
+function renderTitleWithTags(title: HTMLElement, tags: readonly string[], instanceNote: string | null = null): HTMLElement {
+  if (currentRenderOptions.hideTags && !instanceNote) return title;
+  if (tags.length === 0 && !instanceNote) return title;
 
   const stack = el("span", "item-title-stack");
-  stack.append(title, renderTags(tags, optionsForTags()));
+  stack.appendChild(title);
+  if (!currentRenderOptions.hideTags && tags.length > 0) stack.appendChild(renderTags(tags, optionsForTags()));
+  if (instanceNote) {
+    const note = el("span", "item-instance-note");
+    note.textContent = instanceNote;
+    stack.appendChild(note);
+  }
   return stack;
 }
 

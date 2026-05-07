@@ -126,18 +126,16 @@ describe("renderAgenda", () => {
     expect(allDayMarker?.querySelector("svg")).not.toBeNull();
 
     expect(container.querySelector(".overdue-header")?.textContent).toBe("Overdue");
-    expect(container.querySelector(".deadlines-header")).toBeNull();
     expect(container.querySelector(".someday-header")).toBeNull();
     expect(container.querySelector(".overdue-section .item-time")?.textContent).toBe("-2d");
     expect(container.querySelector(".overdue-section .item-title")?.getAttribute("data-base-date")).toBe("2026-04-18");
     expect(container.querySelector(".overdue-section .item-title .item-priority")?.textContent).toBe("B");
     const overdueNote = container.querySelector(".overdue-section .item-instance-note") as HTMLElement | null;
     expect(overdueNote?.textContent).toBe("Call before paying");
-    expect(overdueNote?.classList.contains("overdue-note")).toBe(true);
+    expect(overdueNote?.closest(".item-title-stack")).not.toBeNull();
     const firstOverdueRow = container.querySelectorAll<HTMLElement>(".overdue-section .overdue-item")[0];
     expect(firstOverdueRow?.querySelector(".tag[data-tag='work']")?.textContent).toBe("#work");
     const secondOverdueRow = container.querySelectorAll<HTMLElement>(".overdue-section .overdue-item")[1];
-    expect(secondOverdueRow?.classList.contains("has-priority")).toBe(false);
     expect(secondOverdueRow?.querySelector(".item-title .item-priority")).toBeNull();
     expect(container.querySelector(".deadlines-section .item-title")?.getAttribute("data-base-date")).toBe("2026-04-21");
     expect(container.querySelector(".deadlines-section .item-time")?.textContent).toBe("1d");
@@ -145,15 +143,13 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".deadlines-section .item-title .item-priority")?.textContent).toBe("A");
     const deadlineNote = container.querySelector(".deadlines-section .item-instance-note") as HTMLElement | null;
     expect(deadlineNote?.textContent).toBe("Bring receipt");
-    expect(deadlineNote?.classList.contains("deadline-note")).toBe(true);
+    expect(deadlineNote?.closest(".item-title-stack")).not.toBeNull();
     const firstDeadlineRow = container.querySelectorAll<HTMLElement>(".deadlines-section .deadline-item")[0];
-    expect(firstDeadlineRow?.classList.contains("has-priority")).toBe(false);
     expect(firstDeadlineRow?.querySelector(".tag[data-tag='music']")?.textContent).toBe("#music");
     const deadlineCheckboxes = Array.from(container.querySelectorAll<HTMLElement>(".deadlines-section .checkbox-item"));
     expect(deadlineCheckboxes.map((item) => item.textContent)).toEqual(["Confirm time", "Send notes"]);
     expect(deadlineCheckboxes[0]?.classList.contains("checkbox-checked")).toBe(true);
     expect(container.querySelector(".deadlines-section .checkbox-list")?.classList.contains("checkbox-list-deadline")).toBe(true);
-    expect(container.querySelector(".deadlines-section .checkbox-list")?.classList.contains("checkbox-list-has-priority")).toBe(true);
     const deadlineChecklistToggle = container.querySelector<HTMLElement>(".deadlines-section .item-title .item-progress");
     const deadlineChecklist = container.querySelector<HTMLElement>(".deadlines-section .checkbox-list");
     expect(deadlineChecklist?.classList.contains("is-collapsed")).toBe(true);
@@ -171,12 +167,11 @@ describe("renderAgenda", () => {
     expect(timedRow?.querySelector(".tag[data-tag='work']")?.textContent).toBe("#work");
     expect(timedRow?.querySelector(":scope > .tag-badges")).toBeNull();
     const secondDeadlineRow = container.querySelectorAll<HTMLElement>(".deadlines-section .deadline-item")[1];
-    expect(secondDeadlineRow?.classList.contains("has-priority")).toBe(false);
     expect(secondDeadlineRow?.querySelector(".item-title .item-priority")).toBeNull();
     const somedayCheckboxes = Array.from(container.querySelectorAll<HTMLElement>(".someday-section .checkbox-item"));
     expect(somedayCheckboxes.map((item) => item.textContent)).toEqual(["Draft outline"]);
     expect(somedayCheckboxes[0]?.getAttribute("data-line")).toBe("11");
-    expect(container.querySelector(".someday-section .checkbox-list")?.classList.contains("checkbox-list-someday")).toBe(true);
+    expect(container.querySelector(".someday-section .checkbox-list")).not.toBeNull();
     const overdueState = container.querySelector(".overdue-section .item-state");
     expect(overdueState?.textContent).toBe("TODO");
     expect(overdueState?.getAttribute("data-action")).toBe("toggle-done");
@@ -473,8 +468,7 @@ describe("renderAgenda", () => {
     expect(chip?.title).toBe("from 2026-04-19 17:00-18:00");
     const note = container.querySelector(".item-instance-note") as HTMLElement | null;
     expect(note?.textContent).toBe("Bring water");
-    expect(note?.classList.contains("note-layout-timed")).toBe(true);
-    expect(note?.classList.contains("note-title-col-2")).toBe(true);
+    expect(note?.closest(".item-title-stack")).not.toBeNull();
 
     const checkboxes = Array.from(container.querySelectorAll(".checkbox-item"));
     expect(checkboxes).toHaveLength(2);
@@ -484,12 +478,10 @@ describe("renderAgenda", () => {
     expect(checkboxes[0].getAttribute("data-action")).toBe("toggle-checkbox");
     expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-action")).toBe("edit-checkbox");
     expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-checkbox-index")).toBe("0");
-    expect(container.querySelector(".timed-section .checkbox-list")?.classList.contains("checkbox-list-timed")).toBe(true);
+    expect(container.querySelector(".timed-section .checkbox-list")).not.toBeNull();
     expect(container.querySelector(".tag")?.textContent).toContain("music");
     const timedRows = container.querySelectorAll<HTMLElement>(".timed-item");
-    expect(timedRows[0]?.classList.contains("has-priority")).toBe(false);
     expect(timedRows[0]?.querySelector(".item-title .item-priority")?.textContent).toBe("B");
-    expect(timedRows[1]?.classList.contains("has-priority")).toBe(false);
     expect(timedRows[1]?.querySelector(".item-title .item-priority")).toBeNull();
   });
 
@@ -556,10 +548,7 @@ describe("renderAgenda", () => {
     const notes = Array.from(container.querySelectorAll<HTMLElement>(".allday-section .item-instance-note"));
     expect(notes).toHaveLength(2);
     expect(notes.map(note => note.textContent)).toEqual(["Pack sunscreen", "Use printed notes"]);
-    expect(notes[0].classList.contains("note-layout-allday")).toBe(true);
-    expect(notes[0].classList.contains("note-title-col-2")).toBe(true);
-    expect(notes[1].classList.contains("note-layout-allday-with-state")).toBe(true);
-    expect(notes[1].classList.contains("note-title-col-3")).toBe(true);
+    expect(notes.every(note => note.closest(".item-title-stack") !== null)).toBe(true);
   });
 
   it("renders in-calendar deadlines with a clickable todo badge before the title", () => {
@@ -689,7 +678,6 @@ describe("renderAgenda", () => {
     const row = container.querySelector(".scheduled-item") as HTMLElement | null;
     expect(row).not.toBeNull();
     expect(row?.classList.contains("has-state")).toBe(true);
-    expect(row?.classList.contains("has-priority")).toBe(false);
     expect(row?.querySelector(".item-state")?.textContent).toBe("TODO");
     expect(row?.querySelector(".item-title .item-priority")?.textContent).toBe("C");
     expect(row?.querySelector(".item-title")?.textContent).toContain("Pay bills");

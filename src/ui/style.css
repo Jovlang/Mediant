@@ -298,13 +298,6 @@ body {
     0 16px 34px rgba(15, 23, 42, 0.095);
 }
 
-.day-block,
-.overdue-section,
-.deadlines-section,
-.someday-section {
-  container-type: inline-size;
-}
-
 .day-block {
   display: block;
   padding: 1.2rem 0 1.35rem;
@@ -490,8 +483,7 @@ body {
 
 /* ── Overdue section (top of agenda) ─────────────────────────────── */
 
-.overdue-header,
-.deadlines-header {
+.overdue-header {
   padding: 0.95rem var(--section-padding-x) 0.4rem;
   font-weight: 600;
   font-size: 0.95rem;
@@ -531,10 +523,6 @@ body {
   background: var(--global-row-fringe-color);
 }
 
-.overdue-meta {
-  display: contents;
-}
-
 .overdue-item .item-time {
   font-family: var(--font-mono);
   font-size: 0.82rem;
@@ -570,24 +558,6 @@ body {
   font-size: 0.6625rem;
   opacity: 0.76;
   padding-inline: 0.08rem;
-}
-
-.overdue-item:has(+ .item-instance-note) {
-  padding-bottom: 0.18rem;
-}
-
-.overdue-note {
-  grid-template-columns: 4.1ch 4.35rem 2.35rem 1fr;
-}
-
-.item-instance-note.overdue-note,
-.item-instance-note.deadline-note {
-  padding-top: 0;
-  padding-bottom: 0.78rem;
-}
-
-.overdue-note .item-instance-note-text {
-  grid-column: 4;
 }
 
 .deadlines-section {
@@ -634,10 +604,6 @@ body {
   margin-top: 0.14rem;
 }
 
-.deadline-meta {
-  display: contents;
-}
-
 .deadline-item .item-time {
   font-family: var(--font-mono);
   font-size: 0.84rem;
@@ -646,16 +612,9 @@ body {
   min-width: 0;
 }
 
-.deadline-main {
-  display: contents;
-}
-
-.deadline-main > .item-title,
-.deadline-main > .item-title-stack {
+.deadline-item > .item-title,
+.deadline-item > .item-title-stack {
   min-width: 0;
-}
-
-.deadline-main > .item-title {
   font-weight: 500;
 }
 
@@ -664,25 +623,12 @@ body {
   opacity: 0.86;
 }
 
-.deadline-item:has(+ .item-instance-note) {
-  padding-bottom: 0.18rem;
-}
-
 .deadline-item:has(+ .checkbox-list) {
   padding-bottom: 0.22rem;
 }
 
 .deadlines-section > .checkbox-list:last-child {
   padding-bottom: 0.78rem;
-}
-
-.deadline-note {
-  grid-template-columns: 4.35ch 1fr;
-  column-gap: 0.72rem;
-}
-
-.deadline-note .item-instance-note-text {
-  grid-column: 2;
 }
 
 /* ── Scheduled items ──────────────────────────────────────────────── */
@@ -913,6 +859,15 @@ body {
   max-width: 100%;
 }
 
+.item-title-stack > .item-instance-note {
+  font-size: 0.8125rem;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--text-dim);
+}
+
 
 .hide-tags-toggle,
 .hide-empty-days-toggle,
@@ -1003,66 +958,27 @@ body {
 /* ── Checkbox list ───────────────────────────────────────────────── */
 
 .checkbox-list {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
+  display: block;
   position: relative;
-  padding: 0 var(--section-padding-x);
+  padding: 0 var(--section-padding-x) 0 calc(var(--section-padding-x) + var(--checklist-indent));
   margin-bottom: 0.5rem;
   border-left: 3px solid transparent;
-  gap: 0.35rem 0.8rem;
-  --cb-badge-w: var(--badge-text-w);
-  --cb-gap: var(--gap-badge);
+  --checklist-indent: 1.5rem;
 }
 
 .checkbox-list-ring-state {
-  --cb-badge-w: var(--badge-ring-w);
-  --cb-gap: var(--gap-badge-ring);
+  --checklist-indent: 1rem;
 }
 
 .checkbox-list-deadline {
-  grid-template-columns: 4.35ch var(--cb-badge-w) 1fr;
   border-left: 0;
-  padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
+  padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width) + var(--checklist-indent));
   padding-top: 0.16rem;
-  column-gap: var(--cb-gap);
-}
-
-.checkbox-list-badge {
-  grid-template-columns: var(--cb-badge-w) 1fr;
-  column-gap: var(--cb-gap);
-}
-
-.checkbox-list-time-badge {
-  grid-template-columns: auto var(--cb-badge-w) 1fr;
-  column-gap: var(--cb-gap);
-}
-
-.checkbox-list-time {
-  grid-template-columns: auto 1fr;
 }
 
 .someday-section .checkbox-list {
   border-left: 0;
-  padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
-}
-
-.someday-section .checkbox-list .checkbox-list-items {
-  padding-left: 1.5rem;
-}
-
-.checkbox-list-badge .checkbox-list-items,
-.checkbox-list-time .checkbox-list-items {
-  grid-column: 2;
-}
-
-.checkbox-list-time-badge .checkbox-list-items,
-.checkbox-list-deadline .checkbox-list-items {
-  grid-column: 3;
-}
-
-.checkbox-list-ring-state .checkbox-list-items {
-  padding-left: 0.45rem;
+  padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width) + var(--checklist-indent));
 }
 
 .item-progress-toggle {
@@ -1080,7 +996,6 @@ body {
 }
 
 .checkbox-list-items {
-  grid-row: 1;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -1099,20 +1014,11 @@ body {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  padding-left: 1.15rem;
   font-size: 0.8125rem;
   color: var(--text);
   min-height: 1.35rem;
   cursor: pointer;
   user-select: none;
-}
-
-.checkbox-list-ring-state .checkbox-item {
-  padding-left: 0.45rem;
-}
-
-.checkbox-list-ring-state.checkbox-list-badge .checkbox-item {
-  padding-left: 0;
 }
 
 .checkbox-item:hover .checkbox-icon {
@@ -1213,52 +1119,6 @@ body {
 
 .item-skipped .tag {
   opacity: 0.6;
-}
-
-.item-instance-note {
-  display: grid;
-  padding: 0.2rem var(--section-padding-x) 0.18rem;
-  font-size: 0.8125rem;
-  font-style: italic;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  color: var(--text-dim);
-}
-
-.item-instance-note + .timed-item,
-.item-instance-note + .scheduled-item,
-.item-instance-note + .day-deadline-item,
-.item-instance-note + .allday-item {
-  margin-top: calc(var(--item-gap-y) * 0.95);
-}
-
-.note-layout-allday,
-.note-layout-compact {
-  grid-template-columns: auto 1fr;
-  column-gap: 0.75rem;
-}
-
-.note-layout-allday-with-state,
-.note-layout-timed,
-.note-layout-with-time {
-  grid-template-columns: auto auto 1fr;
-  column-gap: 0.75rem;
-}
-
-.note-title-col-1 .item-instance-note-text {
-  grid-column: 1;
-}
-
-.note-title-col-2 .item-instance-note-text {
-  grid-column: 2;
-}
-
-.note-title-col-3 .item-instance-note-text {
-  grid-column: 3;
-}
-
-.item-instance-note-text {
-  min-width: 0;
 }
 
 /* ── Item body / expand ───────────────────────────────────────────── */
@@ -1640,7 +1500,9 @@ body {
 }
 
 .tag-picker-pills {
-  display: contents;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
 }
 
 .tag-picker-pill {
@@ -2166,11 +2028,6 @@ body {
   .scheduled-item .item-time,
   .day-deadline-item .item-time {
     font-size: 0.75rem;
-  }
-
-  .item-instance-note {
-    display: block;
-    padding: 0.2rem var(--section-padding-x) 0;
   }
 
   .add-panel {
