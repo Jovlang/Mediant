@@ -490,6 +490,7 @@ function buildAddPanel(): void {
 
   addPanelEl.appendChild(form);
   document.body.append(addOverlayEl, addPanelEl);
+  attachSwipeToCloseHandlers(addPanelEl);
 
   addPanelRefs = {
     typeGroup: typeGroup.container,
@@ -1992,6 +1993,79 @@ function closeAddPanel(): void {
   addOverlayEl.classList.remove("is-open");
   addPanelEl.classList.remove("is-open");
   restoreFocusAfterPanelClose();
+}
+
+function attachSwipeToCloseHandlers(panel: HTMLElement): void {
+  const SWIPE_CLOSE_PX = 80;
+  const SWIPE_CLOSE_RATIO = 0.25;
+  const DIRECTION_LOCK_PX = 10;
+  const FORM_FIELD_SELECTOR = "input, textarea, select, [contenteditable='true']";
+
+  let startX = 0;
+  let startY = 0;
+  let dragOffset = 0;
+  let panelWidth = 0;
+  let phase: "idle" | "watching" | "dragging" | "abandoned" = "idle";
+
+  panel.addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1) {
+      phase = "idle";
+      return;
+    }
+    if (!panel.classList.contains("is-open")) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest(FORM_FIELD_SELECTOR)) {
+      phase = "idle";
+      return;
+    }
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    dragOffset = 0;
+    panelWidth = panel.getBoundingClientRect().width;
+    phase = "watching";
+  }, { passive: true });
+
+  panel.addEventListener("touchmove", (e) => {
+    if (phase === "idle" || phase === "abandoned") return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    if (phase === "watching") {
+      if (Math.abs(dx) < DIRECTION_LOCK_PX && Math.abs(dy) < DIRECTION_LOCK_PX) return;
+      if (dx > 0 && Math.abs(dx) > Math.abs(dy)) {
+        phase = "dragging";
+        panel.style.transition = "none";
+      } else {
+        phase = "abandoned";
+        return;
+      }
+    }
+
+    if (phase === "dragging") {
+      dragOffset = Math.max(0, dx);
+      panel.style.transform = `translateX(${dragOffset}px)`;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  const finish = () => {
+    if (phase !== "dragging") {
+      phase = "idle";
+      return;
+    }
+    const threshold = Math.min(SWIPE_CLOSE_PX, panelWidth * SWIPE_CLOSE_RATIO);
+    const shouldClose = dragOffset > threshold;
+    panel.style.transition = "";
+    panel.style.transform = "";
+    if (shouldClose) closeAddPanel();
+    phase = "idle";
+    dragOffset = 0;
+  };
+
+  panel.addEventListener("touchend", finish);
+  panel.addEventListener("touchcancel", finish);
 }
 
 function armDeleteBtn(): void {
