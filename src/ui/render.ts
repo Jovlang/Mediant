@@ -366,8 +366,8 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
   for (const item of items) {
     const row = el("div", "someday-item");
     if (item.entry.todo === "DONE") row.classList.add("item-done");
-    if (usesRingState(item.entry)) row.classList.add("has-ring-state");
     const state = renderStateBadge(item.entry, "TODO");
+    if (state.classList.contains("is-ring-style")) row.classList.add("has-ring-state");
     const checkboxListId = item.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
     const checkboxListKey = checkboxListId ? `someday:${item.entry.sourceLineNumber}` : null;
     const title = renderTitle(item.entry);
@@ -385,7 +385,7 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
         item.entry.priority !== null,
         checkboxListId ?? undefined,
         checkboxListKey ?? undefined,
-        usesRingState(item.entry),
+        row.classList.contains("has-ring-state"),
         collapsible,
       ));
     }
@@ -461,7 +461,8 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
       const checkboxListId = item.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
       const checkboxListKey = checkboxListId ? checkboxKeyForAgendaItem(item) : null;
 
-      section.appendChild(renderItemForCategory(item, checkboxListId, checkboxListKey));
+      const itemRow = renderItemForCategory(item, checkboxListId, checkboxListKey);
+      section.appendChild(itemRow);
 
       // Instance note (per-occurrence)
       if (item.instanceNote) {
@@ -484,7 +485,7 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
           item.entry.priority !== null,
           checkboxListId ?? undefined,
           checkboxListKey ?? undefined,
-          usesRingState(item.entry),
+          itemRow.classList.contains("has-ring-state"),
           item.entry.progress !== null,
         ));
       }

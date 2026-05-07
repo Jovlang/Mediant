@@ -1152,13 +1152,12 @@ body {
 .checkbox-list-deadline {
   grid-template-columns: 4.35ch minmax(0, 1fr) auto;
   border-left: 0;
-  padding-left: var(--section-padding-x);
+  padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
   padding-top: 0.16rem;
   column-gap: 0.72rem;
 }
 
 .checkbox-list-someday {
-  grid-template-columns: 2.35rem 1fr auto;
   border-left: 0;
   padding-top: 0;
   padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
@@ -1166,39 +1165,28 @@ body {
 }
 
 .checkbox-list-ring-state.checkbox-list-someday {
-  grid-template-columns: 1.45rem 1fr auto;
   column-gap: 0.5rem;
 }
 
-.checkbox-list-day-deadline {
-  grid-template-columns: 2.35rem 1fr auto;
-}
-
-.checkbox-list-day-deadline-time {
-  grid-template-columns: auto 2.35rem 1fr auto;
-}
-
+.checkbox-list-someday,
+.checkbox-list-day-deadline,
 .checkbox-list-scheduled {
   grid-template-columns: 2.35rem 1fr auto;
 }
 
+.checkbox-list-day-deadline-time,
 .checkbox-list-scheduled-time,
 .checkbox-list-timed-state {
   grid-template-columns: auto 2.35rem 1fr auto;
 }
 
-.checkbox-list-ring-state.checkbox-list-day-deadline {
-  grid-template-columns: 1.45rem 1fr auto;
-}
-
-.checkbox-list-ring-state.checkbox-list-day-deadline-time {
-  grid-template-columns: auto 1.45rem 1fr auto;
-}
-
+.checkbox-list-ring-state.checkbox-list-someday,
+.checkbox-list-ring-state.checkbox-list-day-deadline,
 .checkbox-list-ring-state.checkbox-list-scheduled {
   grid-template-columns: 1.45rem 1fr auto;
 }
 
+.checkbox-list-ring-state.checkbox-list-day-deadline-time,
 .checkbox-list-ring-state.checkbox-list-scheduled-time,
 .checkbox-list-ring-state.checkbox-list-timed-state {
   grid-template-columns: auto 1.45rem 1fr auto;
@@ -1228,16 +1216,9 @@ body {
   padding-left: 0.45rem;
 }
 
-.checkbox-list-deadline .checkbox-list-items {
-  grid-column: 2;
-}
-
+.checkbox-list-day-deadline-time .checkbox-list-items,
 .checkbox-list-scheduled-time .checkbox-list-items,
 .checkbox-list-timed-state .checkbox-list-items {
-  grid-column: 3;
-}
-
-.checkbox-list-day-deadline-time .checkbox-list-items {
   grid-column: 3;
 }
 
