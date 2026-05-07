@@ -997,6 +997,7 @@ body {
 }
 
 .item-title-stack > .tag-badges {
+  align-self: flex-start;
   justify-content: flex-start;
   max-width: 100%;
 }
@@ -2335,11 +2336,6 @@ body {
 
   .overdue-item {
     grid-template-columns: 4.1ch 4.35rem 2.35rem minmax(0, 1fr);
-  }
-
-  .item-title-stack > .tag-badges {
-    justify-content: flex-start;
-    max-width: 100%;
   }
 
   .allday-item .item-title-stack,
