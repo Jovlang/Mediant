@@ -100,6 +100,19 @@ describe("main.ts integration", () => {
     expect(document.querySelector(".tag-color-mode-toggle")?.classList.contains("is-on")).toBe(false);
     expect(document.querySelector(".scheduled-item .tag[data-tag='work']")).not.toBeNull();
 
+    document.querySelector<HTMLButtonElement>(".tag-text-mode-toggle")!.click();
+    await flush();
+    const textTag = document.querySelector<HTMLElement>(".scheduled-item .tag[data-tag='work']");
+    expect(localStorage.getItem("mediant-tag-text-mode")).toBe("true");
+    expect(textTag?.textContent).toBe("#work");
+    expect(textTag?.classList.contains("tag-text")).toBe(true);
+    expect(document.querySelector(".tag-color-mode-toggle")).toBeNull();
+    expect(document.querySelector(".scheduled-item")?.classList.contains("has-tag-fringe")).toBe(false);
+    document.querySelector<HTMLButtonElement>(".tag-text-mode-toggle")!.click();
+    await flush();
+    expect(localStorage.getItem("mediant-tag-text-mode")).toBe("false");
+    expect(document.querySelector(".scheduled-item .tag[data-tag='work']")?.textContent).toBe("work");
+
     const hideEmptyDaysBtn = document.querySelector<HTMLButtonElement>(".hide-empty-days-toggle");
     expect(hideEmptyDaysBtn).not.toBeNull();
     hideEmptyDaysBtn!.click();

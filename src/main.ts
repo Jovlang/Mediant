@@ -37,6 +37,7 @@ let agendaLoaded = false;
 let activeTagFilters = new Set<string>();
 let tagColorEditMode = false;
 let hideTags = localStorage.getItem("mediant-hide-tags") === "true";
+let tagTextMode = localStorage.getItem("mediant-tag-text-mode") === "true";
 let hideEmptyDays = localStorage.getItem("mediant-hide-empty-days") === "true";
 let hideCompletedAndSkipped = localStorage.getItem("mediant-hide-completed") === "true";
 let monthAhead = localStorage.getItem("mediant-month-ahead") === "true";
@@ -2125,6 +2126,7 @@ function clearTagFilters(): void {
 }
 
 function toggleTagColorMode(): void {
+  if (tagTextMode) return;
   tagColorEditMode = !tagColorEditMode;
   render();
 }
@@ -2133,6 +2135,13 @@ function toggleHideTags(): void {
   hideTags = !hideTags;
   if (hideTags) tagColorEditMode = false;
   localStorage.setItem("mediant-hide-tags", hideTags ? "true" : "false");
+  render();
+}
+
+function toggleTagTextMode(): void {
+  tagTextMode = !tagTextMode;
+  if (tagTextMode) tagColorEditMode = false;
+  localStorage.setItem("mediant-tag-text-mode", tagTextMode ? "true" : "false");
   render();
 }
 
@@ -2454,6 +2463,7 @@ function render(): void {
     activeTagFilters: [...activeTagFilters].sort(),
     tagColorEditMode,
     hideTags,
+    tagTextMode,
     hideEmptyDays,
     hideCompletedAndSkipped,
     monthAhead,
@@ -2499,7 +2509,7 @@ function setupNavigation(): void {
     if (tagEl) {
       const tag = tagEl.dataset.tag;
       if (!tag) return;
-      if (tagColorEditMode || e.altKey) {
+      if (!tagTextMode && (tagColorEditMode || e.altKey)) {
         e.preventDefault();
         e.stopPropagation();
         openTagColorPicker(tagEl);
@@ -2530,6 +2540,8 @@ function setupNavigation(): void {
       toggleTagColorMode();
     } else if (action === "toggle-hide-tags") {
       toggleHideTags();
+    } else if (action === "toggle-tag-text-mode") {
+      toggleTagTextMode();
     } else if (action === "toggle-hide-empty-days") {
       toggleHideEmptyDays();
     } else if (action === "toggle-hide-completed") {

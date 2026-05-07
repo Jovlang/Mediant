@@ -167,7 +167,8 @@ index.html             — Minimal shell with #agenda container
   - Timed events with a monospace, content-width time column, tag-colored left border, tag badges (colors auto-assigned from a palette, persisted in localStorage)
   - Scheduled tasks inline (time → TODO/DONE badge → title)
 - **Tag filtering** — clicking a tag filters the agenda, overdue, deadlines, and someday sections. Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible. Active filters are shown in the header and can be cleared in one click.
-- **Tag color mode** — a `Color tags` toggle switches tag clicks from filtering to recoloring. `Alt`-clicking a tag opens its color picker directly without switching modes.
+- **Tag text mode** — the settings menu can render visible agenda tags as restrained slate-blue `#tag` text instead of colored pills and tag-colored row borders. The preference is stored in `localStorage`.
+- **Tag color mode** — a `Color tags` toggle switches tag clicks from filtering to recoloring. `Alt`-clicking a tag opens its color picker directly without switching modes. This is hidden while tags are hidden or rendered as `#tag` text.
 - **Tag picker keyboard support** — in the add/edit panel, `ArrowUp`/`ArrowDown` move through tag suggestions, `Enter` selects the highlighted suggestion, and `Backspace` on an empty tag field removes the last selected tag pill.
 - **Priority badges** — A/B/C priority cookies rendered as small colored badges (red/amber/blue) before the item title, including overdue and upcoming deadline rows
 - **Progress badges** — `[2/3]` shown as a small badge next to the title (green when complete, gray otherwise)
@@ -221,6 +222,7 @@ Mediant uses your browser's `localStorage` for the following:
 | `mediant-org-source` | Pasted Org content (static mode only — ignored in server mode) |
 | `mediant-tag-colors` | Tag-to-color assignments, so tag colors stay consistent |
 | `mediant-hide-tags` | Whether agenda tag badges and tag-colored row fringes are hidden |
+| `mediant-tag-text-mode` | Whether visible agenda tags render as fixed-color `#tag` text instead of colored pills |
 | `mediant-hide-empty-days` | Whether empty days are hidden in the agenda view |
 | `mediant-hide-completed` | Whether DONE entries and skipped occurrences are hidden in day cards and someday |
 | `mediant-month-ahead` | Whether the agenda shows 30 days instead of 7 |

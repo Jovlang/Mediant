@@ -19,6 +19,7 @@
   --text: #1f2933;
   --text-dim: #687386;
   --text-done: #a8b0bb;
+  --tag-text-color: #536f92;
 
   --border: #d8dee8;
   --border-light: #e7ebf0;
@@ -48,6 +49,7 @@
     --text: #e1e2e5;
     --text-dim: #8b8f96;
     --text-done: #555;
+    --tag-text-color: #8ba4c0;
 
     --border: #232529;
     --border-light: #1e2024;
@@ -1070,6 +1072,35 @@ body {
     opacity: 1;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.92);
   }
+}
+
+.tag-badges-text {
+  gap: 0.45rem;
+}
+
+.tag.tag-text {
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  color: var(--tag-text-color);
+  background: transparent;
+  opacity: 1;
+  box-shadow: none;
+}
+
+.tag.tag-text:hover {
+  filter: none;
+  transform: none;
+  color: color-mix(in srgb, var(--tag-text-color) 82%, var(--text));
+}
+
+.tag.tag-text:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--tag-text-color) 54%, transparent);
+  outline-offset: 2px;
+}
+
+.tag.tag-text.is-selected {
+  box-shadow: inset 0 -1px 0 var(--tag-text-color);
 }
 
 .tag.is-color-editable {
