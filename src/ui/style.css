@@ -1228,7 +1228,10 @@ body {
   padding-left: 0.45rem;
 }
 
-.checkbox-list-deadline .checkbox-list-items,
+.checkbox-list-deadline .checkbox-list-items {
+  grid-column: 2;
+}
+
 .checkbox-list-scheduled-time .checkbox-list-items,
 .checkbox-list-timed-state .checkbox-list-items {
   grid-column: 3;
