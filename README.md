@@ -2,7 +2,7 @@
 
 A focused web agenda and editor for Org-mode files.
 
-Mediant parses a practical subset of Org syntax, renders a responsive rolling agenda view, and can edit common agenda workflows without trying to become a full Org implementation. It runs in two modes:
+Mediant parses a practical subset of Org syntax, renders a rolling agenda view, and can edit common agenda workflows without trying to become a full Org implementation. It runs in two modes:
 
 - **Static mode** — paste Org content into a textarea, everything stays in `localStorage`. Zero-install, works from any static host.
 - **Server mode** — `mediant <file.org>` starts a local Node server that reads and writes a real `.org` file. The UI hydrates from the file on load and picks up external edits (e.g. from Emacs) live via SSE.
@@ -149,7 +149,7 @@ src/
   ui/
     render.ts          — DOM rendering from AgendaDay[] + DeadlineItem[] + OverdueItem[]
     notifications.ts   — Browser notification preference and timer scheduling
-    style.css          — All styles (CSS grid layout, responsive)
+    style.css          — All styles (CSS grid layout)
   i18n.ts              — English/Norwegian UI strings and locale persistence
   main.ts              — Entry point: probes server, hydrates, wires parse → generate → render
 server/
@@ -179,7 +179,7 @@ index.html             — Minimal shell with #agenda container
 - **Hide tags** — the `Hide tags` toggle removes agenda tag labels while preserving active tag filters in the header. The preference is stored in `localStorage`.
 - **Hide empty days** — the `Hide empty days` toggle removes days with no visible agenda items from the active range. This is useful with tag filters; if every day is hidden, the day-card container is hidden too. The preference is stored in `localStorage`.
 - **Hide completed & skipped** — the `Hide completed & skipped` toggle drops DONE entries and skipped recurrence occurrences from the day cards and the someday section. Pairs naturally with `Hide empty days` to collapse the view down to outstanding work. The preference is stored in `localStorage`.
-- **TODO badges** — TODO/DONE badges render as compact rings: open TODO items show an empty ring and DONE items show a filled ring, with the same click/keyboard toggle behavior and accessible labels.
+- **TODO badges** — TODO/DONE badges render as compact status marks with the same click/keyboard toggle behavior and accessible labels.
 - **Month-ahead view** — a settings toggle expands the day cards from 7 days to 30 days. Prev/next navigation moves by the active range length, and the preference is stored in `localStorage`.
 - **Notifications** — a settings toggle requests browser notification permission and schedules reminders for timed events happening today, 1 hour before their start time. The preference is stored in `localStorage`.
 - **Language** — a settings toggle switches the UI between English and Norwegian, with the chosen locale stored in `localStorage`.
@@ -189,14 +189,12 @@ index.html             — Minimal shell with #agenda container
 - **Add-item panel** for creating TODO tasks and events from the UI. New TODOs are appended under `* Tasks`; new events are appended under `* Events`.
 - **Edit-item panel** for updating an existing entry in place (preserves body text). Edits autosave as fields change; there is no separate Save step. Clicking a recurring occurrence reveals a "This occurrence" section alongside the series fields, where skip/stop-repeat toggles, the move date/time field, the note field, and Clear override write exception properties keyed on the unshifted base date.
 - **Shorthand date input** — add/edit date fields accept `DD`, `DD/MM`, `DD/MM/YY`, `DD/MM/YYYY`, `+N`, and weekday names like `mon`..`sun` / `man`..`søn`. Ambiguous numeric forms resolve to the next future occurrence, and 2-digit years are interpreted in the current century.
-- Responsive: sticky day headers and adjusted spacing on mobile
-
 ## Tech stack
 
 - **TypeScript** — parser, data model, agenda generation, rendering
 - **Vite** — dev server and bundling
 - **Vitest** — 356 tests across parser, timestamp, source-edit, agenda, UI, notification, i18n, main, and server suites
-- **HTML/CSS** — responsive agenda view with CSS grid
+- **HTML/CSS** — agenda view with CSS grid
 - **Node** (built-ins only) — optional local server with no runtime npm dependencies
 
 ## Non-goals (v1)

@@ -586,7 +586,7 @@ describe("renderAgenda", () => {
     expect(state?.previousElementSibling?.classList.contains("item-time")).toBe(true);
   });
 
-  it("renders todo badges as rings with done items filled", () => {
+  it("renders todo badges as compact status marks with done items filled", () => {
     const container = document.createElement("div");
     const week = makeWeek([
       [
@@ -640,19 +640,13 @@ describe("renderAgenda", () => {
 
     const states = Array.from(container.querySelectorAll<HTMLElement>(".item-state"));
     expect(states.map(state => state.textContent)).toEqual(["TODO", "TODO", "DONE", "TODO", "TODO"]);
-    expect(container.querySelector<HTMLElement>(".deadline-item")?.classList.contains("has-ring-state")).toBe(true);
-    expect(container.querySelector<HTMLElement>(".someday-item")?.classList.contains("has-ring-state")).toBe(true);
-    expect(container.querySelector<HTMLElement>(".timed-item")?.classList.contains("has-ring-state")).toBe(true);
-    expect(container.querySelector<HTMLElement>(".day-deadline-item")?.classList.contains("has-ring-state")).toBe(true);
-    expect(states.every(state => state.classList.contains("is-ring-style"))).toBe(true);
     expect(states.map(state => state.dataset.state)).toEqual(["TODO", "TODO", "DONE", "TODO", "TODO"]);
-    expect(states.every(state => state.querySelector(".item-state-ring") !== null)).toBe(true);
+    expect(states.every(state => state.querySelector(".item-state-mark") !== null)).toBe(true);
     expect(states[2]?.closest(".item-done")).not.toBeNull();
     expect(container.querySelector<HTMLElement>(".item-title-stack > .checkbox-list")).not.toBeNull();
-    expect(container.querySelector<HTMLButtonElement>(".todo-badge-style-toggle")).toBeNull();
   });
 
-  it("marks scheduled todo rows with priority as stateful so the desktop grid stays on one line", () => {
+  it("marks scheduled todo rows with priority as stateful", () => {
     const container = document.createElement("div");
     const week = makeWeek([
       [
@@ -707,7 +701,6 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".agenda-settings-menu .agenda-settings-summary")?.textContent).toBe("Settings");
     expect(container.querySelector(".agenda-settings-menu .month-ahead-toggle")?.textContent).toBe("Show fewer days");
     expect(container.querySelector(".agenda-settings-menu .month-ahead-toggle")?.classList.contains("is-on")).toBe(true);
-    expect(container.querySelector(".agenda-settings-menu .todo-badge-style-toggle")).toBeNull();
     expect(container.querySelector(".agenda-settings-menu .notification-toggle.is-labeled")?.textContent).toBe("Enable notifications");
   });
 

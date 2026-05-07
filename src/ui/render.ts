@@ -282,7 +282,6 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
     const row = el("div", "deadline-item");
     row.classList.add(getDeadlineUrgencyClass(dl.daysUntil));
     if (dl.entry.todo === "DONE") row.classList.add("item-done");
-    if (usesRingState(dl.entry)) row.classList.add("has-ring-state");
     const time = el("span", "item-time");
     time.textContent = formatDeadlineDueText(dl.daysUntil);
 
@@ -349,7 +348,6 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
     const row = el("div", "someday-item");
     if (item.entry.todo === "DONE") row.classList.add("item-done");
     const state = renderStateBadge(item.entry, "TODO");
-    if (state.classList.contains("is-ring-style")) row.classList.add("has-ring-state");
     const checkboxListId = item.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
     const checkboxListKey = checkboxListId ? `someday:${item.entry.sourceLineNumber}` : null;
     const title = renderTitle(item.entry);
@@ -495,7 +493,6 @@ function renderItem(
 
   if (badges.some((el) => el.classList.contains("item-state"))) {
     row.classList.add("has-state");
-    if (badges.some((el) => el.classList.contains("is-ring-style"))) row.classList.add("has-ring-state");
   }
   if (badges.some((el) => el.classList.contains("item-all-day-marker"))) {
     row.classList.add("has-all-day-marker");
@@ -506,7 +503,6 @@ function renderItem(
   } else if (item.entry.todo) {
     row.classList.add("has-state");
     const stateBadge = renderStateBadge(item.entry);
-    if (stateBadge.classList.contains("is-ring-style")) row.classList.add("has-ring-state");
     children.push(stateBadge);
   }
 
@@ -603,11 +599,10 @@ function renderStateBadge(
     state.setAttribute("aria-label", entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
   }
   if (state.textContent) {
-    state.classList.add("is-ring-style");
     state.dataset.state = state.textContent;
-    const ring = el("span", "item-state-ring");
-    ring.setAttribute("aria-hidden", "true");
-    state.prepend(ring);
+    const mark = el("span", "item-state-mark");
+    mark.setAttribute("aria-hidden", "true");
+    state.prepend(mark);
   }
   return state;
 }
@@ -711,10 +706,6 @@ let renderedCheckboxListKeys = new Set<string>();
 function nextCheckboxListId(): string {
   checkboxListIdCounter += 1;
   return `checklist-${checkboxListIdCounter}`;
-}
-
-function usesRingState(entry: { todo: string | null }): boolean {
-  return entry.todo !== null;
 }
 
 function checkboxKeyForAgendaItem(item: AgendaItem): string {

@@ -107,9 +107,7 @@ describe("main.ts integration", () => {
     expect(document.querySelector(".hide-empty-days-toggle")?.classList.contains("is-on")).toBe(false);
     expect(document.querySelectorAll(".day-block")).toHaveLength(7);
 
-    expect(document.querySelector(".item-state.is-ring-style .item-state-ring")).not.toBeNull();
-    expect(document.querySelector(".todo-badge-style-toggle")).toBeNull();
-    expect(localStorage.getItem("mediant-todo-badge-rings")).toBeNull();
+    expect(document.querySelector(".item-state .item-state-mark")).not.toBeNull();
 
     keydownHandler!(makeKeydownEvent("q", document.body));
     await waitFor(() => document.querySelector(".quick-capture-overlay.is-open") !== null);

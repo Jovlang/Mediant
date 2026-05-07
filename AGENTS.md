@@ -2,7 +2,7 @@
 
 ## Project overview
 
-Mediant is a minimal Org-mode parser and agenda viewer. It parses a focused subset of Org syntax and renders a responsive rolling agenda in HTML/CSS, with a 7-day default and optional 30-day month-ahead view. It runs in two modes: a **static mode** where users paste Org content into a textarea (localStorage-backed), and a **server mode** where a local Node CLI (`mediant <file.org>`) serves the UI and streams the configured Org file over `/api/source` + SSE. No framework dependencies.
+Mediant is a minimal Org-mode parser and agenda viewer. It parses a focused subset of Org syntax and renders a rolling agenda in HTML/CSS, with a 7-day default and optional 30-day month-ahead view. It runs in two modes: a **static mode** where users paste Org content into a textarea (localStorage-backed), and a **server mode** where a local Node CLI (`mediant <file.org>`) serves the UI and streams the configured Org file over `/api/source` + SSE. No framework dependencies.
 
 ## Architecture
 
@@ -37,7 +37,7 @@ Three clearly separated stages — do not collapse them:
 | `src/ui/notifications.ts` | Browser notification preference, permission request, and timer scheduling for timed events happening today. Notifications fire 1 hour before the start time and are rescheduled on render. |
 | `src/i18n.ts` | English/Norwegian UI strings, locale detection, and locale persistence (`mediant-locale`). |
 | `src/ui/style.css` | All styles. CSS grid layout with content-width time column. |
-| `src/main.ts` | Entry point. Probes `/api/source` on boot; if present, enters server mode (hydrates from the server, subscribes to `/api/events` for external file changes). Otherwise shows the textarea input screen backed by localStorage. Owns global keyboard shortcuts, tag-filter state, quick-capture overlay, inline checkbox edits, add-item & edit-item panels, and the "This occurrence" section that writes exception properties via the drawer helpers. |
+| `src/main.ts` | Entry point. Probes `/api/source` on boot; if present, enters server mode (hydrates from the server, subscribes to `/api/events` for external file changes). Otherwise shows the textarea input screen backed by localStorage. Owns global keyboard shortcuts, tag-filter state, quick-capture overlay, checkbox completion toggles, add-item & edit-item panels, and the "This occurrence" section that writes exception properties via the drawer helpers. |
 | `server/cli.mjs` | Node CLI + HTTP server. `mediant <file.org> [--port N] [--daemon]`. Serves `dist/` plus `GET/PUT /api/source` (with `If-Match` version checks) and `GET /api/events` SSE backed by `fs.watch`. Node built-ins only, no deps. |
 | `elisp/mediant-org-agenda.el` | Optional Emacs Org agenda integration. Global minor mode that runs on `org-agenda-finalize-hook`, reads Mediant exception properties from source headings, filters cancelled/cutoff occurrences, inserts moved synthetic agenda lines, and renders exception notes. |
 | `elisp/mediant-org-agenda-test.el` | ERT tests for the optional Org agenda integration. Uses temporary Org files and real `org-agenda-list` generation to verify exception display behavior. |
@@ -117,7 +117,7 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 - **Hide tags** — settings toggle hides agenda tag labels without clearing active tag filters. Active filters remain visible in the header so they can be removed. Preference persists in localStorage (`mediant-hide-tags`).
 - **Tag filtering** — clicking a tag toggles it in the active filter set. Filtering applies to the visible agenda range, overdue section, upcoming deadlines, and someday section. Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible.
 - **Tag picker keyboard support** — in the add/edit panel, `ArrowUp`/`ArrowDown` move through tag suggestions, `Enter` selects the highlighted suggestion, and `Backspace` on an empty tag field removes the last selected pill.
-- **TODO badges** — TODO/DONE badges render as compact rings: TODO as an empty ring and DONE as a filled ring while keeping the same click/keyboard toggle behavior and accessible labels.
+- **TODO badges** — TODO/DONE badges render as compact status marks while keeping the same click/keyboard toggle behavior and accessible labels.
 - **Priority badges** — `[#A]`/`[#B]`/`[#C]` rendered as small colored badges (red/amber/blue) nested inside the item title so the row grid templates stay fixed. Do not duplicate priority in metadata rows; it should appear before the title everywhere.
 - **Progress badges** — `[2/3]` rendered as a small badge next to the title (green when complete, gray otherwise)
 - **Checkbox lists** — `- [ ]`/`- [X]` items rendered as a mini checklist under the agenda item; checked items dimmed. Clicking a checkbox row toggles completion. The edit-panel checklist editor is available for TODO tasks, including repeating tasks, and hidden for events. Events never write checklist state. Lists are collapsed by default; a small disclosure control inside the item title (`>` collapsed, `<` expanded) toggles visibility per list. Collapse state is keyed by a stable per-list identity so it survives full agenda rerenders, and duplicate renderings of the same entry (e.g. an upcoming-deadlines row and the matching day-card row) keep independent state.
