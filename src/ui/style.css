@@ -431,7 +431,7 @@ body {
   margin-top: 0.55rem;
 }
 
-.allday-item .item-title {
+.allday-item > .item-title {
   font-weight: 530;
 }
 
@@ -505,13 +505,13 @@ body {
   grid-column: 2;
 }
 
-.timed-item .item-title {
+.timed-item > .item-title {
   grid-column: 2;
   min-width: 0;
   font-weight: 500;
 }
 
-.timed-item.has-state .item-title {
+.timed-item.has-state > .item-title {
   grid-column: 3;
 }
 
@@ -612,7 +612,7 @@ body {
   opacity: 0.82;
 }
 
-.overdue-item .item-title {
+.overdue-item > .item-title {
   grid-column: 4;
   grid-row: 1;
   justify-self: start;
@@ -730,7 +730,7 @@ body {
   flex: 0 0 auto;
 }
 
-.deadline-item .item-title {
+.deadline-item > .item-title {
   min-width: 0;
   font-weight: 500;
 }
@@ -796,7 +796,7 @@ body {
   grid-template-columns: auto 1fr auto;
 }
 
-.scheduled-item.has-state:not(.has-time) .item-title {
+.scheduled-item.has-state:not(.has-time) > .item-title {
   font-size: 0.9375rem;
   font-weight: 530;
 }
@@ -813,18 +813,18 @@ body {
   grid-column: 2;
 }
 
-.scheduled-item .item-title {
+.scheduled-item > .item-title {
   grid-column: 1;
   min-width: 0;
   font-weight: 500;
 }
 
-.scheduled-item.has-time .item-title,
-.scheduled-item.has-state .item-title {
+.scheduled-item.has-time > .item-title,
+.scheduled-item.has-state > .item-title {
   grid-column: 2;
 }
 
-.scheduled-item.has-time.has-state .item-title {
+.scheduled-item.has-time.has-state > .item-title {
   grid-column: 3;
 }
 
@@ -861,7 +861,7 @@ body {
   grid-column: 1;
 }
 
-.day-deadline-item .item-title {
+.day-deadline-item > .item-title {
   grid-column: 2;
   min-width: 0;
   font-weight: 500;
@@ -876,7 +876,7 @@ body {
   grid-column: 2;
 }
 
-.day-deadline-item.has-time .item-title {
+.day-deadline-item.has-time > .item-title {
   grid-column: 3;
 }
 
@@ -915,7 +915,7 @@ body {
   margin-top: 0.15rem;
 }
 
-.someday-item .item-title {
+.someday-item > .item-title {
   min-width: 0;
   font-weight: 540;
 }
@@ -1125,6 +1125,8 @@ body {
 }
 
 .item-title-stack > .item-title {
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
 }
 
