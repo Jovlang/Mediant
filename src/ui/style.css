@@ -2410,6 +2410,54 @@ body {
 }
 
 @container (max-width: 40rem) {
+  .allday-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .allday-item.has-state,
+  .allday-item.has-all-day-marker {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .allday-item.has-all-day-marker.has-state {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+
+  .timed-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .timed-item.has-state {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+
+  .scheduled-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scheduled-item.has-time,
+  .scheduled-item.has-state {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .scheduled-item.has-time.has-state {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+
+  .day-deadline-item,
+  .deadline-item,
+  .someday-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .day-deadline-item.has-time {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+
+  .overdue-item {
+    grid-template-columns: 4.1ch 4.35rem 2.35rem minmax(0, 1fr);
+  }
+
   .timed-item .tag-badges,
   .deadline-item .tag-badges,
   .day-deadline-item .tag-badges,
