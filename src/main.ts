@@ -1509,7 +1509,6 @@ function attachInlineInsertInput(list: HTMLElement, state: InlineInsertState): v
   const input = document.createElement("input");
   input.type = "text";
   input.className = "checkbox-label-input";
-  input.placeholder = t("subtaskPlaceholder");
   input.setAttribute("aria-label", t("subtaskPlaceholder"));
   input.value = state.value;
 
