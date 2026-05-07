@@ -433,7 +433,7 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".agenda-settings-menu .tag-color-mode-toggle")).toBeNull();
 
     const toggle = container.querySelector<HTMLButtonElement>(".tag-text-mode-toggle");
-    expect(toggle?.textContent).toBe("Show tag pills");
+    expect(toggle?.textContent).toBe("Show colored tags");
     expect(toggle?.getAttribute("aria-pressed")).toBe("true");
   });
 

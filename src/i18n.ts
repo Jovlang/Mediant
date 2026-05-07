@@ -29,7 +29,7 @@ const messages = {
     hideTags: "Hide tags",
     showTags: "Show tags",
     showTagsAsText: "Show tags as #text",
-    showTagPills: "Show tag pills",
+    showTagPills: "Show colored tags",
     hideCompletedAndSkipped: "Hide completed & skipped",
     showCompletedAndSkipped: "Show completed & skipped",
     showFewerDays: "Show fewer days",
