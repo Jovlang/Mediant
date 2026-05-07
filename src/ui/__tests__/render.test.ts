@@ -171,15 +171,15 @@ describe("renderAgenda", () => {
     expect(deadlineCheckboxes[0]?.classList.contains("checkbox-checked")).toBe(true);
     expect(container.querySelector(".deadlines-section .checkbox-list")?.classList.contains("checkbox-list-deadline")).toBe(true);
     expect(container.querySelector(".deadlines-section .checkbox-list")?.classList.contains("checkbox-list-has-priority")).toBe(true);
-    const deadlineChecklistToggle = container.querySelector<HTMLButtonElement>(".deadlines-section .item-title .checkbox-list-toggle-inline");
+    const deadlineChecklistToggle = container.querySelector<HTMLElement>(".deadlines-section .item-title .item-progress");
     const deadlineChecklist = container.querySelector<HTMLElement>(".deadlines-section .checkbox-list");
     expect(deadlineChecklist?.classList.contains("is-collapsed")).toBe(true);
-    expect(deadlineChecklistToggle?.textContent).toBe(">");
+    expect(deadlineChecklistToggle?.classList.contains("item-progress-toggle")).toBe(true);
+    expect(deadlineChecklistToggle?.textContent).toBe("1/2");
     expect(deadlineChecklistToggle?.getAttribute("aria-expanded")).toBe("false");
-    expect(deadlineChecklistToggle?.closest(".item-title")?.textContent).toContain("1/2 >");
+    expect(deadlineChecklistToggle?.getAttribute("role")).toBe("button");
     deadlineChecklistToggle!.click();
     expect(deadlineChecklist?.classList.contains("is-collapsed")).toBe(false);
-    expect(deadlineChecklistToggle?.textContent).toBe("<");
     expect(deadlineChecklistToggle?.getAttribute("aria-expanded")).toBe("true");
     deadlineChecklistToggle!.click();
     expect(deadlineChecklist?.classList.contains("is-collapsed")).toBe(true);
@@ -277,16 +277,16 @@ describe("renderAgenda", () => {
     }];
 
     renderAgenda(container, week, deadlines, [], [], new Date(2026, 3, 20, 10, 0));
-    const upcomingToggle = container.querySelector<HTMLButtonElement>(".deadlines-section .checkbox-list-toggle-inline");
+    const upcomingToggle = container.querySelector<HTMLElement>(".deadlines-section .item-progress-toggle");
     expect(container.querySelector<HTMLElement>(".deadlines-section .checkbox-list")?.classList.contains("is-collapsed")).toBe(true);
     upcomingToggle!.click();
 
     renderAgenda(container, week, deadlines, [], [], new Date(2026, 3, 20, 10, 0));
 
     expect(container.querySelector<HTMLElement>(".deadlines-section .checkbox-list")?.classList.contains("is-collapsed")).toBe(false);
-    expect(container.querySelector<HTMLButtonElement>(".deadlines-section .checkbox-list-toggle-inline")?.getAttribute("aria-expanded")).toBe("true");
+    expect(container.querySelector<HTMLElement>(".deadlines-section .item-progress-toggle")?.getAttribute("aria-expanded")).toBe("true");
     expect(container.querySelector<HTMLElement>(".days-card .checkbox-list")?.classList.contains("is-collapsed")).toBe(true);
-    expect(container.querySelector<HTMLButtonElement>(".days-card .checkbox-list-toggle-inline")?.getAttribute("aria-expanded")).toBe("false");
+    expect(container.querySelector<HTMLElement>(".days-card .item-progress-toggle")?.getAttribute("aria-expanded")).toBe("false");
   });
 
   it("hides empty day blocks when requested", () => {

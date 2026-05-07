@@ -1302,26 +1302,18 @@ body {
   grid-column: 3;
 }
 
-.checkbox-list-toggle-inline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1rem;
-  height: 1rem;
-  border: 0;
-  border-radius: 0.25rem;
-  background: transparent;
-  color: var(--text-dim);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  line-height: 1;
+.item-progress-toggle {
   cursor: pointer;
-  vertical-align: baseline;
+  user-select: none;
 }
 
-.checkbox-list-toggle-inline:hover {
-  color: var(--text);
+.item-progress-toggle:hover {
   background: var(--bg-state);
+}
+
+.item-progress-toggle:focus-visible {
+  outline: 2px solid var(--accent, currentColor);
+  outline-offset: 1px;
 }
 
 .checkbox-list-items {

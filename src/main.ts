@@ -312,10 +312,6 @@ function buildAddPanel(): void {
   const deadRepeatSelect = makeSelect(t("deadlineRepeat"), "add-dead-repeat", todoRepeatOptions());
   form.appendChild(deadRepeatSelect.container);
 
-  // Tags
-  const tagPicker = makeTagPicker(t("tags"), "add-tags");
-  form.appendChild(tagPicker.container);
-
   // Priority
   const priorityGroup = makeRadioGroup(t("priority"), "add-priority", [
     { value: "A", label: "A" },
@@ -324,6 +320,10 @@ function buildAddPanel(): void {
     { value: "", label: t("priorityNone"), checked: true },
   ]);
   form.appendChild(priorityGroup.container);
+
+  // Tags
+  const tagPicker = makeTagPicker(t("tags"), "add-tags");
+  form.appendChild(tagPicker.container);
 
   // Wire priority radios to editingPriority
   const priorityRadios = priorityGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-priority']");

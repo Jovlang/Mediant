@@ -327,7 +327,9 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
       : null;
     const title = renderTitle(dl.entry);
     if (dl.baseDate) title.dataset.baseDate = dl.baseDate;
-    if (checkboxListId && checkboxListKey) appendCheckboxToggle(title, checkboxListId, checkboxListKey);
+    const collapsible = checkboxListId && checkboxListKey
+      ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
+      : false;
 
     const main = el("span", "deadline-main");
     main.append(renderStateBadge(dl.entry), title);
@@ -346,6 +348,7 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
         checkboxListId ?? undefined,
         checkboxListKey ?? undefined,
         usesRingState(dl.entry),
+        collapsible,
       ));
     }
   }
@@ -403,7 +406,9 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
     const checkboxListId = item.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
     const checkboxListKey = checkboxListId ? `someday:${item.entry.sourceLineNumber}` : null;
     const title = renderTitle(item.entry);
-    if (checkboxListId && checkboxListKey) appendCheckboxToggle(title, checkboxListId, checkboxListKey);
+    const collapsible = checkboxListId && checkboxListKey
+      ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
+      : false;
 
     row.append(state, title, renderTags(item.entry.tags, optionsForTags()));
     section.appendChild(row);
@@ -416,6 +421,7 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
         checkboxListId ?? undefined,
         checkboxListKey ?? undefined,
         usesRingState(item.entry),
+        collapsible,
       ));
     }
   }
@@ -514,6 +520,7 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
           checkboxListId ?? undefined,
           checkboxListKey ?? undefined,
           usesRingState(item.entry),
+          item.entry.progress !== null,
         ));
       }
     }
@@ -594,7 +601,7 @@ function renderItem(
     title.insertBefore(document.createTextNode(" "), title.firstChild);
     title.insertBefore(renderOverrideChip(item.override, moveDirection(item)), title.firstChild);
   }
-  if (checkboxListId && checkboxListKey) appendCheckboxToggle(title, checkboxListId, checkboxListKey);
+  if (checkboxListId && checkboxListKey) wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey);
   children.push(title, renderTags(item.entry.tags, optionsForTags()));
   row.append(...children);
   return row;
@@ -784,6 +791,7 @@ function renderCheckboxItems(
   listId?: string,
   listKey?: string,
   ringState: boolean = false,
+  collapsible: boolean = true,
 ): HTMLElement {
   const list = el("div", "checkbox-list");
   if (listId) {
@@ -792,7 +800,7 @@ function renderCheckboxItems(
   }
   if (listKey) {
     renderedCheckboxListKeys.add(listKey);
-    if (isCheckboxListCollapsed(listKey)) list.classList.add("is-collapsed");
+    if (collapsible && isCheckboxListCollapsed(listKey)) list.classList.add("is-collapsed");
   }
   if (layoutClass) list.classList.add(layoutClass);
   if (hasPriority) list.classList.add("checkbox-list-has-priority");
@@ -863,28 +871,33 @@ function isCheckboxListCollapsed(listKey: string): boolean {
   return checkboxListCollapseState.get(listKey) ?? true;
 }
 
-function appendCheckboxToggle(title: HTMLElement, listId: string, listKey: string): void {
+function wireProgressBadgeAsToggle(title: HTMLElement, listId: string, listKey: string): boolean {
+  const badge = title.querySelector<HTMLElement>(".item-progress");
+  if (!badge) return false;
   const initiallyCollapsed = isCheckboxListCollapsed(listKey);
-  title.appendChild(document.createTextNode(" "));
-  const toggle = document.createElement("button");
-  toggle.className = "checkbox-list-toggle-inline";
-  toggle.type = "button";
-  toggle.textContent = initiallyCollapsed ? ">" : "<";
-  toggle.setAttribute("aria-label", initiallyCollapsed ? t("showChecklist") : t("hideChecklist"));
-  toggle.setAttribute("aria-expanded", initiallyCollapsed ? "false" : "true");
-  toggle.setAttribute("aria-controls", listId);
-  toggle.addEventListener("click", (event) => {
+  badge.classList.add("item-progress-toggle");
+  badge.setAttribute("role", "button");
+  badge.setAttribute("tabindex", "0");
+  badge.setAttribute("aria-controls", listId);
+  badge.setAttribute("aria-expanded", initiallyCollapsed ? "false" : "true");
+  badge.setAttribute("aria-label", initiallyCollapsed ? t("showChecklist") : t("hideChecklist"));
+  const toggle = (event: Event) => {
     event.stopPropagation();
     const list = checkboxListsById.get(listId) ?? document.getElementById(listId);
     if (!list) return;
     const collapsed = list.classList.toggle("is-collapsed");
     checkboxListCollapseState.set(listKey, collapsed);
-    toggle.textContent = collapsed ? ">" : "<";
-    toggle.setAttribute("aria-label", collapsed ? t("showChecklist") : t("hideChecklist"));
-    toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
-    toggle.blur();
+    badge.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    badge.setAttribute("aria-label", collapsed ? t("showChecklist") : t("hideChecklist"));
+  };
+  badge.addEventListener("click", toggle);
+  badge.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggle(event);
+    }
   });
-  title.appendChild(toggle);
+  return true;
 }
 
 function getCheckboxLayoutClass(item: AgendaItem): string {
