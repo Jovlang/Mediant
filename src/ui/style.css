@@ -377,24 +377,20 @@ body {
 
 .allday-item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   align-items: center;
   padding: 0.18rem var(--section-padding-x);
   font-size: 0.9375rem;
   gap: 0 0.75rem;
 }
 
-.allday-item.has-state {
-  grid-template-columns: auto 1fr auto;
-  font-size: 0.90625rem;
-}
-
+.allday-item.has-state,
 .allday-item.has-all-day-marker {
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
 }
 
 .allday-item.has-all-day-marker.has-state {
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto auto 1fr;
 }
 
 .item-all-day-marker {
@@ -457,12 +453,12 @@ body {
 }
 
 .timed-item {
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   font-size: 0.875rem;
 }
 
 .timed-item.has-state {
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto auto 1fr;
 }
 
 .timed-item + .timed-item,
@@ -487,18 +483,9 @@ body {
   letter-spacing: -0.01em;
 }
 
-.timed-item .item-state {
-  grid-column: 2;
-}
-
 .timed-item > .item-title {
-  grid-column: 2;
   min-width: 0;
   font-weight: 500;
-}
-
-.timed-item.has-state > .item-title {
-  grid-column: 3;
 }
 
 /* ── Overdue section (top of agenda) ─────────────────────────────── */
@@ -516,7 +503,7 @@ body {
 
 .overdue-item {
   --global-row-fringe-color: var(--accent-deadline);
-  grid-template-columns: 4.1ch 4.35rem 2.35rem 1fr auto;
+  grid-template-columns: 4.1ch 4.35rem 2.35rem 1fr;
   padding: 0.78rem var(--section-padding-x);
   gap: 0 0.5rem;
 }
@@ -549,8 +536,6 @@ body {
 }
 
 .overdue-item .item-time {
-  grid-column: 1;
-  grid-row: 1;
   font-family: var(--font-mono);
   font-size: 0.82rem;
   font-weight: 700;
@@ -560,8 +545,6 @@ body {
 }
 
 .overdue-item .item-kind {
-  grid-column: 2;
-  grid-row: 1;
   display: inline-flex;
   justify-content: center;
   min-width: 0;
@@ -575,16 +558,12 @@ body {
 }
 
 .overdue-item > .item-title {
-  grid-column: 4;
-  grid-row: 1;
   justify-self: start;
   min-width: 0;
   font-weight: 500;
 }
 
 .overdue-item .item-state {
-  grid-column: 3;
-  grid-row: 1;
   display: inline-flex;
   justify-content: center;
   min-width: 0;
@@ -660,8 +639,6 @@ body {
 }
 
 .deadline-item .item-time {
-  grid-column: 1;
-  grid-row: 1;
   font-family: var(--font-mono);
   font-size: 0.84rem;
   font-weight: 650;
@@ -673,15 +650,8 @@ body {
   display: contents;
 }
 
-.deadline-item .item-state {
-  grid-column: 2;
-  grid-row: 1;
-}
-
 .deadline-main > .item-title,
 .deadline-main > .item-title-stack {
-  grid-column: 3;
-  grid-row: 1;
   min-width: 0;
 }
 
@@ -707,7 +677,7 @@ body {
 }
 
 .deadline-note {
-  grid-template-columns: 4.35ch minmax(0, 1fr) auto;
+  grid-template-columns: 4.35ch 1fr;
   column-gap: 0.72rem;
 }
 
@@ -718,77 +688,38 @@ body {
 /* ── Scheduled items ──────────────────────────────────────────────── */
 
 .scheduled-item {
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   font-size: 0.875rem;
 }
 
-.scheduled-item.has-time {
-  grid-template-columns: auto 1fr auto;
-}
-
+.scheduled-item.has-time,
 .scheduled-item.has-state {
-  grid-template-columns: auto 1fr auto;
-}
-
-.scheduled-item.has-state:not(.has-time) > .item-title {
-  font-size: 0.9375rem;
-  font-weight: 530;
+  grid-template-columns: auto 1fr;
 }
 
 .scheduled-item.has-time.has-state {
-  grid-template-columns: auto auto 1fr auto;
-}
-
-.scheduled-item .item-state {
-  grid-column: 1;
-}
-
-.scheduled-item.has-time .item-state {
-  grid-column: 2;
+  grid-template-columns: auto auto 1fr;
 }
 
 .scheduled-item > .item-title {
-  grid-column: 1;
   min-width: 0;
   font-weight: 500;
-}
-
-.scheduled-item.has-time > .item-title,
-.scheduled-item.has-state > .item-title {
-  grid-column: 2;
-}
-
-.scheduled-item.has-time.has-state > .item-title {
-  grid-column: 3;
 }
 
 /* ── Day deadline items (deadlines within day cards) ─────────────── */
 
 .day-deadline-item {
-  grid-template-columns: auto 1fr auto;
-  font-size: 0.90625rem;
+  grid-template-columns: auto 1fr;
+  font-size: 0.875rem;
 }
 
 .day-deadline-item.has-time {
-  grid-template-columns: auto auto 1fr auto;
-}
-
-.day-deadline-item .item-state {
-  grid-column: 1;
+  grid-template-columns: auto auto 1fr;
 }
 
 .day-deadline-item > .item-title {
-  grid-column: 2;
   min-width: 0;
   font-weight: 500;
-}
-
-.day-deadline-item.has-time .item-state {
-  grid-column: 2;
-}
-
-.day-deadline-item.has-time > .item-title {
-  grid-column: 3;
 }
 
 .day-deadline-item:has(+ .checkbox-list) {
@@ -803,7 +734,7 @@ body {
 
 .someday-item {
   --global-row-fringe-color: transparent;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   padding: 0.6rem var(--section-padding-x);
   padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
   gap: 0 0.65rem;
@@ -921,12 +852,8 @@ body {
 .tag-badges {
   display: flex;
   gap: 0.35rem;
-  flex-shrink: 0;
-  justify-self: end;
-  align-self: center;
   flex-wrap: wrap;
   max-width: 14rem;
-  justify-content: flex-end;
 }
 
 .tag {
@@ -962,6 +889,10 @@ body {
   box-shadow: inset 0 -1px 0 currentColor;
 }
 
+.item-title {
+  min-width: 0;
+}
+
 .item-title-stack {
   display: flex;
   flex-direction: column;
@@ -982,53 +913,6 @@ body {
   max-width: 100%;
 }
 
-.allday-item .item-title-stack {
-  grid-column: 1 / 3;
-}
-
-.allday-item.has-state .item-title-stack,
-.allday-item.has-all-day-marker .item-title-stack {
-  grid-column: 2 / 4;
-}
-
-.allday-item.has-all-day-marker.has-state .item-title-stack {
-  grid-column: 3 / 5;
-}
-
-.timed-item .item-title-stack {
-  grid-column: 2 / 4;
-}
-
-.timed-item.has-state .item-title-stack {
-  grid-column: 3 / 5;
-}
-
-.overdue-item .item-title-stack {
-  grid-column: 4 / 6;
-  grid-row: 1;
-}
-
-.scheduled-item .item-title-stack {
-  grid-column: 1 / 3;
-}
-
-.scheduled-item.has-time .item-title-stack,
-.scheduled-item.has-state .item-title-stack {
-  grid-column: 2 / 4;
-}
-
-.scheduled-item.has-time.has-state .item-title-stack {
-  grid-column: 3 / 5;
-}
-
-.day-deadline-item .item-title-stack,
-.someday-item .item-title-stack {
-  grid-column: 2 / 4;
-}
-
-.day-deadline-item.has-time .item-title-stack {
-  grid-column: 3 / 5;
-}
 
 .hide-tags-toggle,
 .hide-empty-days-toggle,
@@ -1120,46 +1004,38 @@ body {
 
 .checkbox-list {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   align-items: start;
   position: relative;
   padding: 0 var(--section-padding-x);
   margin-bottom: 0.5rem;
   border-left: 3px solid transparent;
   gap: 0.35rem 0.8rem;
+  --cb-badge-w: var(--badge-text-w);
+  --cb-gap: var(--gap-badge);
+}
+
+.checkbox-list-ring-state {
+  --cb-badge-w: var(--badge-ring-w);
+  --cb-gap: var(--gap-badge-ring);
 }
 
 .checkbox-list-deadline {
-  grid-template-columns: 4.35ch var(--badge-text-w) 1fr;
+  grid-template-columns: 4.35ch var(--cb-badge-w) 1fr;
   border-left: 0;
   padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
   padding-top: 0.16rem;
-  column-gap: var(--gap-badge);
-}
-
-.checkbox-list-ring-state.checkbox-list-deadline {
-  grid-template-columns: 4.35ch var(--badge-ring-w) 1fr;
-  column-gap: var(--gap-badge-ring);
+  column-gap: var(--cb-gap);
 }
 
 .checkbox-list-badge {
-  grid-template-columns: var(--badge-text-w) 1fr;
-  column-gap: var(--gap-badge);
-}
-
-.checkbox-list-ring-state.checkbox-list-badge {
-  grid-template-columns: var(--badge-ring-w) 1fr;
-  column-gap: var(--gap-badge-ring);
+  grid-template-columns: var(--cb-badge-w) 1fr;
+  column-gap: var(--cb-gap);
 }
 
 .checkbox-list-time-badge {
-  grid-template-columns: auto var(--badge-text-w) 1fr;
-  column-gap: var(--gap-badge);
-}
-
-.checkbox-list-ring-state.checkbox-list-time-badge {
-  grid-template-columns: auto var(--badge-ring-w) 1fr;
-  column-gap: var(--gap-badge-ring);
+  grid-template-columns: auto var(--cb-badge-w) 1fr;
+  column-gap: var(--cb-gap);
 }
 
 .checkbox-list-time {
@@ -1175,11 +1051,8 @@ body {
   padding-left: 1.5rem;
 }
 
-.someday-section .checkbox-list.checkbox-list-ring-state .checkbox-list-items {
-  padding-left: 0.45rem;
-}
-
-.checkbox-list-items {
+.checkbox-list-badge .checkbox-list-items,
+.checkbox-list-time .checkbox-list-items {
   grid-column: 2;
 }
 
@@ -1188,12 +1061,7 @@ body {
   grid-column: 3;
 }
 
-.checkbox-list-deadline.checkbox-list-has-priority .checkbox-list-items {
-  padding-left: 2.85rem;
-}
-
-.checkbox-list-ring-state.checkbox-list-time-badge .checkbox-list-items,
-.checkbox-list-ring-state.checkbox-list-deadline .checkbox-list-items {
+.checkbox-list-ring-state .checkbox-list-items {
   padding-left: 0.45rem;
 }
 
@@ -1364,25 +1232,17 @@ body {
   margin-top: calc(var(--item-gap-y) * 0.95);
 }
 
-.note-layout-allday {
-  grid-template-columns: auto 1fr auto;
+.note-layout-allday,
+.note-layout-compact {
+  grid-template-columns: auto 1fr;
   column-gap: 0.75rem;
 }
 
-.note-layout-allday-with-state {
-  grid-template-columns: auto auto 1fr auto;
-  column-gap: 0.75rem;
-}
-
+.note-layout-allday-with-state,
 .note-layout-timed,
 .note-layout-with-time {
-  grid-template-columns: auto auto 1fr auto;
-  column-gap: 0.8rem;
-}
-
-.note-layout-compact {
-  grid-template-columns: auto 1fr auto;
-  column-gap: 0.8rem;
+  grid-template-columns: auto auto 1fr;
+  column-gap: 0.75rem;
 }
 
 .note-title-col-1 .item-instance-note-text {
@@ -2252,83 +2112,8 @@ body {
   }
 }
 
-@container (max-width: 40rem) {
-  .allday-item {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .allday-item.has-state,
-  .allday-item.has-all-day-marker {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .allday-item.has-all-day-marker.has-state {
-    grid-template-columns: auto auto minmax(0, 1fr);
-  }
-
-  .timed-item {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .timed-item.has-state {
-    grid-template-columns: auto auto minmax(0, 1fr);
-  }
-
-  .scheduled-item {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .scheduled-item.has-time,
-  .scheduled-item.has-state {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .scheduled-item.has-time.has-state {
-    grid-template-columns: auto auto minmax(0, 1fr);
-  }
-
-  .day-deadline-item,
-  .someday-item {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .day-deadline-item.has-time {
-    grid-template-columns: auto auto minmax(0, 1fr);
-  }
-
-  .overdue-item {
-    grid-template-columns: 4.1ch 4.35rem 2.35rem minmax(0, 1fr);
-  }
-
-  .allday-item .item-title-stack,
-  .scheduled-item .item-title-stack {
-    grid-column: 1;
-  }
-
-  .allday-item.has-state .item-title-stack,
-  .allday-item.has-all-day-marker .item-title-stack,
-  .timed-item .item-title-stack,
-  .scheduled-item.has-time .item-title-stack,
-  .scheduled-item.has-state .item-title-stack,
-  .day-deadline-item .item-title-stack,
-  .someday-item .item-title-stack {
-    grid-column: 2;
-  }
-
-  .allday-item.has-all-day-marker.has-state .item-title-stack,
-  .timed-item.has-state .item-title-stack,
-  .scheduled-item.has-time.has-state .item-title-stack,
-  .day-deadline-item.has-time .item-title-stack {
-    grid-column: 3;
-  }
-
-  .overdue-item .item-title-stack {
-    grid-column: 4;
-  }
-}
 
 @media (max-width: 480px) {
-  .timed-item,
   .checkbox-list {
     border-left-color: transparent !important;
   }
@@ -2372,14 +2157,7 @@ body {
   }
 
   .agenda-nav-today,
-  .add-item-btn {
-    width: 2.35rem;
-  }
-
-  .add-item-btn {
-    width: 2.35rem;
-  }
-
+  .add-item-btn,
   .agenda-settings-summary {
     width: 2.35rem;
   }
@@ -2401,7 +2179,6 @@ body {
 }
 
 /* ── Edit button ───────────────────────────────────────────────────── */
-
 
 .item-title[data-action="edit"] {
   cursor: pointer;
