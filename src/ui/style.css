@@ -295,6 +295,13 @@ body {
     0 16px 34px rgba(15, 23, 42, 0.095);
 }
 
+.day-block,
+.overdue-section,
+.deadlines-section,
+.someday-section {
+  container-type: inline-size;
+}
+
 .day-block {
   display: block;
   padding: 1.2rem 0 1.35rem;
@@ -2400,7 +2407,9 @@ body {
   .allday-section {
     padding: 0;
   }
+}
 
+@container (max-width: 40rem) {
   .timed-item .tag-badges,
   .deadline-item .tag-badges,
   .day-deadline-item .tag-badges,
