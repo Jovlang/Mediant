@@ -152,7 +152,7 @@ const messages = {
     hideTags: "Skjul etiketter",
     showTags: "Vis etiketter",
     showTagsAsText: "Vis etiketter som #tekst",
-    showTagPills: "Vis etikettpiller",
+    showTagPills: "Vis fargede etiketter",
     hideCompletedAndSkipped: "Skjul fullførte og hoppet over",
     showCompletedAndSkipped: "Vis fullførte og hoppet over",
     showFewerDays: "Vis færre dager",
