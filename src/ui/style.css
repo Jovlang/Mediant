@@ -2400,6 +2400,68 @@ body {
   .allday-section {
     padding: 0;
   }
+
+  .timed-item .tag-badges,
+  .deadline-item .tag-badges,
+  .day-deadline-item .tag-badges,
+  .someday-item .tag-badges,
+  .allday-item .tag-badges,
+  .overdue-item .tag-badges {
+    align-self: flex-start;
+    justify-self: start;
+    justify-content: flex-start;
+    grid-row: 2;
+    max-width: none;
+    margin-top: 0.18rem;
+  }
+
+  .timed-item .tag-badges {
+    grid-column: 2;
+  }
+
+  .timed-item.has-state .tag-badges {
+    grid-column: 3;
+  }
+
+  .scheduled-item .tag-badges {
+    grid-column: 1;
+  }
+
+  .scheduled-item.has-time .tag-badges,
+  .scheduled-item.has-state .tag-badges {
+    grid-column: 2;
+  }
+
+  .scheduled-item.has-time.has-state .tag-badges {
+    grid-column: 3;
+  }
+
+  .day-deadline-item .tag-badges,
+  .deadline-item .tag-badges,
+  .someday-item .tag-badges {
+    grid-column: 2;
+  }
+
+  .day-deadline-item.has-time .tag-badges {
+    grid-column: 3;
+  }
+
+  .overdue-item .tag-badges {
+    grid-column: 4;
+  }
+
+  .allday-item .tag-badges {
+    grid-column: 1;
+  }
+
+  .allday-item.has-state .tag-badges,
+  .allday-item.has-all-day-marker .tag-badges {
+    grid-column: 2;
+  }
+
+  .allday-item.has-all-day-marker.has-state .tag-badges {
+    grid-column: 3;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2472,68 +2534,6 @@ body {
   .scheduled-item .item-time,
   .day-deadline-item .item-time {
     font-size: 0.75rem;
-  }
-
-  .timed-item .tag-badges,
-  .deadline-item .tag-badges,
-  .day-deadline-item .tag-badges,
-  .someday-item .tag-badges,
-  .allday-item .tag-badges,
-  .overdue-item .tag-badges {
-    align-self: flex-start;
-    justify-self: start;
-    justify-content: flex-start;
-    grid-row: 2;
-    max-width: none;
-    margin-top: 0.18rem;
-  }
-
-  .timed-item .tag-badges {
-    grid-column: 2;
-  }
-
-  .timed-item.has-state .tag-badges {
-    grid-column: 3;
-  }
-
-  .scheduled-item .tag-badges {
-    grid-column: 1;
-  }
-
-  .scheduled-item.has-time .tag-badges,
-  .scheduled-item.has-state .tag-badges {
-    grid-column: 2;
-  }
-
-  .scheduled-item.has-time.has-state .tag-badges {
-    grid-column: 3;
-  }
-
-  .day-deadline-item .tag-badges,
-  .deadline-item .tag-badges,
-  .someday-item .tag-badges {
-    grid-column: 2;
-  }
-
-  .day-deadline-item.has-time .tag-badges {
-    grid-column: 3;
-  }
-
-  .overdue-item .tag-badges {
-    grid-column: 4;
-  }
-
-  .allday-item .tag-badges {
-    grid-column: 1;
-  }
-
-  .allday-item.has-state .tag-badges,
-  .allday-item.has-all-day-marker .tag-badges {
-    grid-column: 2;
-  }
-
-  .allday-item.has-all-day-marker.has-state .tag-badges {
-    grid-column: 3;
   }
 
   .item-instance-note {
