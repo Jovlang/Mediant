@@ -124,7 +124,7 @@ DEADLINE: <2026-05-05 ti.>
 - Parsed into `checkboxItems` on the entry (array of `{ text, checked }`), not included in body text.
 - Indented checkbox items are supported.
 - Rendered in the agenda as a mini checklist under the item.
-- In agenda rows, the checkbox icon toggles completion, the label opens inline text editing, and the inline add control inserts a new checkbox row. These writes update the Org source immediately.
+- In agenda rows, clicking a checkbox row toggles completion and updates the Org source immediately. Text, add, and remove edits are handled by the edit-panel checklist editor for TODO tasks.
 - In the edit panel, checkboxes are interactive toggles with editable labels and add/remove controls that update the Org source immediately.
 
 ### Progress cookies

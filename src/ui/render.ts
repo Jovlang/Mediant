@@ -688,10 +688,6 @@ function renderCheckboxItems(
     row.dataset.line = String(parentSourceLine);
     row.dataset.checkboxIndex = String(i);
     if (listKey) row.dataset.listKey = listKey;
-    // Row-level toggle stays as a fallback for keyboard activation and clicks
-    // on the gap between icon and label. The label's own data-action takes
-    // precedence on label clicks (closest() finds the label first), so tapping
-    // the text enters edit mode instead of toggling.
     row.dataset.action = "toggle-checkbox";
     row.setAttribute("role", "button");
     row.setAttribute("tabindex", "0");
@@ -700,10 +696,6 @@ function renderCheckboxItems(
     icon.setAttribute("aria-hidden", "true");
     const label = el("span", "checkbox-label");
     label.textContent = item.text;
-    label.dataset.action = "edit-checkbox";
-    label.dataset.line = String(parentSourceLine);
-    label.dataset.checkboxIndex = String(i);
-    if (listKey) label.dataset.listKey = listKey;
     row.append(icon, label);
     rows.appendChild(row);
   }

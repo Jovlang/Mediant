@@ -109,7 +109,7 @@ export function toggleDoneInSource(source: string, sourceLine: number): string {
 
 /**
  * Matches a checkbox list item. Captures: 1=indent + `- [`, 2=mark (" " or "X"),
- * 3=`] ` separator, 4=text. Used by every checkbox helper so indexing and
+ * 3=`] ` separator, 4=text. Used by checkbox toggling so indexing and
  * progress-cookie counting stay consistent.
  */
 const CHECKBOX_LINE_RE = /^(\s*-\s+\[)([ X])(\]\s+)(.+)$/;
@@ -186,103 +186,6 @@ export function toggleCheckboxInSource(source: string, parentSourceLine: number,
 
   refreshProgressCookie(lines, startIdx, endIdx);
   return lines.join("\n");
-}
-
-/**
- * Replace the text of the `index`th checkbox within the entry block at
- * `parentSourceLine`, preserving indent and checked marker. No-op if the
- * entry or checkbox isn't found, or if `text` is empty (use
- * `removeCheckboxInSource` to drop a row instead).
- */
-export function editCheckboxTextInSource(
-  source: string,
-  parentSourceLine: number,
-  index: number,
-  text: string,
-): string {
-  if (text === "") return source;
-  const block = findEntryBlock(source, parentSourceLine);
-  if (!block) return source;
-  const { lines, startIdx, endIdx } = block;
-
-  const targetIdx = findCheckboxLineForIndex(lines, startIdx, endIdx, index);
-  if (targetIdx === -1) return source;
-
-  lines[targetIdx] = lines[targetIdx].replace(
-    CHECKBOX_LINE_RE,
-    (_match, before: string, mark: string, sep: string) => `${before}${mark}${sep}${text}`,
-  );
-  return lines.join("\n");
-}
-
-/**
- * Insert a checkbox line after the `afterIndex`th checkbox within the entry
- * block at `parentSourceLine`. Pass `afterIndex = -1` to insert before the
- * first existing checkbox (or at the end of the block if none exist). The
- * inserted line copies the indent of its neighbour. Refreshes any `[N/M]` /
- * `[N%]` progress cookie on the heading.
- */
-export function insertCheckboxInSource(
-  source: string,
-  parentSourceLine: number,
-  afterIndex: number,
-  text: string,
-  checked: boolean,
-): string {
-  if (text === "") return source;
-  const block = findEntryBlock(source, parentSourceLine);
-  if (!block) return source;
-  const { lines, startIdx, endIdx } = block;
-
-  let insertAt: number;
-  let indent = "";
-  if (afterIndex >= 0) {
-    const targetIdx = findCheckboxLineForIndex(lines, startIdx, endIdx, afterIndex);
-    if (targetIdx === -1) return source;
-    insertAt = targetIdx + 1;
-    indent = lines[targetIdx].match(/^(\s*)-/)?.[1] ?? "";
-  } else {
-    let firstCheckboxIdx = -1;
-    for (let i = startIdx + 1; i < endIdx; i++) {
-      if (CHECKBOX_LINE_RE.test(lines[i])) {
-        firstCheckboxIdx = i;
-        break;
-      }
-    }
-    if (firstCheckboxIdx >= 0) {
-      insertAt = firstCheckboxIdx;
-      indent = lines[firstCheckboxIdx].match(/^(\s*)-/)?.[1] ?? "";
-    } else {
-      insertAt = endIdx;
-    }
-  }
-
-  const newLine = `${indent}- [${checked ? "X" : " "}] ${text}`;
-  const updated = [...lines.slice(0, insertAt), newLine, ...lines.slice(insertAt)];
-  refreshProgressCookie(updated, startIdx, endIdx + 1);
-  return updated.join("\n");
-}
-
-/**
- * Drop the `index`th checkbox line from the entry block at
- * `parentSourceLine`. Refreshes any `[N/M]` / `[N%]` progress cookie. No-op
- * if the entry or checkbox isn't found.
- */
-export function removeCheckboxInSource(
-  source: string,
-  parentSourceLine: number,
-  index: number,
-): string {
-  const block = findEntryBlock(source, parentSourceLine);
-  if (!block) return source;
-  const { lines, startIdx, endIdx } = block;
-
-  const targetIdx = findCheckboxLineForIndex(lines, startIdx, endIdx, index);
-  if (targetIdx === -1) return source;
-
-  const updated = [...lines.slice(0, targetIdx), ...lines.slice(targetIdx + 1)];
-  refreshProgressCookie(updated, startIdx, endIdx - 1);
-  return updated.join("\n");
 }
 
 function updateProgressCookie(heading: string, done: number, total: number): string {

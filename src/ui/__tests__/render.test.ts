@@ -178,7 +178,7 @@ describe("renderAgenda", () => {
     expect(overdueState?.getAttribute("data-line")).toBe("7");
   });
 
-  it("exposes a list-key, line, and per-row checkbox-index so inline-edit handlers can route source mutations", () => {
+  it("exposes list keys and row checkbox indexes so toggles can route source mutations", () => {
     const container = document.createElement("div");
     const entry = makeEntry({
       title: "Errands",
@@ -214,10 +214,12 @@ describe("renderAgenda", () => {
 
     const labels = Array.from(container.querySelectorAll<HTMLElement>(".days-card .checkbox-label"));
     expect(labels.map((el) => el.textContent)).toEqual(["Milk", "Bread"]);
-    expect(labels.map((el) => el.dataset.action)).toEqual(["edit-checkbox", "edit-checkbox"]);
-    expect(labels.map((el) => el.dataset.checkboxIndex)).toEqual(["0", "1"]);
-    expect(labels.every((el) => el.dataset.line === "17")).toBe(true);
-    expect(labels.every((el) => el.getAttribute("title") === null)).toBe(true);
+    expect(labels.every((el) => el.dataset.action === undefined)).toBe(true);
+
+    const rows = Array.from(container.querySelectorAll<HTMLElement>(".days-card .checkbox-item"));
+    expect(rows.map((el) => el.dataset.action)).toEqual(["toggle-checkbox", "toggle-checkbox"]);
+    expect(rows.map((el) => el.dataset.checkboxIndex)).toEqual(["0", "1"]);
+    expect(rows.every((el) => el.dataset.line === "17")).toBe(true);
   });
 
   it("preserves checklist visibility state across rerenders per rendered list", () => {
@@ -473,11 +475,8 @@ describe("renderAgenda", () => {
     const checkboxes = Array.from(container.querySelectorAll(".checkbox-item"));
     expect(checkboxes).toHaveLength(2);
     expect(checkboxes[0].classList.contains("checkbox-checked")).toBe(true);
-    // Icon owns the toggle action; label owns the inline-edit action so a tap
-    // on text enters edit mode rather than toggling the checkbox.
     expect(checkboxes[0].getAttribute("data-action")).toBe("toggle-checkbox");
-    expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-action")).toBe("edit-checkbox");
-    expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-checkbox-index")).toBe("0");
+    expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-action")).toBeNull();
     expect(container.querySelector(".timed-section .checkbox-list")).not.toBeNull();
     expect(container.querySelector(".tag")?.textContent).toContain("music");
     const timedRows = container.querySelectorAll<HTMLElement>(".timed-item");
