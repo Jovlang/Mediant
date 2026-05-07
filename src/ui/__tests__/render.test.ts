@@ -186,6 +186,8 @@ describe("renderAgenda", () => {
     const timedRow = container.querySelector<HTMLElement>(".timed-item");
     expect(timedRow?.classList.contains("has-tag-fringe")).toBe(true);
     expect(timedRow?.style.getPropertyValue("--tag-fringe-color")).toBe("#3366ff");
+    expect(timedRow?.querySelector(".tag[data-tag='work']")?.closest(".item-title-stack")).not.toBeNull();
+    expect(timedRow?.querySelector(":scope > .tag-badges")).toBeNull();
     const secondDeadlineRow = container.querySelectorAll<HTMLElement>(".deadlines-section .deadline-item")[1];
     expect(secondDeadlineRow?.classList.contains("has-priority")).toBe(false);
     expect(secondDeadlineRow?.querySelector(".item-title .item-priority")).toBeNull();
