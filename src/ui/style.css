@@ -1164,10 +1164,6 @@ body {
   column-gap: 0.65rem;
 }
 
-.checkbox-list-ring-state.checkbox-list-someday {
-  column-gap: 0.5rem;
-}
-
 .checkbox-list-ring-state.checkbox-list-deadline {
   grid-template-columns: 3.55ch minmax(0, 1fr) auto;
   column-gap: 0.5rem;
@@ -1189,6 +1185,7 @@ body {
 .checkbox-list-ring-state.checkbox-list-day-deadline,
 .checkbox-list-ring-state.checkbox-list-scheduled {
   grid-template-columns: 1.45rem 1fr auto;
+  column-gap: 0.5rem;
 }
 
 .checkbox-list-ring-state.checkbox-list-day-deadline-time,
@@ -1216,14 +1213,11 @@ body {
 }
 
 .checkbox-list-ring-state.checkbox-list-someday .checkbox-list-items,
-.checkbox-list-ring-state.checkbox-list-day-deadline-time .checkbox-list-items {
-  padding-left: 0.45rem;
-}
-
 .checkbox-list-ring-state.checkbox-list-day-deadline .checkbox-list-items,
-.checkbox-list-ring-state.checkbox-list-scheduled .checkbox-list-items {
-  grid-column: 1 / -1;
-  padding-left: 0;
+.checkbox-list-ring-state.checkbox-list-scheduled .checkbox-list-items,
+.checkbox-list-ring-state.checkbox-list-day-deadline-time .checkbox-list-items,
+.checkbox-list-ring-state.checkbox-list-deadline .checkbox-list-items {
+  padding-left: 0.45rem;
 }
 
 .checkbox-list-day-deadline-time .checkbox-list-items,
@@ -1276,12 +1270,6 @@ body {
 
 .checkbox-list-ring-state .checkbox-item {
   padding-left: 0.45rem;
-}
-
-.checkbox-list-ring-state.checkbox-list-deadline .checkbox-item,
-.checkbox-list-ring-state.checkbox-list-day-deadline .checkbox-item,
-.checkbox-list-ring-state.checkbox-list-scheduled .checkbox-item {
-  padding-left: 0;
 }
 
 .checkbox-item:hover .checkbox-icon {
