@@ -1192,7 +1192,6 @@ body {
   padding-left: 2.85rem;
 }
 
-.checkbox-list-ring-state.checkbox-list-badge .checkbox-list-items,
 .checkbox-list-ring-state.checkbox-list-time-badge .checkbox-list-items,
 .checkbox-list-ring-state.checkbox-list-deadline .checkbox-list-items {
   padding-left: 0.45rem;
@@ -1242,6 +1241,10 @@ body {
 
 .checkbox-list-ring-state .checkbox-item {
   padding-left: 0.45rem;
+}
+
+.checkbox-list-ring-state.checkbox-list-badge .checkbox-item {
+  padding-left: 0;
 }
 
 .checkbox-item:hover .checkbox-icon {
