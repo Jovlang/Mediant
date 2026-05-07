@@ -163,7 +163,7 @@ function renderHeader(startDate: Date, endDate: Date, options: RenderAgendaOptio
   header.append(nav, todayBtn, actions);
 
   if ((options.activeTagFilters?.length ?? 0) > 0) {
-    header.appendChild(renderActiveTagFilters(options.activeTagFilters ?? [], options));
+    header.appendChild(renderActiveTagFilters(options.activeTagFilters ?? []));
   }
   return header;
 }
@@ -381,7 +381,7 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
       section.appendChild(renderCheckboxItems(
         item.entry.checkboxItems,
         item.entry.sourceLineNumber,
-        "checkbox-list-someday",
+        "checkbox-list-badge",
         item.entry.priority !== null,
         checkboxListId ?? undefined,
         checkboxListKey ?? undefined,
@@ -850,13 +850,10 @@ function wireProgressBadgeAsToggle(title: HTMLElement, listId: string, listKey: 
 }
 
 function getCheckboxLayoutClass(item: AgendaItem): string {
-  if (item.category === "deadline") {
-    return item.startTime ? "checkbox-list-day-deadline-time" : "checkbox-list-day-deadline";
+  if (item.category === "timed") {
+    return item.entry.todo ? "checkbox-list-time-badge" : "checkbox-list-time";
   }
-  if (item.category === "scheduled") {
-    return item.startTime ? "checkbox-list-scheduled-time" : "checkbox-list-scheduled";
-  }
-  return item.entry.todo ? "checkbox-list-timed-state" : "checkbox-list-timed";
+  return item.startTime ? "checkbox-list-time-badge" : "checkbox-list-badge";
 }
 
 function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags"> {
