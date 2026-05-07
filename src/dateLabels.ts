@@ -18,7 +18,7 @@ const MONTH_NAMES_NB = [
   "juli", "august", "september", "oktober", "november", "desember",
 ] as const;
 
-function pickByLocale<T>(en: T, nb: T): T {
+function pickByLocale(en: readonly string[], nb: readonly string[]): readonly string[] {
   return getLocale() === "nb" ? nb : en;
 }
 
