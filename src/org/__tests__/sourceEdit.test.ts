@@ -5,6 +5,9 @@ import {
   appendOrgTextUnderHeading,
   appendQuickCaptureToTasks,
   deleteOrgBlockInSource,
+  editCheckboxTextInSource,
+  insertCheckboxInSource,
+  removeCheckboxInSource,
   replaceOrgBlockInSource,
   toggleCheckboxInSource,
   toggleDoneInSource,
@@ -329,6 +332,250 @@ describe("toggleCheckboxInSource", () => {
       "- [ ] Item\n";
 
     expect(toggleCheckboxInSource(source, 2, 0)).toBe(source);
+  });
+});
+
+describe("editCheckboxTextInSource", () => {
+  it("rewrites the index-th checkbox's text and preserves the checked marker", () => {
+    const source =
+      "** TODO Buy stuff [1/3]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n" +
+      "- [ ] Eggs\n";
+
+    expect(editCheckboxTextInSource(source, 1, 1, "Sourdough")).toBe(
+      "** TODO Buy stuff [1/3]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Sourdough\n" +
+      "- [ ] Eggs\n",
+    );
+  });
+
+  it("preserves indent on indented checkbox lines", () => {
+    const source =
+      "** TODO Outer [0/1]\n" +
+      "  - [ ] Indented\n";
+
+    expect(editCheckboxTextInSource(source, 1, 0, "Renamed")).toBe(
+      "** TODO Outer [0/1]\n" +
+      "  - [ ] Renamed\n",
+    );
+  });
+
+  it("leaves the heading's progress cookie unchanged on a pure text edit", () => {
+    const source =
+      "** TODO Buy stuff [33%]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n" +
+      "- [ ] Eggs\n";
+
+    expect(editCheckboxTextInSource(source, 1, 0, "Whole milk")).toBe(
+      "** TODO Buy stuff [33%]\n" +
+      "- [X] Whole milk\n" +
+      "- [ ] Bread\n" +
+      "- [ ] Eggs\n",
+    );
+  });
+
+  it("is a no-op for empty text — caller should remove the row instead", () => {
+    const source =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+    expect(editCheckboxTextInSource(source, 1, 0, "")).toBe(source);
+  });
+
+  it("is a no-op when the checkbox index is out of range", () => {
+    const source =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+    expect(editCheckboxTextInSource(source, 1, 5, "X")).toBe(source);
+  });
+});
+
+describe("insertCheckboxInSource", () => {
+  it("inserts after the given index, preserving indent and refreshing [N/M]", () => {
+    const source =
+      "** TODO Buy stuff [1/2]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n";
+
+    expect(insertCheckboxInSource(source, 1, 0, "Eggs", false)).toBe(
+      "** TODO Buy stuff [1/3]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Eggs\n" +
+      "- [ ] Bread\n",
+    );
+  });
+
+  it("inserts checked rows and bumps both done and total counts in [N/M]", () => {
+    const source =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+
+    expect(insertCheckboxInSource(source, 1, 0, "Bread", true)).toBe(
+      "** TODO Buy stuff [1/2]\n" +
+      "- [ ] Milk\n" +
+      "- [X] Bread\n",
+    );
+  });
+
+  it("inserts before the first checkbox when afterIndex is -1", () => {
+    const source =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+
+    expect(insertCheckboxInSource(source, 1, -1, "Bread", false)).toBe(
+      "** TODO Buy stuff [0/2]\n" +
+      "- [ ] Bread\n" +
+      "- [ ] Milk\n",
+    );
+  });
+
+  it("refreshes [%] cookies after insert", () => {
+    const source =
+      "** TODO Buy stuff [50%]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n";
+
+    expect(insertCheckboxInSource(source, 1, 1, "Eggs", false)).toBe(
+      "** TODO Buy stuff [33%]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n" +
+      "- [ ] Eggs\n",
+    );
+  });
+
+  it("matches the indent of the existing neighbour", () => {
+    const source =
+      "** TODO Outer [0/1]\n" +
+      "  - [ ] Indented\n";
+
+    expect(insertCheckboxInSource(source, 1, 0, "Sibling", false)).toBe(
+      "** TODO Outer [0/2]\n" +
+      "  - [ ] Indented\n" +
+      "  - [ ] Sibling\n",
+    );
+  });
+
+  it("is a no-op for empty text", () => {
+    const source =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+    expect(insertCheckboxInSource(source, 1, 0, "", false)).toBe(source);
+  });
+
+  it("is a no-op when afterIndex is out of range", () => {
+    const source =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+    expect(insertCheckboxInSource(source, 1, 5, "Bread", false)).toBe(source);
+  });
+});
+
+describe("removeCheckboxInSource", () => {
+  it("drops the row and refreshes [N/M] for an unchecked removal", () => {
+    const source =
+      "** TODO Buy stuff [1/3]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n" +
+      "- [ ] Eggs\n";
+
+    expect(removeCheckboxInSource(source, 1, 1)).toBe(
+      "** TODO Buy stuff [1/2]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Eggs\n",
+    );
+  });
+
+  it("decrements done when removing a checked row", () => {
+    const source =
+      "** TODO Buy stuff [2/3]\n" +
+      "- [X] Milk\n" +
+      "- [X] Bread\n" +
+      "- [ ] Eggs\n";
+
+    expect(removeCheckboxInSource(source, 1, 0)).toBe(
+      "** TODO Buy stuff [1/2]\n" +
+      "- [X] Bread\n" +
+      "- [ ] Eggs\n",
+    );
+  });
+
+  it("refreshes [%] cookies", () => {
+    const source =
+      "** TODO Buy stuff [33%]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n" +
+      "- [ ] Eggs\n";
+
+    expect(removeCheckboxInSource(source, 1, 2)).toBe(
+      "** TODO Buy stuff [50%]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n",
+    );
+  });
+
+  it("only drops checkboxes inside the target entry's block", () => {
+    const source =
+      "** TODO First [1/2]\n" +
+      "- [X] A\n" +
+      "- [ ] B\n" +
+      "** TODO Second [0/1]\n" +
+      "- [ ] C\n";
+
+    expect(removeCheckboxInSource(source, 1, 0)).toBe(
+      "** TODO First [0/1]\n" +
+      "- [ ] B\n" +
+      "** TODO Second [0/1]\n" +
+      "- [ ] C\n",
+    );
+  });
+
+  it("is a no-op when the index is out of range", () => {
+    const source =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+    expect(removeCheckboxInSource(source, 1, 5)).toBe(source);
+  });
+
+  it("is a no-op when the parent line is not a heading", () => {
+    const source =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+    expect(removeCheckboxInSource(source, 2, 0)).toBe(source);
+  });
+});
+
+describe("checkbox helpers compose with toggleCheckboxInSource", () => {
+  it("an inline insert + toggle round-trip matches the same change made via repeated toggles", () => {
+    const initial =
+      "** TODO Buy stuff [0/1]\n" +
+      "- [ ] Milk\n";
+
+    const inserted = insertCheckboxInSource(initial, 1, 0, "Bread", false);
+    const toggled = toggleCheckboxInSource(inserted, 1, 1);
+
+    expect(toggled).toBe(
+      "** TODO Buy stuff [1/2]\n" +
+      "- [ ] Milk\n" +
+      "- [X] Bread\n",
+    );
+  });
+
+  it("inline edit followed by toggle keeps progress cookie consistent", () => {
+    const initial =
+      "** TODO Buy stuff [1/2]\n" +
+      "- [X] Milk\n" +
+      "- [ ] Bread\n";
+
+    const edited = editCheckboxTextInSource(initial, 1, 1, "Sourdough");
+    const toggled = toggleCheckboxInSource(edited, 1, 1);
+
+    expect(toggled).toBe(
+      "** TODO Buy stuff [2/2]\n" +
+      "- [X] Milk\n" +
+      "- [X] Sourdough\n",
+    );
   });
 });
 

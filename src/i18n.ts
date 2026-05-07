@@ -62,6 +62,10 @@ const messages = {
     movedLater: "→ Moved",
     showChecklist: "Show checklist",
     hideChecklist: "Hide checklist",
+    editSubtask: "Edit subtask",
+    subtaskPlaceholder: "Subtask",
+    addSubtaskInline: "+ Add subtask",
+    removeSubtask: "Remove subtask",
 
     // Add/edit panel — header and shared
     close: "Close",
@@ -180,6 +184,10 @@ const messages = {
     movedLater: "→ Flyttet",
     showChecklist: "Vis sjekkliste",
     hideChecklist: "Skjul sjekkliste",
+    editSubtask: "Rediger deloppgave",
+    subtaskPlaceholder: "Deloppgave",
+    addSubtaskInline: "+ Legg til deloppgave",
+    removeSubtask: "Fjern deloppgave",
 
     close: "Lukk",
     addItem: "Legg til oppføring",

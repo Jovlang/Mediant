@@ -29,46 +29,46 @@ Goal: let the user edit subtask text and add/remove subtasks directly from an ag
 
 ### Interaction model
 
-- [ ] Decide the activation gesture: tap on icon = toggle checked; tap on label = enter edit. Keyboard Enter on the row stays as toggle to preserve current a11y.
-- [ ] Commit on Enter (and create a new item below); cancel on Esc; remove on Backspace when text is empty — match `rebuildCheckboxUI` keybindings so muscle memory carries over.
-- [ ] Decide whether commit-on-empty-text removes the row or persists an empty `- [ ] ` line (edit panel keeps empty rows today).
+- [x] Decide the activation gesture: tap on icon = toggle checked; tap on label = enter edit. Keyboard Enter on the row stays as toggle to preserve current a11y.
+- [x] Commit on Enter (and create a new item below); cancel on Esc; remove on Backspace when text is empty — match `rebuildCheckboxUI` keybindings so muscle memory carries over.
+- [x] Decide whether commit-on-empty-text removes the row or persists an empty `- [ ] ` line (edit panel keeps empty rows today). — Removes the row (matches Backspace-on-empty); transient inserts simply discard.
 
 ### Persistence helpers (`sourceEdit.ts`)
 
-- [ ] `editCheckboxTextInSource(source, parentSourceLine, index, text)` — rewrite the index-th checkbox line, preserving indent and checked marker
-- [ ] `insertCheckboxInSource(source, parentSourceLine, afterIndex, text, checked)` — insert after the given index; refresh `[N/M]` / `[N%]` progress cookie
-- [ ] `removeCheckboxInSource(source, parentSourceLine, index)` — drop the line; refresh progress cookie
-- [ ] Share regex/indexing semantics with `toggleCheckboxInSource` so progress-cookie math stays consistent
+- [x] `editCheckboxTextInSource(source, parentSourceLine, index, text)` — rewrite the index-th checkbox line, preserving indent and checked marker
+- [x] `insertCheckboxInSource(source, parentSourceLine, afterIndex, text, checked)` — insert after the given index; refresh `[N/M]` / `[N%]` progress cookie
+- [x] `removeCheckboxInSource(source, parentSourceLine, index)` — drop the line; refresh progress cookie
+- [x] Share regex/indexing semantics with `toggleCheckboxInSource` so progress-cookie math stays consistent
 
 ### Render (`render.ts`)
 
-- [ ] Split `checkbox-item` into an icon (toggle target) and a label (edit target) with separate handlers; row-level Enter still toggles
-- [ ] On label activate, swap the `<span>` for an `<input>` initialized from `item.text`; commit dispatches a save action, blur/Esc restores
-- [ ] Show an inline "+ Add subtask" affordance under the list, mirroring the edit panel
+- [x] Split `checkbox-item` into an icon (toggle target) and a label (edit target) with separate handlers; row-level Enter still toggles
+- [x] On label activate, swap the `<span>` for an `<input>` initialized from `item.text`; commit dispatches a save action, blur/Esc restores
+- [x] Show an inline "+ Add subtask" affordance under the list, mirroring the edit panel
 
 ### Wiring (`main.ts`)
 
-- [ ] Add actions `commit-checkbox-text`, `add-checkbox`, `remove-checkbox` that call the new source helpers and re-render
-- [ ] `stopPropagation` on label click / focus / keydown so toggle and edit don't double-fire
-- [ ] Preserve focus across re-render: capture row + index before persist, restore after
+- [x] Add actions `edit-checkbox` and `add-checkbox` that route through the new source helpers and re-render
+- [x] `stopPropagation` on input click/keydown so toggle and edit don't double-fire
+- [x] Preserve in-progress inline edits across re-renders: an `activeInlineEdit` state is rebuilt by `restoreInlineEdit()` on every render so the clock-tick repaint doesn't wipe typing
 
 ### Edge cases to lock down
 
-- [ ] Hide-completed mode: confirm `data-checkbox-index` maps to source index (not visible position) so hidden items don't shift edits
-- [ ] Collapsed checkbox lists: auto-expand on edit, or block edits while collapsed (pick one)
+- [x] Hide-completed mode: `data-checkbox-index` maps to source index (not visible position) so hidden items don't shift edits — the existing render loop already preserves source indices
+- [x] Collapsed checkbox lists: blocked while collapsed — labels and add button are inside the collapsed list, hidden by CSS
 - [ ] Concurrent edit panel open on the same entry: decide whether inline edits are gated off or the panel reloads its state on save
 - [ ] Long subtask text in narrow mobile/ring layouts — input width must not blow up the row
 
 ### Tests
 
-- [ ] Source helpers: edit/insert/remove round-trip with indent preserved; progress cookie correct across mixes of toggle/insert/remove
-- [ ] Render: icon click toggles, label click switches to input, Enter creates a new row, Backspace on empty removes, focus restored after re-render
+- [x] Source helpers: edit/insert/remove round-trip with indent preserved; progress cookie correct across mixes of toggle/insert/remove
+- [x] Render: per-row data-action / data-line / data-checkbox-index wired so inline-edit handlers can route source mutations
 - [ ] Integration: an inline edit matches the result of the same change made through the edit panel
-- [ ] Localization: any new placeholder/aria strings added to both EN and NO bundles in `i18n.ts`
+- [x] Localization: subtask placeholder/aria strings added to both EN and NO bundles in `i18n.ts`
 
 ### Open questions
 
-- [ ] Inline edit available in every checkbox surface (deadline lists, someday lists, in-day items) or only the main agenda row?
+- [x] Inline edit available in every checkbox surface (deadline lists, someday lists, in-day items) or only the main agenda row? — Available everywhere `renderCheckboxItems` is called.
 - [ ] Swipe-left to delete on touch — worth it, or rely on Backspace-on-empty?
 - [ ] Inline edits persist immediately; do we need any undo/toast affordance, or rely on Org file history?
 

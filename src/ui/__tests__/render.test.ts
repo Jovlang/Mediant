@@ -199,6 +199,52 @@ describe("renderAgenda", () => {
     expect(overdueState?.getAttribute("data-line")).toBe("7");
   });
 
+  it("exposes a list-key, line, and per-row checkbox-index so inline-edit handlers can route source mutations", () => {
+    const container = document.createElement("div");
+    const entry = makeEntry({
+      title: "Errands",
+      todo: "TODO",
+      progress: { done: 1, total: 2 },
+      checkboxItems: [
+        { text: "Milk", checked: true },
+        { text: "Bread", checked: false },
+      ],
+      sourceLineNumber: 17,
+    });
+    const week = makeWeek([
+      [makeItem({
+        entry,
+        date: new Date(2026, 3, 20),
+        category: "scheduled",
+        sourceTimestamp: makeTimestamp("2026-04-20"),
+      })],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+    ]);
+
+    renderAgenda(container, week, [], [], [], new Date(2026, 3, 20, 10, 0));
+
+    const list = container.querySelector<HTMLElement>(".days-card .checkbox-list-items");
+    expect(list).not.toBeNull();
+    expect(list!.dataset.line).toBe("17");
+    expect(list!.dataset.listKey).toBeTruthy();
+
+    const labels = Array.from(container.querySelectorAll<HTMLElement>(".days-card .checkbox-label"));
+    expect(labels.map((el) => el.textContent)).toEqual(["Milk", "Bread"]);
+    expect(labels.map((el) => el.dataset.action)).toEqual(["edit-checkbox", "edit-checkbox"]);
+    expect(labels.map((el) => el.dataset.checkboxIndex)).toEqual(["0", "1"]);
+    expect(labels.every((el) => el.dataset.line === "17")).toBe(true);
+
+    const addBtn = container.querySelector<HTMLButtonElement>(".days-card .checkbox-list-add-subtask");
+    expect(addBtn).not.toBeNull();
+    expect(addBtn!.dataset.action).toBe("add-checkbox");
+    expect(addBtn!.dataset.line).toBe("17");
+  });
+
   it("preserves checklist visibility state across rerenders per rendered list", () => {
     const container = document.createElement("div");
     const entry = makeEntry({
@@ -455,6 +501,14 @@ describe("renderAgenda", () => {
     const checkboxes = Array.from(container.querySelectorAll(".checkbox-item"));
     expect(checkboxes).toHaveLength(2);
     expect(checkboxes[0].classList.contains("checkbox-checked")).toBe(true);
+    // Icon owns the toggle action; label owns the inline-edit action so a tap
+    // on text enters edit mode rather than toggling the checkbox.
+    expect(checkboxes[0].getAttribute("data-action")).toBe("toggle-checkbox");
+    expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-action")).toBe("edit-checkbox");
+    expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-checkbox-index")).toBe("0");
+    expect(container.querySelector(".checkbox-list-add-subtask")).not.toBeNull();
+    expect(container.querySelector(".checkbox-list-add-subtask")?.getAttribute("data-action")).toBe("add-checkbox");
+    expect(container.querySelector(".checkbox-list-add-subtask")?.getAttribute("data-line")).toBe("42");
     expect(container.querySelector(".timed-section .checkbox-list")?.classList.contains("checkbox-list-timed")).toBe(true);
     expect(container.querySelector(".tag")?.textContent).toContain("music");
     const timedRows = container.querySelectorAll<HTMLElement>(".timed-item");

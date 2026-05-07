@@ -800,14 +800,21 @@ function renderCheckboxItems(
 
   const hideCompleted = currentRenderOptions.hideCompletedAndSkipped === true;
   const rows = el("div", "checkbox-list-items");
+  if (listKey) rows.dataset.listKey = listKey;
+  rows.dataset.line = String(parentSourceLine);
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (hideCompleted && item.checked) continue;
     const row = el("div", "checkbox-item");
     if (item.checked) row.classList.add("checkbox-checked");
-    row.dataset.action = "toggle-checkbox";
     row.dataset.line = String(parentSourceLine);
     row.dataset.checkboxIndex = String(i);
+    if (listKey) row.dataset.listKey = listKey;
+    // Row-level toggle stays as a fallback for keyboard activation and clicks
+    // on the gap between icon and label. The label's own data-action takes
+    // precedence on label clicks (closest() finds the label first), so tapping
+    // the text enters edit mode instead of toggling.
+    row.dataset.action = "toggle-checkbox";
     row.setAttribute("role", "button");
     row.setAttribute("tabindex", "0");
     row.setAttribute("aria-label", item.checked ? t("markNotDone") : t("markDone"));
@@ -815,10 +822,25 @@ function renderCheckboxItems(
     icon.setAttribute("aria-hidden", "true");
     const label = el("span", "checkbox-label");
     label.textContent = item.text;
+    label.dataset.action = "edit-checkbox";
+    label.dataset.line = String(parentSourceLine);
+    label.dataset.checkboxIndex = String(i);
+    if (listKey) label.dataset.listKey = listKey;
+    label.title = t("editSubtask");
     row.append(icon, label);
     rows.appendChild(row);
   }
   list.appendChild(rows);
+
+  const addBtn = document.createElement("button");
+  addBtn.type = "button";
+  addBtn.className = "checkbox-list-add-subtask";
+  addBtn.textContent = t("addSubtaskInline");
+  addBtn.dataset.action = "add-checkbox";
+  addBtn.dataset.line = String(parentSourceLine);
+  if (listKey) addBtn.dataset.listKey = listKey;
+  addBtn.setAttribute("aria-label", t("addSubtaskInline"));
+  list.appendChild(addBtn);
   return list;
 }
 

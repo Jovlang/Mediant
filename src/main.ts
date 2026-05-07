@@ -5,6 +5,9 @@ import {
   appendAgendaItemToSource,
   appendQuickCaptureToTasks,
   deleteOrgBlockInSource,
+  editCheckboxTextInSource,
+  insertCheckboxInSource,
+  removeCheckboxInSource,
   replaceOrgBlockInSource,
   toggleCheckboxInSource,
   toggleDoneInSource,
@@ -1423,6 +1426,262 @@ async function toggleCheckbox(parentSourceLine: number, index: number): Promise<
   await persistSource(toggleCheckboxInSource(currentSource, parentSourceLine, index));
 }
 
+// ── Inline subtask editing ────────────────────────────────────────────
+//
+// Tracks the user's in-progress inline edit so that re-renders (e.g. the
+// minute-tick render or a save-driven render) don't wipe the input mid-type.
+// `activeInlineEdit` is set when the user enters edit mode and cleared when
+// they commit / cancel. After every render(), `restoreInlineEdit()` rebuilds
+// the input from this state.
+
+interface InlineEditState {
+  kind: "edit";
+  line: number;
+  index: number;
+  listKey: string;
+  original: string;
+  value: string;
+}
+
+interface InlineInsertState {
+  kind: "insert";
+  line: number;
+  afterIndex: number;
+  listKey: string;
+  value: string;
+}
+
+type InlineState = InlineEditState | InlineInsertState;
+
+let activeInlineEdit: InlineState | null = null;
+
+function restoreInlineEdit(): void {
+  const state = activeInlineEdit;
+  if (!state) return;
+  const list = findCheckboxList(state.listKey);
+  if (!list) return;
+  if (state.kind === "edit") {
+    const label = list.querySelector<HTMLElement>(
+      `.checkbox-label[data-checkbox-index="${state.index}"]`,
+    );
+    if (label) attachInlineEditInput(label, state);
+    return;
+  }
+  attachInlineInsertInput(list, state);
+}
+
+function findCheckboxList(listKey: string): HTMLElement | null {
+  return document.querySelector<HTMLElement>(
+    `.checkbox-list-items[data-list-key="${cssEscape(listKey)}"]`,
+  );
+}
+
+function attachInlineEditInput(label: HTMLElement, state: InlineEditState): void {
+  if (label.querySelector("input.checkbox-label-input")) return;
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "checkbox-label-input";
+  input.value = state.value;
+  input.setAttribute("aria-label", t("editSubtask"));
+  label.textContent = "";
+  label.removeAttribute("data-action");
+  label.appendChild(input);
+  bindInlineInput(input, state);
+  input.focus();
+  input.setSelectionRange(state.value.length, state.value.length);
+}
+
+function attachInlineInsertInput(list: HTMLElement, state: InlineInsertState): void {
+  if (list.querySelector(".checkbox-item-transient input.checkbox-label-input")) return;
+  const lineRaw = list.dataset.line;
+  const line = lineRaw ? Number(lineRaw) : NaN;
+  if (!Number.isFinite(line) || line <= 0) return;
+
+  const transient = document.createElement("div");
+  transient.className = "checkbox-item checkbox-item-transient";
+  transient.dataset.line = String(line);
+
+  const icon = document.createElement("span");
+  icon.className = "checkbox-icon";
+  icon.setAttribute("aria-hidden", "true");
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "checkbox-label-input";
+  input.placeholder = t("subtaskPlaceholder");
+  input.setAttribute("aria-label", t("addSubtaskInline"));
+  input.value = state.value;
+
+  transient.append(icon, input);
+
+  if (state.afterIndex >= 0) {
+    const anchor = list.querySelector<HTMLElement>(
+      `.checkbox-item[data-checkbox-index="${state.afterIndex}"]`,
+    );
+    if (anchor && anchor.parentElement === list) {
+      anchor.insertAdjacentElement("afterend", transient);
+    } else {
+      list.appendChild(transient);
+    }
+  } else {
+    list.appendChild(transient);
+  }
+
+  bindInlineInput(input, state);
+  input.focus();
+  input.setSelectionRange(state.value.length, state.value.length);
+}
+
+function startInlineLabelEdit(label: HTMLElement): void {
+  const lineRaw = label.dataset.line;
+  const indexRaw = label.dataset.checkboxIndex;
+  const listKey = label.dataset.listKey;
+  const line = lineRaw ? Number(lineRaw) : NaN;
+  const index = indexRaw ? Number(indexRaw) : NaN;
+  if (!Number.isFinite(line) || line <= 0 || !Number.isInteger(index) || index < 0) return;
+  if (!listKey) return;
+
+  const original = label.textContent ?? "";
+  activeInlineEdit = {
+    kind: "edit",
+    line,
+    index,
+    listKey,
+    original,
+    value: original,
+  };
+  attachInlineEditInput(label, activeInlineEdit);
+}
+
+function startInlineInsert(list: HTMLElement, afterIndex: number): void {
+  const lineRaw = list.dataset.line;
+  const listKey = list.dataset.listKey;
+  const line = lineRaw ? Number(lineRaw) : NaN;
+  if (!Number.isFinite(line) || line <= 0) return;
+  if (!listKey) return;
+
+  activeInlineEdit = {
+    kind: "insert",
+    line,
+    afterIndex,
+    listKey,
+    value: "",
+  };
+  attachInlineInsertInput(list, activeInlineEdit);
+}
+
+function bindInlineInput(input: HTMLInputElement, state: InlineState): void {
+  let cancelled = false;
+  let handled = false;
+
+  const stop = (e: Event) => e.stopPropagation();
+  input.addEventListener("click", stop);
+  input.addEventListener("mousedown", stop);
+  input.addEventListener("keypress", stop);
+
+  input.addEventListener("input", () => {
+    state.value = input.value;
+  });
+
+  const commit = (createNewBelow: boolean): void => {
+    if (handled) return;
+    handled = true;
+    state.value = input.value;
+    const text = input.value.trim();
+    void runInlineCommit(state, text, createNewBelow);
+  };
+
+  const cancel = (): void => {
+    if (handled) return;
+    handled = true;
+    cancelled = true;
+    activeInlineEdit = null;
+    render();
+  };
+
+  input.addEventListener("keydown", (e) => {
+    e.stopPropagation();
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commit(true);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      cancel();
+    } else if (e.key === "Backspace" && input.value === "") {
+      e.preventDefault();
+      if (state.kind === "edit") {
+        handled = true;
+        void runInlineRemove(state);
+      } else {
+        cancel();
+      }
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    if (cancelled || handled) return;
+    commit(false);
+  });
+}
+
+async function runInlineCommit(
+  state: InlineState,
+  text: string,
+  createNewBelow: boolean,
+): Promise<void> {
+  if (state.kind === "edit") {
+    if (text === "") {
+      await runInlineRemove(state);
+      return;
+    }
+    if (text === state.original) {
+      activeInlineEdit = createNewBelow
+        ? { kind: "insert", line: state.line, afterIndex: state.index, listKey: state.listKey, value: "" }
+        : null;
+      render();
+      return;
+    }
+    activeInlineEdit = createNewBelow
+      ? { kind: "insert", line: state.line, afterIndex: state.index, listKey: state.listKey, value: "" }
+      : null;
+    const updated = editCheckboxTextInSource(currentSource, state.line, state.index, text);
+    await persistSource(updated);
+    return;
+  }
+
+  // insert
+  if (text === "") {
+    activeInlineEdit = null;
+    render();
+    return;
+  }
+  const nextAfterIndex = state.afterIndex + 1;
+  activeInlineEdit = createNewBelow
+    ? { kind: "insert", line: state.line, afterIndex: nextAfterIndex, listKey: state.listKey, value: "" }
+    : null;
+  const updated = insertCheckboxInSource(
+    currentSource,
+    state.line,
+    state.afterIndex,
+    text,
+    /* checked */ false,
+  );
+  await persistSource(updated);
+}
+
+async function runInlineRemove(state: InlineEditState): Promise<void> {
+  activeInlineEdit = null;
+  const updated = removeCheckboxInSource(currentSource, state.line, state.index);
+  await persistSource(updated);
+}
+
+function cssEscape(value: string): string {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+    return CSS.escape(value);
+  }
+  return value.replace(/[^a-zA-Z0-9_-]/g, (c) => `\\${c}`);
+}
+
 function deleteOrgBlock(sourceLine: number): void {
   void persistSource(deleteOrgBlockInSource(currentSource, sourceLine));
 }
@@ -2167,6 +2426,11 @@ function render(): void {
     }
   }
   scheduleNotifications(notifItems);
+
+  // Reattach any in-progress inline subtask input that was wiped by the
+  // re-render — captures clock-tick re-renders and post-persist re-renders
+  // alike, so the user's typing isn't lost mid-edit.
+  restoreInlineEdit();
 }
 
 // ── Navigation ───────────────────────────────────────────────────────
@@ -2250,6 +2514,15 @@ function setupNavigation(): void {
       const line = Number(btn.dataset.line);
       const index = Number(btn.dataset.checkboxIndex);
       if (line && Number.isInteger(index) && index >= 0) void toggleCheckbox(line, index);
+    } else if (action === "edit-checkbox") {
+      e.stopPropagation();
+      startInlineLabelEdit(btn);
+    } else if (action === "add-checkbox") {
+      e.stopPropagation();
+      const list = btn.parentElement?.querySelector<HTMLElement>(".checkbox-list-items");
+      if (!list) return;
+      const existing = list.querySelectorAll(".checkbox-item:not(.checkbox-item-transient)").length;
+      startInlineInsert(list, existing - 1);
     }
   });
 }
