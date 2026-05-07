@@ -334,9 +334,10 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
       : false;
 
     const main = el("span", "deadline-main");
-    main.append(renderStateBadge(dl.entry), title);
+    main.append(renderStateBadge(dl.entry), renderTitleWithInlineTextTags(title, dl.entry.tags));
 
-    row.append(meta, main, renderTags(dl.entry.tags, optionsForTags()));
+    row.append(meta, main);
+    appendTrailingTags(row, dl.entry.tags);
     section.appendChild(row);
     if (dl.instanceNote) {
       section.appendChild(renderGlobalInstanceNote(dl.instanceNote, "deadline-note"));
@@ -383,7 +384,8 @@ function renderOverdue(items: OverdueItem[]): HTMLElement {
     const title = renderTitle(item.entry);
     if (item.baseDate) title.dataset.baseDate = item.baseDate;
 
-    row.append(meta, title, renderTags(item.entry.tags, optionsForTags()));
+    row.append(meta, renderTitleWithInlineTextTags(title, item.entry.tags));
+    appendTrailingTags(row, item.entry.tags);
     section.appendChild(row);
     if (item.instanceNote) {
       section.appendChild(renderGlobalInstanceNote(item.instanceNote, "overdue-note"));
@@ -412,7 +414,8 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
       ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
       : false;
 
-    row.append(state, title, renderTags(item.entry.tags, optionsForTags()));
+    row.append(state, renderTitleWithInlineTextTags(title, item.entry.tags));
+    appendTrailingTags(row, item.entry.tags);
     section.appendChild(row);
     if (item.entry.checkboxItems.length > 0) {
       section.appendChild(renderCheckboxItems(
@@ -604,7 +607,9 @@ function renderItem(
     title.insertBefore(renderOverrideChip(item.override, moveDirection(item)), title.firstChild);
   }
   if (checkboxListId && checkboxListKey) wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey);
-  children.push(title, renderTags(item.entry.tags, optionsForTags()));
+  children.push(renderTitleWithInlineTextTags(title, item.entry.tags));
+  const trailingTags = renderTrailingTags(item.entry.tags);
+  if (trailingTags) children.push(trailingTags);
   row.append(...children);
   return row;
 }
@@ -932,6 +937,24 @@ function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, 
     }));
   }
   return badges;
+}
+
+function renderTrailingTags(tags: readonly string[]): HTMLElement | null {
+  if (currentRenderOptions.tagTextMode) return null;
+  return renderTags(tags, optionsForTags());
+}
+
+function appendTrailingTags(parent: HTMLElement, tags: readonly string[]): void {
+  const trailingTags = renderTrailingTags(tags);
+  if (trailingTags) parent.appendChild(trailingTags);
+}
+
+function renderTitleWithInlineTextTags(title: HTMLElement, tags: readonly string[]): HTMLElement {
+  if (!currentRenderOptions.tagTextMode || currentRenderOptions.hideTags || tags.length === 0) return title;
+
+  const stack = el("span", "item-title-stack");
+  stack.append(title, renderTags(tags, optionsForTags()));
+  return stack;
 }
 
 function renderTag(

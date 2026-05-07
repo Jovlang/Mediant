@@ -428,6 +428,8 @@ describe("renderAgenda", () => {
     expect(tag?.textContent).toBe("#work");
     expect(tag?.classList.contains("tag-text")).toBe(true);
     expect(tag?.classList.contains("is-color-editable")).toBe(false);
+    expect(tag?.closest(".item-title-stack")).not.toBeNull();
+    expect(container.querySelector(".timed-item > .tag-badges-text")).toBeNull();
     expect(container.querySelector(".timed-item")?.classList.contains("has-tag-fringe")).toBe(false);
     expect(container.querySelector(".active-tag-filters .tag[data-tag='work']")?.textContent).toBe("#work");
     expect(container.querySelector(".agenda-settings-menu .tag-color-mode-toggle")).toBeNull();
