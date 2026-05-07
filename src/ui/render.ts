@@ -834,7 +834,6 @@ function renderCheckboxItems(
     label.dataset.line = String(parentSourceLine);
     label.dataset.checkboxIndex = String(i);
     if (listKey) label.dataset.listKey = listKey;
-    label.title = t("editSubtask");
     row.append(icon, label);
     rows.appendChild(row);
   }

@@ -238,6 +238,7 @@ describe("renderAgenda", () => {
     expect(labels.map((el) => el.dataset.action)).toEqual(["edit-checkbox", "edit-checkbox"]);
     expect(labels.map((el) => el.dataset.checkboxIndex)).toEqual(["0", "1"]);
     expect(labels.every((el) => el.dataset.line === "17")).toBe(true);
+    expect(labels.every((el) => el.getAttribute("title") === null)).toBe(true);
   });
 
   it("preserves checklist visibility state across rerenders per rendered list", () => {
