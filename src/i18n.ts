@@ -64,7 +64,6 @@ const messages = {
     hideChecklist: "Hide checklist",
     editSubtask: "Edit subtask",
     subtaskPlaceholder: "Subtask",
-    addSubtaskInline: "+ Add subtask",
     removeSubtask: "Remove subtask",
 
     // Add/edit panel — header and shared
@@ -186,7 +185,6 @@ const messages = {
     hideChecklist: "Skjul sjekkliste",
     editSubtask: "Rediger deloppgave",
     subtaskPlaceholder: "Deloppgave",
-    addSubtaskInline: "+ Legg til deloppgave",
     removeSubtask: "Fjern deloppgave",
 
     close: "Lukk",

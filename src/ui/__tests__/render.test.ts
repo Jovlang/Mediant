@@ -238,11 +238,6 @@ describe("renderAgenda", () => {
     expect(labels.map((el) => el.dataset.action)).toEqual(["edit-checkbox", "edit-checkbox"]);
     expect(labels.map((el) => el.dataset.checkboxIndex)).toEqual(["0", "1"]);
     expect(labels.every((el) => el.dataset.line === "17")).toBe(true);
-
-    const addBtn = container.querySelector<HTMLButtonElement>(".days-card .checkbox-list-add-subtask");
-    expect(addBtn).not.toBeNull();
-    expect(addBtn!.dataset.action).toBe("add-checkbox");
-    expect(addBtn!.dataset.line).toBe("17");
   });
 
   it("preserves checklist visibility state across rerenders per rendered list", () => {
@@ -506,9 +501,6 @@ describe("renderAgenda", () => {
     expect(checkboxes[0].getAttribute("data-action")).toBe("toggle-checkbox");
     expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-action")).toBe("edit-checkbox");
     expect(checkboxes[0].querySelector(".checkbox-label")?.getAttribute("data-checkbox-index")).toBe("0");
-    expect(container.querySelector(".checkbox-list-add-subtask")).not.toBeNull();
-    expect(container.querySelector(".checkbox-list-add-subtask")?.getAttribute("data-action")).toBe("add-checkbox");
-    expect(container.querySelector(".checkbox-list-add-subtask")?.getAttribute("data-line")).toBe("42");
     expect(container.querySelector(".timed-section .checkbox-list")?.classList.contains("checkbox-list-timed")).toBe(true);
     expect(container.querySelector(".tag")?.textContent).toContain("music");
     const timedRows = container.querySelectorAll<HTMLElement>(".timed-item");

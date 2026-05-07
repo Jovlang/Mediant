@@ -831,16 +831,6 @@ function renderCheckboxItems(
     rows.appendChild(row);
   }
   list.appendChild(rows);
-
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className = "checkbox-list-add-subtask";
-  addBtn.textContent = t("addSubtaskInline");
-  addBtn.dataset.action = "add-checkbox";
-  addBtn.dataset.line = String(parentSourceLine);
-  if (listKey) addBtn.dataset.listKey = listKey;
-  addBtn.setAttribute("aria-label", t("addSubtaskInline"));
-  list.appendChild(addBtn);
   return list;
 }
 

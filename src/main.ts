@@ -1509,7 +1509,7 @@ function attachInlineInsertInput(list: HTMLElement, state: InlineInsertState): v
   input.type = "text";
   input.className = "checkbox-label-input";
   input.placeholder = t("subtaskPlaceholder");
-  input.setAttribute("aria-label", t("addSubtaskInline"));
+  input.setAttribute("aria-label", t("subtaskPlaceholder"));
   input.value = state.value;
 
   transient.append(icon, input);
@@ -1551,23 +1551,6 @@ function startInlineLabelEdit(label: HTMLElement): void {
     value: original,
   };
   attachInlineEditInput(label, activeInlineEdit);
-}
-
-function startInlineInsert(list: HTMLElement, afterIndex: number): void {
-  const lineRaw = list.dataset.line;
-  const listKey = list.dataset.listKey;
-  const line = lineRaw ? Number(lineRaw) : NaN;
-  if (!Number.isFinite(line) || line <= 0) return;
-  if (!listKey) return;
-
-  activeInlineEdit = {
-    kind: "insert",
-    line,
-    afterIndex,
-    listKey,
-    value: "",
-  };
-  attachInlineInsertInput(list, activeInlineEdit);
 }
 
 function bindInlineInput(input: HTMLInputElement, state: InlineState): void {
@@ -2517,12 +2500,6 @@ function setupNavigation(): void {
     } else if (action === "edit-checkbox") {
       e.stopPropagation();
       startInlineLabelEdit(btn);
-    } else if (action === "add-checkbox") {
-      e.stopPropagation();
-      const list = btn.parentElement?.querySelector<HTMLElement>(".checkbox-list-items");
-      if (!list) return;
-      const existing = list.querySelectorAll(".checkbox-item:not(.checkbox-item-transient)").length;
-      startInlineInsert(list, existing - 1);
     }
   });
 }

@@ -1425,33 +1425,6 @@ body {
   margin: 0;
 }
 
-.checkbox-list-add-subtask {
-  display: block;
-  margin-top: 0.2rem;
-  margin-left: 1.15rem;
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  font: inherit;
-  font-size: 0.78rem;
-  cursor: pointer;
-  padding: 0.1rem 0.25rem;
-  border-radius: 0.2rem;
-}
-
-.checkbox-list-ring-state .checkbox-list-add-subtask {
-  margin-left: 0.45rem;
-}
-
-.checkbox-list-add-subtask:hover {
-  background: color-mix(in srgb, var(--text-dim) 10%, transparent);
-  color: var(--text);
-}
-
-.checkbox-list.is-collapsed .checkbox-list-add-subtask {
-  display: none;
-}
-
 /* ── Instance override chip / note ────────────────────────────────── */
 
 .item-override-chip {
