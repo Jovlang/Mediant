@@ -290,7 +290,6 @@ describe("main.ts integration", () => {
     const schedInput = document.querySelector<HTMLInputElement>("#add-sched");
     const schedField = document.querySelector<HTMLInputElement>("#add-sched")?.closest(".add-field");
     const schedPreview = schedField?.querySelector<HTMLElement>(".datetime-preview");
-    const schedPickerToggle = schedField?.querySelector<HTMLButtonElement>(".datetime-picker-toggle");
     const schedRepeatSelect = document.querySelector<HTMLSelectElement>("#add-sched-repeat");
     const deadRepeatSelect = document.querySelector<HTMLSelectElement>("#add-dead-repeat");
     const deadInput = document.querySelector<HTMLInputElement>("#add-dead");
@@ -303,9 +302,6 @@ describe("main.ts integration", () => {
     expect(schedInput?.value).toBe("21/04/2026 17:00");
     expect(schedPreview?.textContent).toBe("Tue 21 Apr 2026, 17:00");
     expect(document.querySelector(".add-panel")?.classList.contains("is-editing")).toBe(true);
-    expect(schedField?.querySelector<HTMLInputElement>(".datetime-picker-popover input[type='date']")?.value).toBe("2026-04-21");
-    expect(schedField?.querySelector<HTMLInputElement>(".datetime-picker-popover input[type='time']")?.value).toBe("17:00");
-    expect(schedPickerToggle).not.toBeNull();
     expect(schedRepeatSelect?.value).toBe(".+1w");
     expect(deadRepeatSelect?.value).toBe("");
     expect((schedRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
@@ -366,16 +362,8 @@ describe("main.ts integration", () => {
     expect(schedPreview?.classList.contains("is-visible")).toBe(true);
     expect((schedRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
 
-    const schedDatePicker = schedField?.querySelector<HTMLInputElement>(".datetime-picker-popover input[type='date']");
-    const schedTimePicker = schedField?.querySelector<HTMLInputElement>(".datetime-picker-popover input[type='time']");
-    expect(schedDatePicker).not.toBeNull();
-    expect(schedTimePicker).not.toBeNull();
-    schedPickerToggle!.click();
-    expect(schedField?.querySelector<HTMLElement>(".datetime-picker-popover")?.classList.contains("is-open")).toBe(true);
-    schedDatePicker!.value = "2026-04-22";
-    schedDatePicker!.dispatchEvent(new Event("input", { bubbles: true }));
-    schedTimePicker!.value = "19:15";
-    schedTimePicker!.dispatchEvent(new Event("input", { bubbles: true }));
+    schedInput!.value = "22/04/2026 19:15";
+    schedInput!.dispatchEvent(new Event("input", { bubbles: true }));
     expect(schedInput!.value).toBe("22/04/2026 19:15");
     expect(schedPreview?.textContent).toBe("Wed 22 Apr 2026, 19:15");
     schedRepeatSelect!.value = "++1w";

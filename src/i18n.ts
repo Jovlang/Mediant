@@ -83,7 +83,6 @@ const messages = {
     tags: "Tags",
     checklist: "Checklist",
     addSubtask: "+ Add subtask",
-    openPicker: "Open {label} picker",
 
     // Repeat options
     repeatNone: "None",
@@ -194,7 +193,6 @@ const messages = {
     tags: "Etiketter",
     checklist: "Sjekkliste",
     addSubtask: "+ Legg til deloppgave",
-    openPicker: "Åpne {label}-velger",
 
     repeatNone: "Ingen",
     repeatEveryDay: "Hver dag (+1d)",
