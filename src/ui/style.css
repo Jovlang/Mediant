@@ -658,7 +658,8 @@ body {
   margin-top: 0.15rem;
 }
 
-.someday-item > .item-title {
+.someday-item > .item-title,
+.someday-item > .item-title-stack > .item-title {
   min-width: 0;
   font-weight: 540;
 }
