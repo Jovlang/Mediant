@@ -869,13 +869,16 @@ function isSameDate(a: Date, b: Date): boolean {
 }
 
 function formatDateRange(start: Date, end: Date): string {
+  const currentYear = new Date().getFullYear();
   const sameMonth = start.getMonth() === end.getMonth();
   const sameYear = start.getFullYear() === end.getFullYear();
   if (sameMonth && sameYear) {
-    return `${formatDayNumber(start.getDate())}–${formatDayNumber(end.getDate())} ${MONTH_NAMES[start.getMonth()]} ${start.getFullYear()}`;
+    const year = start.getFullYear() === currentYear ? "" : ` ${start.getFullYear()}`;
+    return `${formatDayNumber(start.getDate())}–${formatDayNumber(end.getDate())} ${MONTH_NAMES[start.getMonth()]}${year}`;
   }
   if (sameYear) {
-    return `${formatDayMonth(start)} – ${formatDayMonth(end)} ${start.getFullYear()}`;
+    const year = start.getFullYear() === currentYear ? "" : ` ${start.getFullYear()}`;
+    return `${formatDayMonth(start)} – ${formatDayMonth(end)}${year}`;
   }
   return `${formatDayMonth(start)} ${start.getFullYear()} – ${formatDayMonth(end)} ${end.getFullYear()}`;
 }
