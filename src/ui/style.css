@@ -564,7 +564,6 @@ body {
   --deadline-urgency: var(--deadline-urgency-critical);
 }
 
-.deadline-on-day .item-state-mark,
 .day-deadline-item .item-state-mark {
   border-color: var(--deadline-urgency-critical);
 }

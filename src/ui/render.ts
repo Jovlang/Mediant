@@ -281,7 +281,6 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
   for (const dl of deadlines) {
     const row = el("div", "deadline-item");
     row.classList.add(getDeadlineUrgencyClass(dl.daysUntil));
-    if (dl.daysUntil === 0) row.classList.add("deadline-on-day");
     if (dl.entry.todo === "DONE") row.classList.add("item-done");
     const time = el("span", "item-time");
     time.textContent = formatDeadlineDueText(dl.daysUntil);
