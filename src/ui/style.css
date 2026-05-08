@@ -36,7 +36,7 @@
   --deadline-urgency-caution: #aa8238;
   --deadline-urgency-calm: #647b92;
   --section-padding-x: 1.125rem;
-  --item-gap-y: 0.65rem;
+  --item-gap-y: 0.45rem;
 
   --badge-text-w: 2.35rem;
   --gap-badge: 0.72rem;
@@ -590,7 +590,7 @@ body {
 }
 
 .deadline-item + .deadline-item {
-  margin-top: 0.08rem;
+  margin-top: 0.04rem;
 }
 
 .deadline-item .item-time {
@@ -655,7 +655,7 @@ body {
 }
 
 .someday-item + .someday-item {
-  margin-top: 0.08rem;
+  margin-top: 0.04rem;
 }
 
 .someday-item > .item-title,
