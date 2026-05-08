@@ -564,7 +564,8 @@ body {
   --deadline-urgency: var(--deadline-urgency-critical);
 }
 
-.deadline-on-day {
+.deadline-on-day,
+.day-block.is-today .day-deadline-item {
   outline: 1.5px solid var(--deadline-urgency-critical);
   outline-offset: -1.5px;
   border-radius: 0.375rem;
