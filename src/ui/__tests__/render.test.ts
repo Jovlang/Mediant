@@ -250,7 +250,7 @@ describe("renderAgenda", () => {
 
     renderAgenda(container, week, [], [], [], new Date(2026, 4, 10, 12, 30));
 
-    expect(container.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("10.–16. mai 2026");
+    expect(container.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("10.–16. mai");
     expect(container.querySelector<HTMLElement>(".date-label")?.textContent).toBe("søndag 10. mai");
     expect(container.querySelector<HTMLElement>(".day-header")?.getAttribute("aria-label")).toBe("Legg til hendelse søndag 10. mai");
 
