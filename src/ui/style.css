@@ -565,7 +565,7 @@ body {
 }
 
 .deadline-on-day .item-state-mark,
-.day-block.is-today .day-deadline-item .item-state-mark {
+.day-deadline-item .item-state-mark {
   border-color: var(--deadline-urgency-critical);
 }
 
