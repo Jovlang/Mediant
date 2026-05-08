@@ -564,6 +564,12 @@ body {
   --deadline-urgency: var(--deadline-urgency-critical);
 }
 
+.deadline-on-day {
+  outline: 1.5px solid var(--deadline-urgency-critical);
+  outline-offset: -1.5px;
+  border-radius: 0.375rem;
+}
+
 .deadline-urgency-warning {
   --deadline-urgency: var(--deadline-urgency-warning);
 }
