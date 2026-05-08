@@ -320,9 +320,10 @@ body {
   align-items: baseline;
   padding: 0 var(--section-padding-x);
   margin-bottom: 0.55rem;
-  font-weight: 560;
-  font-size: 1rem;
-  letter-spacing: -0.018em;
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .day-header[data-action="add-on-date"] {
@@ -342,7 +343,7 @@ body {
 }
 
 .day-header .date-label {
-  color: var(--text);
+  color: var(--text-dim);
 }
 
 .day-header .today-marker {
