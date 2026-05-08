@@ -1465,7 +1465,7 @@ body {
 /* ── Edit panel checkboxes ──────────────────────────────────────── */
 
 .edit-checkboxes {
-  gap: 0.375rem;
+  gap: 0.25rem;
 }
 
 .edit-checkbox-row {
@@ -1473,43 +1473,26 @@ body {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8125rem;
-  cursor: pointer;
-  padding: 0.28rem 0.35rem;
-  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  border-radius: 0.65rem;
-  background: color-mix(in srgb, var(--bg-card) 70%, transparent);
 }
 
 .edit-checkbox-row input[type="checkbox"] {
   appearance: none;
-  width: 1rem;
-  height: 1rem;
+  width: 0.8rem;
+  height: 0.8rem;
   margin: 0;
   cursor: pointer;
   flex-shrink: 0;
-  border: 1.5px solid color-mix(in srgb, var(--text-dim) 48%, transparent);
-  border-radius: 0.35rem;
-  background: var(--bg-card);
-  position: relative;
-  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  border: 1.5px solid color-mix(in srgb, var(--text-dim) 58%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  box-sizing: border-box;
+  transition: border-color 120ms ease;
 }
 
 .edit-checkbox-row input[type="checkbox"]:checked {
-  border-color: color-mix(in srgb, #16a34a 82%, var(--border));
-  background: linear-gradient(145deg, #22c55e, #15803d);
-  box-shadow: 0 3px 8px color-mix(in srgb, #16a34a 22%, transparent);
-}
-
-.edit-checkbox-row input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  left: 0.29rem;
-  top: 0.14rem;
-  width: 0.3rem;
-  height: 0.52rem;
-  border: solid #fff;
-  border-width: 0 1.5px 1.5px 0;
-  transform: rotate(42deg);
+  border-color: var(--text-done);
+  background: var(--text-done);
+  box-shadow: inset 0 0 0 1.5px var(--bg-card);
 }
 
 .edit-checkbox-row input[type="checkbox"]:focus-visible {
@@ -1546,9 +1529,11 @@ body {
   padding: 0 0.25rem;
   line-height: 1;
   flex-shrink: 0;
+  opacity: 0.5;
 }
 
 .edit-checkbox-remove:hover {
+  opacity: 1;
   color: var(--accent-deadline);
 }
 
