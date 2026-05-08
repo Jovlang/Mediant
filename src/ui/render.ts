@@ -7,7 +7,7 @@
 
 import type { AgendaDay, AgendaItem, DeadlineItem, OverdueItem, SomedayItem } from "../agenda/model.ts";
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, clearScheduled, scheduleNotifications } from "./notifications.ts";
-import { DAY_NAMES, MONTH_NAMES, formatDayMonth, formatDayNumber } from "../dateLabels.ts";
+import { DAY_NAMES, MONTH_ABBREVS, formatDayMonth, formatDayNumber } from "../dateLabels.ts";
 import { t, type Locale, getLocale, setLocale, SUPPORTED_LOCALES } from "../i18n.ts";
 
 export interface RenderAgendaOptions {
@@ -748,13 +748,13 @@ function formatDateRange(start: Date, end: Date): string {
   const sameYear = start.getFullYear() === end.getFullYear();
   if (sameMonth && sameYear) {
     const year = start.getFullYear() === currentYear ? "" : ` ${start.getFullYear()}`;
-    return `${formatDayNumber(start.getDate())}–${formatDayNumber(end.getDate())} ${MONTH_NAMES[start.getMonth()]}${year}`;
+    return `${formatDayNumber(start.getDate())}–${formatDayNumber(end.getDate())} ${MONTH_ABBREVS[start.getMonth()]}${year}`;
   }
   if (sameYear) {
     const year = start.getFullYear() === currentYear ? "" : ` ${start.getFullYear()}`;
-    return `${formatDayMonth(start)} – ${formatDayMonth(end)}${year}`;
+    return `${formatDayMonth(start, MONTH_ABBREVS)} – ${formatDayMonth(end, MONTH_ABBREVS)}${year}`;
   }
-  return `${formatDayMonth(start)} ${start.getFullYear()} – ${formatDayMonth(end)} ${end.getFullYear()}`;
+  return `${formatDayMonth(start, MONTH_ABBREVS)} ${start.getFullYear()} – ${formatDayMonth(end, MONTH_ABBREVS)} ${end.getFullYear()}`;
 }
 
 function formatDateKey(date: Date): string {

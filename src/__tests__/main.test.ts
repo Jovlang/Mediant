@@ -192,34 +192,34 @@ describe("main.ts integration", () => {
     expect(toggledSource).toContain("** DONE Inbox");
     expect(toggledSource).toContain("** TODO Yoga");
 
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 April 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 Apr 2026");
     expect(keydownHandler).not.toBeNull();
 
     keydownHandler!(makeKeydownEvent("n", document.body));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("27 April – 3 May 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("27 Apr – 3 May 2026");
 
     keydownHandler!(makeKeydownEvent("p", document.body));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 April 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 Apr 2026");
 
     keydownHandler!(makeKeydownEvent("n", document.body));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("27 April – 3 May 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("27 Apr – 3 May 2026");
 
     keydownHandler!(makeKeydownEvent("t", document.body));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 April 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 Apr 2026");
 
     keydownHandler!(makeKeydownEvent("m", document.body));
     await flush();
     expect(localStorage.getItem("mediant-month-ahead")).toBe("true");
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20 April – 19 May 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20 Apr – 19 May 2026");
     expect(document.querySelectorAll(".day-block")).toHaveLength(30);
 
     keydownHandler!(makeKeydownEvent("n", document.body));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20 May – 18 June 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20 May – 18 Jun 2026");
 
     keydownHandler!(makeKeydownEvent("m", document.body));
     await flush();
@@ -228,7 +228,7 @@ describe("main.ts integration", () => {
 
     keydownHandler!(makeKeydownEvent("t", document.body));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 April 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 Apr 2026");
 
     keydownHandler!(makeKeydownEvent("a", document.body));
     await waitFor(() => document.querySelector(".add-panel.is-open") !== null);
@@ -265,11 +265,11 @@ describe("main.ts integration", () => {
 
     keydownHandler!(makeKeydownEvent("n", document.body));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("27 April – 3 May 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("27 Apr – 3 May 2026");
 
     keydownHandler!(makeKeydownEvent("t", document.body));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 April 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 Apr 2026");
 
     const deadlineTitle = document.querySelector<HTMLElement>(".deadlines-section .item-title[data-base-date='2026-04-22']");
     expect(deadlineTitle).not.toBeNull();
@@ -550,7 +550,7 @@ describe("main.ts integration", () => {
     keydownHandler!(makeKeydownEvent("m", typingTitleInput!));
     keydownHandler!(makeKeydownEvent("x", typingTitleInput!));
     await flush();
-    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 April 2026");
+    expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 Apr 2026");
     expect(document.querySelector(".add-panel.is-open")).not.toBeNull();
     expect(document.querySelector(".quick-capture-overlay.is-open")).toBeNull();
   });
