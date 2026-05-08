@@ -355,10 +355,7 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
   header.tabIndex = 0;
   header.setAttribute("role", "button");
   const label = el("span", "date-label");
-  let dayText = `${DAY_NAMES[day.date.getDay()]} ${formatDayMonth(day.date)}`;
-  if (day.date.getDay() === 1) {
-    dayText += ` (${t("weekAbbrev")}${getISOWeek(day.date)})`;
-  }
+  const dayText = `${DAY_NAMES[day.date.getDay()]} ${formatDayMonth(day.date)}`;
   label.textContent = dayText;
   header.setAttribute("aria-label", t("addEventOn", { date: dayText }));
   header.appendChild(label);
@@ -727,13 +724,6 @@ function getDeadlineUrgencyClass(daysUntil: number): string {
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
   return h * 60 + m;
-}
-
-function getISOWeek(d: Date): number {
-  const tmp = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  tmp.setDate(tmp.getDate() + 3 - ((tmp.getDay() + 6) % 7));
-  const jan4 = new Date(tmp.getFullYear(), 0, 4);
-  return 1 + Math.round(((tmp.getTime() - jan4.getTime()) / 86400000 - 3 + ((jan4.getDay() + 6) % 7)) / 7);
 }
 
 function isSameDate(a: Date, b: Date): boolean {

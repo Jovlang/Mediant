@@ -44,7 +44,6 @@ const messages = {
 
     // Day rows
     addEventOn: "Add event on {date}",
-    weekAbbrev: "W",
     overdue: "Overdue",
     deadline: "DEADLINE",
     overdueScheduled: "SCHEDULED",
@@ -154,7 +153,6 @@ const messages = {
     removeTagFilter: "Fjern etikettfilter {tag}",
 
     addEventOn: "Legg til hendelse {date}",
-    weekAbbrev: "U",
     overdue: "Forfalt",
     deadline: "FRIST",
     overdueScheduled: "PLANLAGT",
