@@ -907,79 +907,43 @@ body {
   margin-top: 0.2rem;
 }
 
-.item-progress-toggle {
-  cursor: pointer;
-  user-select: none;
-}
-
-.item-progress-toggle:hover {
-  background: var(--bg-state);
-}
-
-.item-progress-toggle:focus-visible {
-  outline: 2px solid var(--accent, currentColor);
-  outline-offset: 1px;
-}
-
 .checkbox-list-items {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-}
-
-.checkbox-list.is-collapsed .checkbox-list-items {
-  display: none;
-}
-
-.checkbox-list.is-collapsed {
-  margin-top: 0;
+  gap: 0.22rem;
 }
 
 .checkbox-item {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.8125rem;
+  gap: 0.35rem;
+  font-size: 0.75rem;
   color: var(--text);
-  min-height: 1.35rem;
+  min-height: 1.1rem;
   cursor: pointer;
   user-select: none;
 }
 
 .checkbox-item:hover .checkbox-icon {
-  filter: brightness(1.15);
-  border-color: color-mix(in srgb, var(--text-dim) 70%, transparent);
+  border-color: color-mix(in srgb, var(--text-dim) 80%, transparent);
 }
 
 .checkbox-icon {
-  width: 0.95rem;
-  height: 0.95rem;
-  border: 1.5px solid color-mix(in srgb, var(--text-dim) 44%, transparent);
-  border-radius: 0.35rem;
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 78%, white), var(--bg-card));
-  box-shadow: inset 0 1px 0 color-mix(in srgb, white 58%, transparent);
+  width: 0.72rem;
+  height: 0.72rem;
+  border: 1.5px solid color-mix(in srgb, var(--text-dim) 58%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  box-sizing: border-box;
   flex-shrink: 0;
   position: relative;
-  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  transition: border-color 120ms ease;
 }
 
 .checkbox-checked .checkbox-icon {
-  border-color: color-mix(in srgb, #16a34a 82%, var(--border));
-  background: linear-gradient(145deg, #22c55e, #15803d);
-  box-shadow: 0 3px 8px color-mix(in srgb, #16a34a 24%, transparent);
-}
-
-.checkbox-checked .checkbox-icon::after {
-  content: "";
-  position: absolute;
-  left: 0.28rem;
-  top: 0.13rem;
-  width: 0.28rem;
-  height: 0.5rem;
-  border: solid #fff;
-  border-width: 0 1.5px 1.5px 0;
-  transform: rotate(42deg);
+  border-color: var(--text-done);
+  background: var(--text-done);
+  box-shadow: inset 0 0 0 1.5px var(--bg-card);
 }
 
 .checkbox-checked .checkbox-label {

@@ -66,9 +66,6 @@ function renderAgendaBase(
   today: Date,
   options: RenderAgendaOptions = {},
 ): void {
-  checkboxListIdCounter = 0;
-  checkboxListsById.clear();
-  renderedCheckboxListKeys = new Set();
   container.innerHTML = "";
 
   if (week.length === 0) return;
@@ -116,9 +113,6 @@ function renderAgendaBase(
     container.appendChild(renderSomeday(visibleSomeday));
   }
 
-  for (const key of checkboxListCollapseState.keys()) {
-    if (!renderedCheckboxListKeys.has(key)) checkboxListCollapseState.delete(key);
-  }
 }
 
 // ── Header ───────────────────────────────────────────────────────────
@@ -285,24 +279,10 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
     const time = el("span", "item-time");
     time.textContent = formatDeadlineDueText(dl.daysUntil);
 
-    const checkboxListId = dl.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
-    const checkboxListKey = checkboxListId
-      ? `deadline:${dl.entry.sourceLineNumber}:${dl.baseDate ?? formatDateKey(dl.dueDate)}`
-      : null;
     const title = renderTitle(dl.entry);
     if (dl.baseDate) title.dataset.baseDate = dl.baseDate;
-    const collapsible = checkboxListId && checkboxListKey
-      ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
-      : false;
-
     const checklist = dl.entry.checkboxItems.length > 0
-      ? renderCheckboxItems(
-        dl.entry.checkboxItems,
-        dl.entry.sourceLineNumber,
-        checkboxListId ?? undefined,
-        checkboxListKey ?? undefined,
-        collapsible,
-      )
+      ? renderCheckboxItems(dl.entry.checkboxItems, dl.entry.sourceLineNumber)
       : null;
 
     row.append(time, renderStateBadge(dl.entry), renderTitleWithTags(title, dl.entry.tags, dl.instanceNote, checklist));
@@ -348,21 +328,9 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
     const row = el("div", "someday-item");
     if (item.entry.todo === "DONE") row.classList.add("item-done");
     const state = renderStateBadge(item.entry, "TODO");
-    const checkboxListId = item.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
-    const checkboxListKey = checkboxListId ? `someday:${item.entry.sourceLineNumber}` : null;
     const title = renderTitle(item.entry);
-    const collapsible = checkboxListId && checkboxListKey
-      ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
-      : false;
-
     const checklist = item.entry.checkboxItems.length > 0
-      ? renderCheckboxItems(
-        item.entry.checkboxItems,
-        item.entry.sourceLineNumber,
-        checkboxListId ?? undefined,
-        checkboxListKey ?? undefined,
-        collapsible,
-      )
+      ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber)
       : null;
 
     row.append(state, renderTitleWithTags(title, item.entry.tags, null, checklist));
@@ -433,10 +401,7 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
         }
       }
 
-      const checkboxListId = item.entry.checkboxItems.length > 0 ? nextCheckboxListId() : null;
-      const checkboxListKey = checkboxListId ? checkboxKeyForAgendaItem(item) : null;
-
-      const itemRow = renderItemForCategory(item, checkboxListId, checkboxListKey);
+      const itemRow = renderItemForCategory(item);
       section.appendChild(itemRow);
 
       // Body text
@@ -473,8 +438,6 @@ function renderItem(
   className: string,
   badge?: HTMLElement | HTMLElement[],
   showTime?: "always" | "optional",
-  checkboxListId: string | null = null,
-  checkboxListKey: string | null = null,
 ): HTMLElement {
   const row = el("div", className);
   if (item.entry.todo === "DONE") row.classList.add("item-done");
@@ -512,17 +475,8 @@ function renderItem(
     title.insertBefore(document.createTextNode(" "), title.firstChild);
     title.insertBefore(renderOverrideChip(item.override, moveDirection(item)), title.firstChild);
   }
-  const collapsible = checkboxListId && checkboxListKey
-    ? wireProgressBadgeAsToggle(title, checkboxListId, checkboxListKey)
-    : false;
   const checklist = item.entry.checkboxItems.length > 0
-    ? renderCheckboxItems(
-      item.entry.checkboxItems,
-      item.entry.sourceLineNumber,
-      checkboxListId ?? undefined,
-      checkboxListKey ?? undefined,
-      item.entry.progress !== null && collapsible,
-    )
+    ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber)
     : null;
   children.push(renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist));
   row.append(...children);
@@ -556,22 +510,18 @@ function moveDirection(item: AgendaItem): "earlier" | "later" {
   return item.date.getTime() < baseInstantMs ? "earlier" : "later";
 }
 
-function renderItemForCategory(
-  item: AgendaItem,
-  checkboxListId: string | null = null,
-  checkboxListKey: string | null = null,
-): HTMLElement {
+function renderItemForCategory(item: AgendaItem): HTMLElement {
   if (item.category === "all-day") {
     const badges = [renderAllDayMarker()];
     if (item.entry.todo) badges.push(renderStateBadge(item.entry));
     return renderItem(item, "allday-item", badges);
   }
-  if (item.category === "timed") return renderItem(item, "timed-item", undefined, "always", checkboxListId, checkboxListKey);
+  if (item.category === "timed") return renderItem(item, "timed-item", undefined, "always");
   if (item.category === "scheduled") {
-    return renderItem(item, "scheduled-item", renderStateBadge(item.entry, "TODO"), "optional", checkboxListId, checkboxListKey);
+    return renderItem(item, "scheduled-item", renderStateBadge(item.entry, "TODO"), "optional");
   }
 
-  return renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional", checkboxListId, checkboxListKey);
+  return renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional");
 }
 
 function renderAllDayMarker(): HTMLElement {
@@ -658,22 +608,10 @@ function renderTitle(
 function renderCheckboxItems(
   items: readonly { text: string; checked: boolean }[],
   parentSourceLine: number,
-  listId?: string,
-  listKey?: string,
-  collapsible: boolean = true,
 ): HTMLElement {
   const list = el("div", "checkbox-list");
-  if (listId) {
-    list.id = listId;
-    checkboxListsById.set(listId, list);
-  }
-  if (listKey) {
-    renderedCheckboxListKeys.add(listKey);
-    if (collapsible && isCheckboxListCollapsed(listKey)) list.classList.add("is-collapsed");
-  }
   const hideCompleted = currentRenderOptions.hideCompletedAndSkipped === true;
   const rows = el("div", "checkbox-list-items");
-  if (listKey) rows.dataset.listKey = listKey;
   rows.dataset.line = String(parentSourceLine);
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -682,7 +620,6 @@ function renderCheckboxItems(
     if (item.checked) row.classList.add("checkbox-checked");
     row.dataset.line = String(parentSourceLine);
     row.dataset.checkboxIndex = String(i);
-    if (listKey) row.dataset.listKey = listKey;
     row.dataset.action = "toggle-checkbox";
     row.setAttribute("role", "button");
     row.setAttribute("tabindex", "0");
@@ -696,60 +633,6 @@ function renderCheckboxItems(
   }
   list.appendChild(rows);
   return list;
-}
-
-let checkboxListIdCounter = 0;
-const checkboxListsById = new Map<string, HTMLElement>();
-const checkboxListCollapseState = new Map<string, boolean>();
-let renderedCheckboxListKeys = new Set<string>();
-
-function nextCheckboxListId(): string {
-  checkboxListIdCounter += 1;
-  return `checklist-${checkboxListIdCounter}`;
-}
-
-function checkboxKeyForAgendaItem(item: AgendaItem): string {
-  return [
-    "day",
-    formatDateKey(item.date),
-    item.category,
-    item.entry.sourceLineNumber,
-    item.baseDate ?? formatDateKey(item.date),
-    item.startTime ?? "",
-  ].join(":");
-}
-
-function isCheckboxListCollapsed(listKey: string): boolean {
-  return checkboxListCollapseState.get(listKey) ?? true;
-}
-
-function wireProgressBadgeAsToggle(title: HTMLElement, listId: string, listKey: string): boolean {
-  const badge = title.querySelector<HTMLElement>(".item-progress");
-  if (!badge) return false;
-  const initiallyCollapsed = isCheckboxListCollapsed(listKey);
-  badge.classList.add("item-progress-toggle");
-  badge.setAttribute("role", "button");
-  badge.setAttribute("tabindex", "0");
-  badge.setAttribute("aria-controls", listId);
-  badge.setAttribute("aria-expanded", initiallyCollapsed ? "false" : "true");
-  badge.setAttribute("aria-label", initiallyCollapsed ? t("showChecklist") : t("hideChecklist"));
-  const toggle = (event: Event) => {
-    event.stopPropagation();
-    const list = checkboxListsById.get(listId) ?? document.getElementById(listId);
-    if (!list) return;
-    const collapsed = list.classList.toggle("is-collapsed");
-    checkboxListCollapseState.set(listKey, collapsed);
-    badge.setAttribute("aria-expanded", collapsed ? "false" : "true");
-    badge.setAttribute("aria-label", collapsed ? t("showChecklist") : t("hideChecklist"));
-  };
-  badge.addEventListener("click", toggle);
-  badge.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      toggle(event);
-    }
-  });
-  return true;
 }
 
 function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags"> {

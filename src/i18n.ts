@@ -55,9 +55,6 @@ const messages = {
     skippedDetail: "Skipped ({detail})",
     movedEarlier: "← Moved",
     movedLater: "→ Moved",
-    showChecklist: "Show checklist",
-    hideChecklist: "Hide checklist",
-
     // Add/edit panel — header and shared
     close: "Close",
     addItem: "Add item",
@@ -168,9 +165,6 @@ const messages = {
     skippedDetail: "Hoppet over ({detail})",
     movedEarlier: "← Flyttet",
     movedLater: "→ Flyttet",
-    showChecklist: "Vis sjekkliste",
-    hideChecklist: "Skjul sjekkliste",
-
     close: "Lukk",
     addItem: "Legg til oppføring",
     editTask: "Rediger oppgave",
