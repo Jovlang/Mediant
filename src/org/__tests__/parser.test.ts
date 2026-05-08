@@ -697,51 +697,6 @@ describe("checkbox items", () => {
   });
 });
 
-// ── Progress cookies ────────────────────────────────────────────────
-
-describe("progress cookies", () => {
-  it("parses fractional progress cookie [2/3]", () => {
-    const entries = parseOrg("** TODO Task [2/3]\n");
-    expect(entries[0].progress).toEqual({ done: 2, total: 3 });
-    expect(entries[0].title).toBe("Task");
-  });
-
-  it("parses percentage progress cookie [66%]", () => {
-    const entries = parseOrg("** TODO Task [66%]\n");
-    expect(entries[0].progress).toEqual({ done: 66, total: 100 });
-    expect(entries[0].title).toBe("Task");
-  });
-
-  it("progress is null when no cookie present", () => {
-    const entries = parseOrg("** TODO Plain task\n");
-    expect(entries[0].progress).toBeNull();
-  });
-
-  it("parses progress cookie without TODO state", () => {
-    const entries = parseOrg("** Heading [1/5]\n");
-    expect(entries[0].progress).toEqual({ done: 1, total: 5 });
-    expect(entries[0].title).toBe("Heading");
-  });
-
-  it("parses progress cookie with priority and tags", () => {
-    const entries = parseOrg("** TODO [#A] Important [3/4] :work:\n");
-    expect(entries[0].priority).toBe("A");
-    expect(entries[0].progress).toEqual({ done: 3, total: 4 });
-    expect(entries[0].title).toBe("Important");
-    expect(entries[0].tags).toEqual(["work"]);
-  });
-
-  it("parses [0/0] cookie", () => {
-    const entries = parseOrg("** Task [0/0]\n");
-    expect(entries[0].progress).toEqual({ done: 0, total: 0 });
-  });
-
-  it("parses [0%] cookie", () => {
-    const entries = parseOrg("** Task [0%]\n");
-    expect(entries[0].progress).toEqual({ done: 0, total: 100 });
-  });
-});
-
 // ── Full inbox.org integration test ──────────────────────────────────
 
 describe("inbox.org integration", () => {

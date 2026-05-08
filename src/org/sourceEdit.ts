@@ -152,23 +152,9 @@ function findCheckboxLineForIndex(
   return -1;
 }
 
-function refreshProgressCookie(lines: string[], startIdx: number, endIdx: number): void {
-  let done = 0;
-  let total = 0;
-  for (let i = startIdx + 1; i < endIdx; i++) {
-    const m = lines[i].match(CHECKBOX_LINE_RE);
-    if (m) {
-      total += 1;
-      if (m[2] === "X") done += 1;
-    }
-  }
-  lines[startIdx] = updateProgressCookie(lines[startIdx], done, total);
-}
-
 /**
  * Flip the checked state of the `index`th checkbox within the entry block at
- * `parentSourceLine`. Updates any `[N/M]` or `[N%]` progress cookie on the
- * heading to match the new counts. No-op if the entry or checkbox isn't found.
+ * `parentSourceLine`. No-op if the entry or checkbox isn't found.
  */
 export function toggleCheckboxInSource(source: string, parentSourceLine: number, index: number): string {
   const block = findEntryBlock(source, parentSourceLine);
@@ -184,21 +170,7 @@ export function toggleCheckboxInSource(source: string, parentSourceLine: number,
       `${before}${mark === "X" ? " " : "X"}${sep}${text}`,
   );
 
-  refreshProgressCookie(lines, startIdx, endIdx);
   return lines.join("\n");
-}
-
-function updateProgressCookie(heading: string, done: number, total: number): string {
-  const fracRe = /\[\d*\/\d*\]/;
-  if (fracRe.test(heading)) {
-    return heading.replace(fracRe, `[${done}/${total}]`);
-  }
-  const pctRe = /\[\d*%\]/;
-  if (pctRe.test(heading)) {
-    const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-    return heading.replace(pctRe, `[${pct}%]`);
-  }
-  return heading;
 }
 
 function shiftRepeatingTimestamp(raw: string, now: Date): string {

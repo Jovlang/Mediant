@@ -879,25 +879,6 @@ body {
 
 /* ── Progress badge ──────────────────────────────────────────────── */
 
-.item-progress {
-  display: inline-block;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  border-radius: 0.25rem;
-  padding: 0 0.3125rem;
-  line-height: 1.4;
-  vertical-align: baseline;
-  color: var(--text-dim);
-}
-
-.item-progress.progress-complete {
-  color: #16a34a;
-}
-
-.item-done .item-progress {
-  color: var(--text-done);
-}
-
 /* ── Checkbox list ───────────────────────────────────────────────── */
 
 .checkbox-list {

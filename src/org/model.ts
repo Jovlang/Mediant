@@ -79,7 +79,6 @@ export interface OrgEntry {
   readonly planning: readonly OrgPlanning[];
   readonly timestamps: readonly OrgTimestamp[];
   readonly checkboxItems: readonly CheckboxItem[];
-  readonly progress: { readonly done: number; readonly total: number } | null;
   readonly body: string;
   readonly sourceLineNumber: number;
   /**

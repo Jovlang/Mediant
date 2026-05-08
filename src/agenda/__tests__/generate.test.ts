@@ -17,7 +17,6 @@ function entry(overrides: Partial<OrgEntry> & { title: string }): OrgEntry {
     timestamps: [],
     body: "",
     checkboxItems: [],
-    progress: null,
     sourceLineNumber: 1,
     exceptions: new Map(),
     seriesUntil: null,

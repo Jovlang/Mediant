@@ -73,7 +73,6 @@ describe("renderAgenda", () => {
         title: "Upcoming",
         todo: "TODO",
         priority: "A",
-        progress: { done: 1, total: 2 },
         tags: ["music"],
         checkboxItems: [
           { text: "Confirm time", checked: true },
@@ -171,7 +170,6 @@ describe("renderAgenda", () => {
     const entry = makeEntry({
       title: "Errands",
       todo: "TODO",
-      progress: { done: 1, total: 2 },
       checkboxItems: [
         { text: "Milk", checked: true },
         { text: "Bread", checked: false },
@@ -358,7 +356,7 @@ describe("renderAgenda", () => {
     expect(timedSection!.querySelector(".now-time")?.textContent).toBe("12:30");
   });
 
-  it("renders override chips, notes, progress, checkboxes, and edit metadata", () => {
+  it("renders override chips, notes, checkboxes, and edit metadata", () => {
     const container = document.createElement("div");
     const week = makeWeek([
       [
@@ -372,7 +370,6 @@ describe("renderAgenda", () => {
           baseDate: "2026-04-19",
           override: { kind: "reschedule", detail: "from 2026-04-19 17:00-18:00" },
           instanceNote: "Bring water",
-          progress: { done: 2, total: 3 },
           checkboxItems: [
             { text: "Shoes", checked: true },
             { text: "Bottle", checked: false },
@@ -401,7 +398,6 @@ describe("renderAgenda", () => {
     expect(title?.getAttribute("data-line")).toBe("42");
     expect(title?.getAttribute("data-base-date")).toBe("2026-04-19");
     expect(title?.textContent).toContain("Yoga");
-    expect(title?.querySelector(".item-progress")?.textContent).toBe("2/3");
 
     const chip = container.querySelector(".item-override-chip") as HTMLElement | null;
     expect(chip?.textContent).toBe("→ Moved");
@@ -720,7 +716,6 @@ function makeItem(overrides: Partial<AgendaItem> & {
   priority?: AgendaItem["entry"]["priority"];
   tags?: string[];
   sourceLineNumber?: number;
-  progress?: { done: number; total: number } | null;
   checkboxItems?: { text: string; checked: boolean }[];
 }): AgendaItem {
   const entry = overrides.entry ?? makeEntry({
@@ -728,7 +723,6 @@ function makeItem(overrides: Partial<AgendaItem> & {
     priority: overrides.priority ?? null,
     tags: overrides.tags ?? [],
     sourceLineNumber: overrides.sourceLineNumber ?? 1,
-    progress: overrides.progress ?? null,
     checkboxItems: overrides.checkboxItems ?? [],
   });
 
@@ -752,7 +746,6 @@ function makeEntry(overrides: Partial<AgendaItem["entry"]> & { title: string }) 
     title,
     tags,
     checkboxItems,
-    progress,
     body,
     sourceLineNumber,
     seriesUntil,
@@ -768,7 +761,6 @@ function makeEntry(overrides: Partial<AgendaItem["entry"]> & { title: string }) 
     planning: [],
     timestamps: [],
     checkboxItems: checkboxItems ?? [],
-    progress: progress ?? null,
     body: body ?? "",
     sourceLineNumber: sourceLineNumber ?? 1,
     exceptions: new Map(),

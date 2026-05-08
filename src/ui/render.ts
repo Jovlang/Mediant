@@ -579,7 +579,7 @@ function renderNowLine(today: Date): HTMLElement {
 // ── Helpers ──────────────────────────────────────────────────────────
 
 function renderTitle(
-  entry: { title: string; priority: "A" | "B" | "C" | null; progress?: { done: number; total: number } | null; sourceLineNumber: number },
+  entry: { title: string; priority: "A" | "B" | "C" | null; sourceLineNumber: number },
 ): HTMLElement {
   const title = el("span", "item-title");
   title.dataset.action = "edit";
@@ -593,15 +593,6 @@ function renderTitle(
     title.appendChild(document.createTextNode(" "));
   }
   title.appendChild(document.createTextNode(entry.title));
-  if (entry.progress) {
-    title.appendChild(document.createTextNode(" "));
-    const badge = el("span", "item-progress");
-    badge.textContent = `${entry.progress.done}/${entry.progress.total}`;
-    if (entry.progress.done === entry.progress.total && entry.progress.total > 0) {
-      badge.classList.add("progress-complete");
-    }
-    title.appendChild(badge);
-  }
   return title;
 }
 

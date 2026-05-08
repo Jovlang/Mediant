@@ -66,7 +66,6 @@ let editingPriority: "A" | "B" | "C" | null = null;
 let editingTodoState: "TODO" | "DONE" = "TODO";
 let editingSchedRepeater: string | null = null;
 let editingDeadRepeater: string | null = null;
-let editingProgress: { done: number; total: number } | null = null;
 let editingCheckboxItems: { text: string; checked: boolean }[] = [];
 
 interface TagPicker {
@@ -534,7 +533,7 @@ function rebuildCheckboxUI(container: HTMLElement): void {
     cb.addEventListener("change", () => {
       editingCheckboxItems[ci].checked = cb.checked;
       text.classList.toggle("edit-checkbox-done", cb.checked);
-      syncProgress();
+      scheduleEditAutosave();
     });
 
     const text = document.createElement("input");
@@ -552,14 +551,12 @@ function rebuildCheckboxUI(container: HTMLElement): void {
         // Add a new item below and focus it
         editingCheckboxItems.splice(ci + 1, 0, { text: "", checked: false });
         rebuildCheckboxUI(container);
-        syncProgress();
         const rows = container.querySelectorAll<HTMLElement>(".edit-checkbox-text");
         (rows[ci + 1] as HTMLInputElement | undefined)?.focus();
       } else if (e.key === "Backspace" && text.value === "") {
         e.preventDefault();
         editingCheckboxItems.splice(ci, 1);
         rebuildCheckboxUI(container);
-        syncProgress();
         // Focus the previous item, or the next if this was first
         const rows = container.querySelectorAll<HTMLElement>(".edit-checkbox-text");
         const target = ci > 0 ? rows[ci - 1] : rows[0];
@@ -576,7 +573,6 @@ function rebuildCheckboxUI(container: HTMLElement): void {
       e.preventDefault();
       editingCheckboxItems.splice(ci, 1);
       rebuildCheckboxUI(container);
-      syncProgress();
     });
 
     row.append(cb, text, removeBtn);
@@ -590,22 +586,12 @@ function rebuildCheckboxUI(container: HTMLElement): void {
   addBtn.addEventListener("click", () => {
     editingCheckboxItems.push({ text: "", checked: false });
     rebuildCheckboxUI(container);
-    syncProgress();
     // Focus the new item's text
     const rows = container.querySelectorAll<HTMLElement>(".edit-checkbox-text");
     rows[rows.length - 1]?.focus();
   });
   container.appendChild(addBtn);
 
-  function syncProgress(): void {
-    if (editingCheckboxItems.length === 0) {
-      editingProgress = null;
-    } else {
-      const done = editingCheckboxItems.filter(i => i.checked).length;
-      editingProgress = { done, total: editingCheckboxItems.length };
-    }
-    scheduleEditAutosave();
-  }
 }
 
 function makeSelect(label: string, id: string, options: { value: string; label: string }[]): { container: HTMLElement; select: HTMLSelectElement } {
@@ -1103,7 +1089,6 @@ interface BuildOrgOpts {
   tags: string;
   todoState?: "TODO" | "DONE";
   priority?: "A" | "B" | "C" | null;
-  progress?: { done: number; total: number } | null;
   // event
   date?: string;
   time?: string;
@@ -1127,9 +1112,8 @@ function buildOrgText(opts: BuildOrgOpts): string {
 
   const todoPrefix = opts.type === "todo" ? `${opts.todoState ?? "TODO"} ` : "";
   const priorityPrefix = opts.priority ? `[#${opts.priority}] ` : "";
-  const progressStr = opts.progress ? ` [${opts.progress.done}/${opts.progress.total}]` : "";
   const stars = "*".repeat(opts.level);
-  const headingLine = `${stars} ${todoPrefix}${priorityPrefix}${opts.heading}${progressStr}${tagStr}`;
+  const headingLine = `${stars} ${todoPrefix}${priorityPrefix}${opts.heading}${tagStr}`;
 
   const makeTs = (date: string, time: string | undefined, repeater: string | null | undefined): string => {
     const d = new Date(date + "T00:00:00");
@@ -1182,7 +1166,6 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
   };
 
   if (type === "event") {
-    editingProgress = null;
     const dt = readDateTime(refs.when.input);
     if (dt === null) return null;
     if (!dt.date) {
@@ -1195,7 +1178,6 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
       heading,
       tags: tagsVal,
       priority: editingPriority,
-      progress: editingProgress,
       date: dt.date,
       time: dt.time,
       repeater: refs.repeatSelect.value || null,
@@ -1203,9 +1185,6 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
   }
 
   const checkboxItems = editingCheckboxItems.filter(ci => ci.text.trim() !== "");
-  editingProgress = checkboxItems.length > 0
-    ? { done: checkboxItems.filter(ci => ci.checked).length, total: checkboxItems.length }
-    : null;
 
   const scheduled = readDateTime(refs.sched.input);
   if (scheduled === null) return null;
@@ -1218,7 +1197,6 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
     tags: tagsVal,
     todoState: editingTodoState,
     priority: editingPriority,
-    progress: editingProgress,
     schedDate: scheduled.date,
     schedTime: scheduled.time,
     schedRepeater: scheduled.date ? (refs.schedRepeatSelect.value || null) : null,
@@ -1350,7 +1328,6 @@ function openAddPanel(prefillDate: string | null = null): void {
   editingTodoState = "TODO";
   editingSchedRepeater = null;
   editingDeadRepeater = null;
-  editingProgress = null;
   editingCheckboxItems = [];
   if (addPanelTitleEl) addPanelTitleEl.textContent = t("addItem");
   if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
@@ -1404,7 +1381,6 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   editingLevel = entry.level;
   editingPriority = entry.priority;
   editingTodoState = entry.todo === "DONE" ? "DONE" : "TODO";
-  editingProgress = entry.progress;
   if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
   addPanelEl.classList.add("is-editing");
   addPanelEl.classList.toggle("has-occurrence", baseDate !== null && entryHasRepeater(entry));
