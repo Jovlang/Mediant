@@ -1774,3 +1774,14 @@ body {
   text-decoration: underline;
   text-decoration-color: var(--text-dim);
 }
+
+/* Prevent iOS auto-zoom on input focus (triggered when font-size < 16px) */
+@media (hover: none) and (pointer: coarse) {
+  .input-textarea,
+  .add-input,
+  .tag-picker-input,
+  .occurrence-input,
+  .datetime-text-input {
+    font-size: 1rem;
+  }
+}
