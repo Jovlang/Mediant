@@ -1571,7 +1571,7 @@ function refreshOccurrenceSection(opts: { resetOccurrenceInput?: boolean } = {})
 
   refs.occurrenceState.textContent = override
     ? describeOverride(override, editingBaseDate)
-    : "On schedule";
+    : t("onSchedule");
   refs.occurrenceState.classList.toggle("is-modified", override !== null);
 
   refs.skipCheckboxRow.style.display = "";

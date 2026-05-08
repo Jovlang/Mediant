@@ -104,6 +104,7 @@ const messages = {
     addTagOption: "Add \"{tag}\"",
 
     // Occurrence section
+    onSchedule: "On schedule",
     skipThisOccurrence: "Skip this occurrence",
     stopRepeatingAfter: "Stop repeating after this occurrence",
     moveToDateTime: "Move to date/time",
@@ -211,6 +212,7 @@ const messages = {
 
     addTagOption: "Legg til «{tag}»",
 
+    onSchedule: "I rute",
     skipThisOccurrence: "Hopp over denne forekomsten",
     stopRepeatingAfter: "Slutt å gjenta etter denne forekomsten",
     moveToDateTime: "Flytt til dato/klokkeslett",
