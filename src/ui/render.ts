@@ -360,10 +360,6 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
   header.setAttribute("aria-label", t("addEventOn", { date: dayText }));
   header.appendChild(label);
 
-  if (isToday) {
-    header.appendChild(el("span", "today-marker"));
-  }
-
   card.appendChild(header);
 
   // Separate items by category

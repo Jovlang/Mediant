@@ -346,14 +346,6 @@ body {
   color: var(--text-dim);
 }
 
-.day-header .today-marker {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--border-today);
-  align-self: center;
-}
-
 .day-empty {
   padding: 0.4rem var(--section-padding-x) 0;
   color: var(--text-done);
