@@ -1,13 +1,11 @@
 # TODO
 
 ## General
-- [x] Multilingual support
-- [x] Browser notifications
-- [ ] Mobile notifications
 - [ ] ICS import/export
 - [ ] Subscribe to ICS URLs
 - [ ] Serve ICS endpoint
 - [ ] Time-grid view
+- [ ] Event locations
 
 ## This and future operations
 
