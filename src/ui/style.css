@@ -544,7 +544,6 @@ body {
       color-mix(in srgb, var(--border-today) 5%, var(--bg-card)),
       color-mix(in srgb, var(--border-today) 1.5%, var(--bg-card)) 70%
     );
-  border-color: color-mix(in srgb, var(--border) 86%, var(--border-today));
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.045),
     0 10px 24px rgba(15, 23, 42, 0.045),
