@@ -35,6 +35,7 @@ let hideTags = localStorage.getItem("mediant-hide-tags") === "true";
 let hideEmptyDays = localStorage.getItem("mediant-hide-empty-days") === "true";
 let hideCompletedAndSkipped = localStorage.getItem("mediant-hide-completed") === "true";
 let monthAhead = localStorage.getItem("mediant-month-ahead") === "true";
+let hideDeadlines = localStorage.getItem("mediant-hide-deadlines") === "true";
 
 let quickCaptureOverlayEl: HTMLElement | null = null;
 let quickCaptureInputEl: HTMLInputElement | null = null;
@@ -1718,6 +1719,12 @@ function toggleMonthAhead(): void {
   render();
 }
 
+function toggleHideDeadlines(): void {
+  hideDeadlines = !hideDeadlines;
+  localStorage.setItem("mediant-hide-deadlines", hideDeadlines ? "true" : "false");
+  render();
+}
+
 function isTypingTarget(target: EventTarget | null): boolean {
   const el = target instanceof HTMLElement ? target : null;
   if (!el) return false;
@@ -2016,6 +2023,7 @@ function render(): void {
     hideEmptyDays,
     hideCompletedAndSkipped,
     monthAhead,
+    hideDeadlines,
   });
 
   // Schedule notifications for today's timed events
@@ -2077,6 +2085,8 @@ function setupNavigation(): void {
       toggleHideCompletedAndSkipped();
     } else if (action === "toggle-month-ahead") {
       toggleMonthAhead();
+    } else if (action === "toggle-hide-deadlines") {
+      toggleHideDeadlines();
     } else if (action === "toggle-tag-filter") {
       const tag = btn.dataset.tag;
       if (tag) toggleTagFilter(tag);

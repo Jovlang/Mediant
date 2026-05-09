@@ -16,6 +16,7 @@ export interface RenderAgendaOptions {
   readonly hideEmptyDays?: boolean;
   readonly hideCompletedAndSkipped?: boolean;
   readonly monthAhead?: boolean;
+  readonly hideDeadlines?: boolean;
 }
 
 interface ToggleButtonOptions {
@@ -83,7 +84,7 @@ function renderAgendaBase(
   }
 
   // Deadlines section
-  if (deadlines.length > 0) {
+  if (deadlines.length > 0 && !options.hideDeadlines) {
     container.appendChild(renderDeadlines(deadlines));
   }
 
@@ -195,6 +196,17 @@ function createHideCompletedToggle(options: RenderAgendaOptions): HTMLButtonElem
   return btn;
 }
 
+function createHideDeadlinesToggle(options: RenderAgendaOptions): HTMLButtonElement {
+  const btn = el("button", "hide-deadlines-toggle");
+  const label = options.hideDeadlines ? t("showDeadlines") : t("hideDeadlines");
+  btn.textContent = label;
+  btn.dataset.action = "toggle-hide-deadlines";
+  btn.setAttribute("aria-label", label);
+  btn.setAttribute("aria-pressed", options.hideDeadlines ? "true" : "false");
+  if (options.hideDeadlines) btn.classList.add("is-on");
+  return btn;
+}
+
 function createMonthAheadToggle(options: RenderAgendaOptions): HTMLButtonElement {
   const btn = el("button", "month-ahead-toggle");
   const label = options.monthAhead ? t("showFewerDays") : t("showMoreDays");
@@ -234,6 +246,7 @@ function renderSettingsMenu(options: RenderAgendaOptions): HTMLElement {
     createHideTagsToggle(options),
     createHideEmptyDaysToggle(options),
     createHideCompletedToggle(options),
+    createHideDeadlinesToggle(options),
     createMonthAheadToggle(options),
     createNotificationToggle({ label: true }),
     createLanguageToggle(),
