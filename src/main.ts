@@ -2018,7 +2018,8 @@ function closeSettingsMenusForClick(target: EventTarget | null): void {
 }
 
 function setupNavigation(): void {
-  document.addEventListener("click", () => {
+  document.addEventListener("click", (e) => {
+    if (addPanelEl?.contains(e.target as Node)) return;
     const active = document.activeElement;
     if (active instanceof HTMLElement && !(active instanceof HTMLInputElement) && !(active instanceof HTMLTextAreaElement) && !(active instanceof HTMLSelectElement)) {
       active.blur();
