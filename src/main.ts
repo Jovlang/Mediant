@@ -244,7 +244,7 @@ function buildAddPanel(): void {
   form.appendChild(occurrenceSection);
 
   // Type toggle
-  const typeGroup = makeRadioGroup(t("type"), "add-type", [
+  const typeGroup = makeRadioGroup(null, "add-type", [
     { value: "event", label: t("typeEvent"), checked: true },
     { value: "todo", label: t("typeTodo") },
   ]);
@@ -808,14 +808,16 @@ function makeTagPicker(label: string, id: string): TagPicker {
   };
 }
 
-function makeRadioGroup(label: string, name: string, options: { value: string; label: string; checked?: boolean }[]): { container: HTMLElement } {
+function makeRadioGroup(label: string | null, name: string, options: { value: string; label: string; checked?: boolean }[]): { container: HTMLElement } {
   const container = document.createElement("div");
   container.className = "add-field";
 
-  const lbl = document.createElement("label");
-  lbl.className = "add-label";
-  lbl.textContent = label;
-  container.appendChild(lbl);
+  if (label) {
+    const lbl = document.createElement("label");
+    lbl.className = "add-label";
+    lbl.textContent = label;
+    container.appendChild(lbl);
+  }
 
   const group = document.createElement("div");
   group.className = "add-radio-group";
