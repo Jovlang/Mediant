@@ -1183,10 +1183,13 @@ body {
   background: var(--bg-card);
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
   overflow-y: auto;
+  transition: transform 0.25s ease;
+}
+
+.add-panel[open] {
   display: flex;
   flex-direction: column;
   transform: translateX(0);
-  transition: transform 0.25s ease;
 }
 
 .add-panel::backdrop {
