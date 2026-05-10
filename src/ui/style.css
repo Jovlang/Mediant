@@ -1119,7 +1119,7 @@ body {
   box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.22), 0 0 0 3px color-mix(in srgb, var(--border-today) 18%, transparent);
 }
 
-.quick-capture-input:disabled {
+.quick-capture-input:read-only {
   opacity: 0.7;
 }
 

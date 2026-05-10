@@ -194,19 +194,17 @@ async function submitQuickCapture(): Promise<void> {
   const updated = appendQuickCaptureToTasks(currentSource, text);
   if (updated === currentSource) return;
 
-  quickCaptureInputEl.disabled = true;
+  quickCaptureInputEl.readOnly = true;
   if (quickCaptureErrorEl) quickCaptureErrorEl.textContent = "";
   try {
     const result = await persistSource(updated);
     if (result === "saved") {
       quickCaptureInputEl.value = "";
-      quickCaptureInputEl.focus();
     } else if (quickCaptureErrorEl) {
       quickCaptureErrorEl.textContent = t("couldNotSaveTask");
     }
   } finally {
-    quickCaptureInputEl.disabled = false;
-    quickCaptureInputEl.focus();
+    quickCaptureInputEl.readOnly = false;
   }
 }
 
