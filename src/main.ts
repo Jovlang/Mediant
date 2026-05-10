@@ -1208,11 +1208,7 @@ function restoreFocusAfterPanelClose(): void {
   if (active instanceof HTMLElement && addPanelEl?.contains(active)) {
     active.blur();
   }
-  const target = lastPanelFocusEl;
   lastPanelFocusEl = null;
-  if (target && target.isConnected) {
-    target.focus();
-  }
 }
 
 function queueEditSourceSave(updated: string): Promise<boolean> {
