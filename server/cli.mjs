@@ -18,7 +18,7 @@ Options:
   --daemon        Fork to background and print the PID
   --help, -h      Show this message
 
-Stop a daemonised instance with: kill <pid>
+Stop a daemonised instance with: pkill mediant
 `;
 
 function die(msg) {
@@ -89,9 +89,11 @@ if (args.daemon && !process.env.MEDIANT_CHILD) {
   child.unref();
   console.log(`mediant: started in background (pid ${child.pid})`);
   console.log(`mediant: http://localhost:${args.port}`);
-  console.log(`mediant: stop with: kill ${child.pid}`);
+  console.log(`mediant: stop with: pkill mediant`);
   process.exit(0);
 }
+
+process.title = "mediant";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, "..", "dist");
