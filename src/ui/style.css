@@ -6,6 +6,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 :root {
@@ -1154,6 +1155,14 @@ body {
   filter: brightness(1.1);
 }
 
+
+.focus-sentinel {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
 
 .add-panel {
   position: fixed;

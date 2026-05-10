@@ -226,7 +226,13 @@ function hasParsedDate(input: HTMLInputElement): boolean {
 function buildAddPanel(): void {
   addPanelEl = document.createElement("dialog");
   addPanelEl.className = "add-panel";
-  addPanelEl.tabIndex = -1;
+
+  // Absorbs showModal()'s auto-focus so no visible field is focused on open
+  const focusSentinel = document.createElement("span");
+  focusSentinel.tabIndex = 0;
+  focusSentinel.setAttribute("aria-hidden", "true");
+  focusSentinel.className = "focus-sentinel";
+  addPanelEl.appendChild(focusSentinel);
 
   // Form
   const form = document.createElement("div");
@@ -1321,6 +1327,7 @@ function openAddPanel(prefillDate: string | null = null): void {
   refs.syncVisibility();
 
   addPanelEl.showModal();
+  refs.titleInput.focus();
 }
 
 function tsToTimeDisplay(ts: { startTime: string | null; endTime: string | null }): string {
@@ -1406,7 +1413,6 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   refs.syncVisibility();
 
   addPanelEl.showModal();
-  addPanelEl.focus();
 }
 
 function isoToDisplayDate(iso: string): string {
@@ -2012,13 +2018,11 @@ function closeSettingsMenusForClick(target: EventTarget | null): void {
 }
 
 function setupNavigation(): void {
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", () => {
     const active = document.activeElement;
-    if (!(active instanceof HTMLElement)) return;
-    if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return;
-    const insidePanel = addPanelEl?.contains(e.target as Node);
-    if (insidePanel && !(active instanceof HTMLButtonElement)) return;
-    active.blur();
+    if (active instanceof HTMLElement && !(active instanceof HTMLInputElement) && !(active instanceof HTMLTextAreaElement) && !(active instanceof HTMLSelectElement)) {
+      active.blur();
+    }
   });
 
   document.addEventListener("click", (e) => {
