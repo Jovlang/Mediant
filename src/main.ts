@@ -1332,7 +1332,7 @@ function openAddPanel(prefillDate: string | null = null): void {
   refs.syncVisibility();
 
   addPanelEl.showModal();
-
+  (document.activeElement as HTMLElement | null)?.blur();
   setTimeout(() => refs.titleInput.focus(), 250);
 }
 
@@ -1420,7 +1420,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   refs.syncVisibility();
 
   addPanelEl.showModal();
-
+  (document.activeElement as HTMLElement | null)?.blur();
   setTimeout(() => refs.titleInput.focus(), 250);
 }
 
