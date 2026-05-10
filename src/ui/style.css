@@ -71,7 +71,7 @@ body {
   line-height: 1.5;
   max-width: 54rem;
   margin: 0 auto;
-  padding: calc(env(safe-area-inset-top) + 1.25rem) 1rem calc(env(safe-area-inset-bottom) + 1.75rem);
+  padding: 1.25rem 1rem 1.75rem;
 }
 
 /* ── Header / Navigation ──────────────────────────────────────────── */
@@ -1137,6 +1137,8 @@ body {
   font-weight: 600;
   font-size: 0.9375rem;
   flex-shrink: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .te-close {
@@ -1184,7 +1186,7 @@ body {
 
 .add-panel {
   position: fixed;
-  top: env(safe-area-inset-top);
+  top: 0;
   right: 0;
   bottom: 0;
   width: 18rem;
