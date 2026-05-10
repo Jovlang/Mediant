@@ -1209,7 +1209,7 @@ body {
 }
 
 .add-form {
-  padding: 0.25rem 1rem 1.25rem;
+  padding: 1rem 1rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1.125rem;
