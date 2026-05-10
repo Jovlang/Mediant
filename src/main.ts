@@ -2012,11 +2012,13 @@ function closeSettingsMenusForClick(target: EventTarget | null): void {
 }
 
 function setupNavigation(): void {
-  document.addEventListener("click", () => {
+  document.addEventListener("click", (e) => {
     const active = document.activeElement;
-    if (active instanceof HTMLElement && !(active instanceof HTMLInputElement) && !(active instanceof HTMLTextAreaElement) && !(active instanceof HTMLSelectElement)) {
-      active.blur();
-    }
+    if (!(active instanceof HTMLElement)) return;
+    if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return;
+    const insidePanel = addPanelEl?.contains(e.target as Node);
+    if (insidePanel && !(active instanceof HTMLButtonElement)) return;
+    active.blur();
   });
 
   document.addEventListener("click", (e) => {
