@@ -19,8 +19,14 @@ import { t } from "./i18n.ts";
 
 // ── Theme-color ──────────────────────────────────────────────────────
 
-function syncThemeColor(cssVar: string): void {
-  const color = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+function syncThemeColor(cssVar: string, overlayAlpha = 0): void {
+  let color = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+  if (overlayAlpha > 0 && color.startsWith("#") && color.length === 7) {
+    const r = Math.round(parseInt(color.slice(1, 3), 16) * (1 - overlayAlpha));
+    const g = Math.round(parseInt(color.slice(3, 5), 16) * (1 - overlayAlpha));
+    const b = Math.round(parseInt(color.slice(5, 7), 16) * (1 - overlayAlpha));
+    color = `rgb(${r},${g},${b})`;
+  }
   document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach(m => { m.content = color; });
 }
 
@@ -1362,7 +1368,7 @@ function openAddPanel(prefillDate: string | null = null): void {
 
   addOverlayEl.classList.add("is-open");
   addPanelEl.classList.add("is-open");
-  syncThemeColor("--bg-card");
+  syncThemeColor("--bg", 0.35);
   setTimeout(() => refs.titleInput.focus(), 250);
 }
 
@@ -1452,7 +1458,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
 
   addOverlayEl.classList.add("is-open");
   addPanelEl.classList.add("is-open");
-  syncThemeColor("--bg-card");
+  syncThemeColor("--bg", 0.35);
   setTimeout(() => refs.titleInput.focus(), 250);
 }
 
