@@ -146,16 +146,17 @@ function renderHeader(startDate: Date, endDate: Date, options: RenderAgendaOptio
   nav.append(prevBtn, title, nextBtn);
 
   const actions = el("div", "agenda-actions");
-  const primaryActions = el("div", "agenda-primary-actions");
 
-  const addBtn = el("button", "add-item-btn");
-  addBtn.textContent = t("addLabel");
-  addBtn.dataset.action = "add";
-  addBtn.setAttribute("aria-label", t("addAria"));
-
-  primaryActions.append(addBtn);
-  actions.append(primaryActions, renderSettingsMenu(options));
+  actions.append(renderSettingsMenu(options));
   header.append(nav, todayBtn, actions);
+
+  if (!document.querySelector(".add-item-fab")) {
+    const addBtn = el("button", "add-item-fab");
+    addBtn.textContent = t("addLabel");
+    addBtn.dataset.action = "add";
+    addBtn.setAttribute("aria-label", t("addAria"));
+    document.body.appendChild(addBtn);
+  }
 
   if ((options.activeTagFilters?.length ?? 0) > 0) {
     header.appendChild(renderActiveTagFilters(options.activeTagFilters ?? []));
