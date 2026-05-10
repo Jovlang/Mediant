@@ -25,7 +25,9 @@
   --border-today: #4f7df5;
 
   --bg-state: rgba(79, 125, 245, 0.1);
+  --bg-panel: #f5f6f8;
   --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.045), 0 10px 24px rgba(15, 23, 42, 0.04);
+  --panel-shadow: -4px 0 20px rgba(15, 23, 42, 0.1), -1px 0 4px rgba(15, 23, 42, 0.06);
 
   /* Category accents */
   --accent-deadline: #d85a55;
@@ -56,7 +58,9 @@
     --border-light: #1e2024;
     --border-today: #5b8def;
     --bg-state: rgba(91, 141, 239, 0.12);
+    --bg-panel: #212326;
     --card-shadow: 0 16px 36px rgba(0, 0, 0, 0.28), 0 2px 10px rgba(0, 0, 0, 0.16);
+    --panel-shadow: -4px 0 24px rgba(0, 0, 0, 0.45), -1px 0 6px rgba(0, 0, 0, 0.3);
     --deadline-urgency-critical: #ef4444;
     --deadline-urgency-warning: #f97316;
     --deadline-urgency-caution: #f4c15c;
@@ -1180,9 +1184,9 @@ body {
   margin: 0;
   padding: 0;
   border: none;
-  background: var(--bg-card);
+  background: var(--bg-panel);
   color: var(--text);
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--panel-shadow);
   overflow-y: auto;
   transition: transform 0.25s ease;
 }
