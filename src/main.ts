@@ -259,8 +259,8 @@ function buildAddPanel(): void {
 
   // Type toggle
   const typeGroup = makeRadioGroup(null, "add-type", [
-    { value: "event", label: t("typeEvent"), checked: true },
-    { value: "todo", label: t("typeTodo") },
+    { value: "todo", label: t("typeTodo"), checked: true },
+    { value: "event", label: t("typeEvent") },
   ]);
   form.appendChild(typeGroup.container);
 
