@@ -6,7 +6,6 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  -webkit-tap-highlight-color: transparent;
 }
 
 :root {
@@ -45,7 +44,6 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    color-scheme: dark;
     --bg: #111215;
     --bg-card: #1a1b1e;
     --bg-today: #1a1f2e;
@@ -1175,7 +1173,6 @@ body {
   height: 100%;
   max-height: 100%;
   margin: 0;
-  outline: none;
   padding: 0;
   border: none;
   background: var(--bg-card);
@@ -1231,8 +1228,6 @@ body {
   border-radius: 0.25rem;
   font-size: 0.875rem;
   background: var(--bg);
-  -webkit-appearance: none;
-  appearance: none;
 }
 
 .datetime-preview {
@@ -1269,7 +1264,7 @@ body {
   padding: 0.25rem 0.375rem;
   border: 1px solid var(--border);
   border-radius: 0.25rem;
-  background: var(--bg-card);
+  background: var(--bg);
   cursor: text;
 }
 
