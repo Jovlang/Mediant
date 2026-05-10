@@ -1737,11 +1737,7 @@ async function init(): Promise<void> {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      if (isQuickCaptureOpen()) {
-        closeQuickCapture();
-        return;
-      }
-      if (addPanelEl?.open) closeAddPanel();
+      if (isQuickCaptureOpen()) closeQuickCapture();
       return;
     }
     const actionEl = e.target instanceof HTMLElement ? e.target.closest<HTMLElement>("[data-action]") : null;
