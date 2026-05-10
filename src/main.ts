@@ -1328,8 +1328,9 @@ function openAddPanel(prefillDate: string | null = null): void {
   selectRadioValue(refs.priorityGroup, "");
   refs.syncVisibility();
 
+  refs.titleInput.setAttribute("autofocus", "");
   addPanelEl.showModal();
-  refs.titleInput.focus();
+  refs.titleInput.removeAttribute("autofocus");
 }
 
 function tsToTimeDisplay(ts: { startTime: string | null; endTime: string | null }): string {
