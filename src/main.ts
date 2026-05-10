@@ -53,7 +53,7 @@ function collectAllTags(): string[] {
 
 // ── Add-item panel ─────────────────────────────────────────────────
 
-let addPanelEl: HTMLElement | null = null;
+let addPanelEl: HTMLDialogElement | null = null;
 let addPanelTitleEl: HTMLElement | null = null;
 let addPanelSaveBtnEl: HTMLButtonElement | null = null;
 let addPanelDeleteBtnEl: HTMLButtonElement | null = null;
@@ -149,7 +149,7 @@ function buildQuickCaptureOverlay(): void {
 }
 
 function openQuickCapture(): void {
-  if (!quickCaptureOverlayEl || !quickCaptureInputEl || addPanelEl?.classList.contains("is-open") || !agendaLoaded) return;
+  if (!quickCaptureOverlayEl || !quickCaptureInputEl || addPanelEl?.open || !agendaLoaded) return;
   const active = document.activeElement;
   quickCaptureLastFocusEl = active instanceof HTMLElement && !quickCaptureOverlayEl.contains(active) ? active : null;
   if (quickCaptureErrorEl) quickCaptureErrorEl.textContent = "";
@@ -226,7 +226,7 @@ function hasParsedDate(input: HTMLInputElement): boolean {
 }
 
 function buildAddPanel(): void {
-  addPanelEl = document.createElement("aside");
+  addPanelEl = document.createElement("dialog");
   addPanelEl.className = "add-panel";
 
   // Header
@@ -476,12 +476,9 @@ function buildAddPanel(): void {
   addPanelSaveBtnEl = saveBtn;
 
   addPanelEl.appendChild(form);
+  addPanelEl.addEventListener("cancel", (e) => { e.preventDefault(); closeAddPanel(); });
+  addPanelEl.addEventListener("click", (e) => { if (e.target === addPanelEl) closeAddPanel(); });
   document.body.append(addPanelEl);
-  document.addEventListener("click", (e) => {
-    if (addPanelEl?.classList.contains("is-open") && !addPanelEl.contains(e.target as Node)) {
-      closeAddPanel();
-    }
-  });
 
   addPanelRefs = {
     typeGroup: typeGroup.container,
@@ -1353,7 +1350,7 @@ function openAddPanel(prefillDate: string | null = null): void {
   selectRadioValue(refs.priorityGroup, "");
   refs.syncVisibility();
 
-  addPanelEl.classList.add("is-open");
+  addPanelEl.showModal();
 
   setTimeout(() => refs.titleInput.focus(), 250);
 }
@@ -1442,7 +1439,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
 
   refs.syncVisibility();
 
-  addPanelEl.classList.add("is-open");
+  addPanelEl.showModal();
 
   setTimeout(() => refs.titleInput.focus(), 250);
 }
@@ -1631,7 +1628,7 @@ async function clearException(which: "override" | "note"): Promise<void> {
 function closeAddPanel(): void {
   if (!addPanelEl) return;
   disarmDeleteBtn();
-  addPanelEl.classList.remove("is-open");
+  addPanelEl.close();
 
   restoreFocusAfterPanelClose();
 }
@@ -1764,7 +1761,7 @@ async function init(): Promise<void> {
         closeQuickCapture();
         return;
       }
-      if (addPanelEl?.classList.contains("is-open")) closeAddPanel();
+      if (addPanelEl?.open) closeAddPanel();
       return;
     }
     const actionEl = e.target instanceof HTMLElement ? e.target.closest<HTMLElement>("[data-action]") : null;
