@@ -64,17 +64,6 @@
   }
 }
 
-#safe-area-top {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: env(safe-area-inset-top);
-  background: var(--bg);
-  z-index: 999;
-  pointer-events: none;
-}
-
 body {
   font-family: var(--font-sans);
   background: var(--bg);
@@ -1195,7 +1184,7 @@ body {
 
 .add-panel {
   position: fixed;
-  top: 0;
+  top: env(safe-area-inset-top);
   right: 0;
   bottom: 0;
   width: 18rem;
