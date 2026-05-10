@@ -1,0 +1,22 @@
+{
+  "name": "Mediant",
+  "short_name": "Mediant",
+  "description": "A focused web agenda and editor for Org-mode files.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#eef1f5",
+  "theme_color": "#60a5fa",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
