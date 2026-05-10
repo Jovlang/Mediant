@@ -1174,9 +1174,7 @@ body {
   right: 0;
   bottom: 0;
   width: 18rem;
-  background: rgb(from var(--bg-card) r g b / 0.85);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  background: var(--bg-card);
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
   z-index: 101;
   transform: translateX(100%);
