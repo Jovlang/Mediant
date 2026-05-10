@@ -54,7 +54,6 @@ function collectAllTags(): string[] {
 // ── Add-item panel ─────────────────────────────────────────────────
 
 let addPanelEl: HTMLElement | null = null;
-let addOverlayEl: HTMLElement | null = null;
 let addPanelTitleEl: HTMLElement | null = null;
 let addPanelSaveBtnEl: HTMLButtonElement | null = null;
 let addPanelDeleteBtnEl: HTMLButtonElement | null = null;
@@ -227,10 +226,6 @@ function hasParsedDate(input: HTMLInputElement): boolean {
 }
 
 function buildAddPanel(): void {
-  addOverlayEl = document.createElement("div");
-  addOverlayEl.className = "add-overlay";
-  addOverlayEl.addEventListener("click", closeAddPanel);
-
   addPanelEl = document.createElement("aside");
   addPanelEl.className = "add-panel";
 
@@ -481,7 +476,12 @@ function buildAddPanel(): void {
   addPanelSaveBtnEl = saveBtn;
 
   addPanelEl.appendChild(form);
-  document.body.append(addOverlayEl, addPanelEl);
+  document.body.append(addPanelEl);
+  document.addEventListener("click", (e) => {
+    if (addPanelEl?.classList.contains("is-open") && !addPanelEl.contains(e.target as Node)) {
+      closeAddPanel();
+    }
+  });
 
   addPanelRefs = {
     typeGroup: typeGroup.container,
@@ -1318,7 +1318,7 @@ function appendOrgText(orgText: string): void {
 }
 
 function openAddPanel(prefillDate: string | null = null): void {
-  if (!addPanelEl || !addOverlayEl || !addPanelRefs) return;
+  if (!addPanelEl || !addPanelRefs) return;
   rememberFocusBeforePanelOpen();
   disarmDeleteBtn();
 
@@ -1353,7 +1353,6 @@ function openAddPanel(prefillDate: string | null = null): void {
   selectRadioValue(refs.priorityGroup, "");
   refs.syncVisibility();
 
-  addOverlayEl.classList.add("is-open");
   addPanelEl.classList.add("is-open");
 
   setTimeout(() => refs.titleInput.focus(), 250);
@@ -1371,7 +1370,7 @@ function tsToDateTimeDisplay(ts: { date: string; startTime: string | null; endTi
 }
 
 function openEditPanel(sourceLine: number, baseDate: string | null = null): void {
-  if (!addPanelEl || !addOverlayEl || !addPanelRefs) return;
+  if (!addPanelEl || !addPanelRefs) return;
   rememberFocusBeforePanelOpen();
   disarmDeleteBtn();
 
@@ -1443,7 +1442,6 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
 
   refs.syncVisibility();
 
-  addOverlayEl.classList.add("is-open");
   addPanelEl.classList.add("is-open");
 
   setTimeout(() => refs.titleInput.focus(), 250);
@@ -1631,9 +1629,8 @@ async function clearException(which: "override" | "note"): Promise<void> {
 }
 
 function closeAddPanel(): void {
-  if (!addPanelEl || !addOverlayEl) return;
+  if (!addPanelEl) return;
   disarmDeleteBtn();
-  addOverlayEl.classList.remove("is-open");
   addPanelEl.classList.remove("is-open");
 
   restoreFocusAfterPanelClose();

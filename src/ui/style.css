@@ -1167,20 +1167,6 @@ body {
   filter: brightness(1.1);
 }
 
-.add-overlay {
-  position: fixed;
-  inset: 0;
-  background: transparent;
-  z-index: 100;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.add-overlay.is-open {
-  opacity: 1;
-  pointer-events: auto;
-}
 
 .add-panel {
   position: fixed;
