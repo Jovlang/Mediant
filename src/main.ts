@@ -2020,10 +2020,9 @@ function closeSettingsMenusForClick(target: EventTarget | null): void {
 function setupNavigation(): void {
   document.addEventListener("click", () => {
     const active = document.activeElement;
-    if (!(active instanceof HTMLElement)) return;
-    if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) return;
-    if (addPanelEl?.contains(active)) return;
-    active.blur();
+    if (active instanceof HTMLElement && !(active instanceof HTMLInputElement) && !(active instanceof HTMLTextAreaElement) && !(active instanceof HTMLSelectElement)) {
+      active.blur();
+    }
   });
 
   document.addEventListener("click", (e) => {
