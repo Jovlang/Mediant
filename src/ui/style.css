@@ -45,6 +45,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    color-scheme: dark;
     --bg: #111215;
     --bg-card: #1a1b1e;
     --bg-today: #1a1f2e;
@@ -1230,6 +1231,8 @@ body {
   border-radius: 0.25rem;
   font-size: 0.875rem;
   background: var(--bg);
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .datetime-preview {
