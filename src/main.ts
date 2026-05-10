@@ -1329,7 +1329,7 @@ function openAddPanel(prefillDate: string | null = null): void {
   refs.syncVisibility();
 
   addPanelEl.showModal();
-  refs.titleInput.focus();
+  requestAnimationFrame(() => refs.titleInput.focus());
 }
 
 function tsToTimeDisplay(ts: { startTime: string | null; endTime: string | null }): string {
