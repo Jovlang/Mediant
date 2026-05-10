@@ -415,7 +415,8 @@ body {
   margin-top: 0.55rem;
 }
 
-.allday-item > .item-title {
+.allday-item > .item-title,
+.allday-item > .item-title-stack > .item-title {
   font-weight: 530;
 }
 
@@ -461,7 +462,8 @@ body {
   letter-spacing: -0.01em;
 }
 
-.timed-item > .item-title {
+.timed-item > .item-title,
+.timed-item > .item-title-stack > .item-title {
   min-width: 0;
   font-weight: 500;
 }
@@ -518,7 +520,8 @@ body {
   color: var(--accent-deadline);
 }
 
-.overdue-item > .item-title {
+.overdue-item > .item-title,
+.overdue-item > .item-title-stack > .item-title {
   min-width: 0;
   font-weight: 500;
 }
@@ -590,7 +593,8 @@ body {
   grid-template-columns: auto auto 1fr;
 }
 
-.scheduled-item > .item-title {
+.scheduled-item > .item-title,
+.scheduled-item > .item-title-stack > .item-title {
   min-width: 0;
   font-weight: 500;
 }
@@ -606,7 +610,8 @@ body {
   grid-template-columns: auto auto 1fr;
 }
 
-.day-deadline-item > .item-title {
+.day-deadline-item > .item-title,
+.day-deadline-item > .item-title-stack > .item-title {
   min-width: 0;
   font-weight: 500;
 }
