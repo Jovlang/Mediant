@@ -477,7 +477,7 @@ body {
 
 .overdue-item {
   --global-row-fringe-color: var(--accent-deadline);
-  grid-template-columns: 4.1ch 4.35rem 2.35rem 1fr;
+  grid-template-columns: 4.1ch 4.35rem auto 1fr;
   padding: 0.78rem var(--section-padding-x);
   gap: 0 0.5rem;
 }
