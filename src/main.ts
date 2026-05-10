@@ -227,6 +227,7 @@ function hasParsedDate(input: HTMLInputElement): boolean {
 function buildAddPanel(): void {
   addPanelEl = document.createElement("dialog");
   addPanelEl.className = "add-panel";
+  addPanelEl.tabIndex = -1;
 
   // Form
   const form = document.createElement("div");
@@ -1418,6 +1419,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   refs.syncVisibility();
 
   addPanelEl.showModal();
+  addPanelEl.focus();
 }
 
 function isoToDisplayDate(iso: string): string {
