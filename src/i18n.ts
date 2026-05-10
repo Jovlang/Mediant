@@ -112,6 +112,7 @@ const messages = {
     // Quick capture
     quickTaskCapture: "Quick task capture",
     couldNotSaveTask: "Could not save task.",
+    addDetails: "Add details",
 
     // Input screen
     appTitle: "Mediant",
@@ -217,6 +218,7 @@ const messages = {
 
     quickTaskCapture: "Hurtigregistrering",
     couldNotSaveTask: "Kunne ikke lagre oppgaven.",
+    addDetails: "Legg til detaljer",
 
     appTitle: "Mediant",
     loadAgenda: "Last inn agenda",

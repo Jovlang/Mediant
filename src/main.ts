@@ -40,6 +40,7 @@ let hideDeadlines = localStorage.getItem("mediant-hide-deadlines") === "true";
 let quickCaptureOverlayEl: HTMLElement | null = null;
 let quickCaptureInputEl: HTMLInputElement | null = null;
 let quickCaptureErrorEl: HTMLElement | null = null;
+let quickCaptureMoreBtnEl: HTMLButtonElement | null = null;
 let quickCaptureLastFocusEl: HTMLElement | null = null;
 
 /** Collect every unique tag from the current parsed entries. */
@@ -117,8 +118,11 @@ function buildQuickCaptureOverlay(): void {
   quickCaptureOverlayEl = document.createElement("div");
   quickCaptureOverlayEl.className = "quick-capture-overlay";
   quickCaptureOverlayEl.addEventListener("click", (e) => {
-    if (e.target !== quickCaptureInputEl) closeQuickCapture();
+    if (!box.contains(e.target as Node)) closeQuickCapture();
   });
+
+  const box = document.createElement("div");
+  box.className = "quick-capture-box";
 
   quickCaptureInputEl = document.createElement("input");
   quickCaptureInputEl.type = "text";
@@ -127,7 +131,6 @@ function buildQuickCaptureOverlay(): void {
   quickCaptureInputEl.autocomplete = "off";
   quickCaptureInputEl.spellcheck = true;
   quickCaptureInputEl.setAttribute("aria-label", t("quickTaskCapture"));
-  quickCaptureInputEl.addEventListener("click", (e) => e.stopPropagation());
   quickCaptureInputEl.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -142,7 +145,14 @@ function buildQuickCaptureOverlay(): void {
   quickCaptureErrorEl.className = "quick-capture-error";
   quickCaptureErrorEl.setAttribute("role", "status");
 
-  quickCaptureOverlayEl.append(quickCaptureInputEl, quickCaptureErrorEl);
+  quickCaptureMoreBtnEl = document.createElement("button");
+  quickCaptureMoreBtnEl.type = "button";
+  quickCaptureMoreBtnEl.className = "quick-capture-more";
+  quickCaptureMoreBtnEl.textContent = t("addDetails");
+  quickCaptureMoreBtnEl.addEventListener("click", switchToFullPanel);
+
+  box.append(quickCaptureInputEl, quickCaptureErrorEl, quickCaptureMoreBtnEl);
+  quickCaptureOverlayEl.appendChild(box);
   document.body.appendChild(quickCaptureOverlayEl);
 }
 
@@ -168,6 +178,12 @@ function closeQuickCapture(): void {
 
 function isQuickCaptureOpen(): boolean {
   return quickCaptureOverlayEl?.classList.contains("is-open") ?? false;
+}
+
+function switchToFullPanel(): void {
+  const text = quickCaptureInputEl?.value.trim() ?? "";
+  closeQuickCapture();
+  openAddPanel(null, text || null);
 }
 
 async function submitQuickCapture(): Promise<void> {
@@ -1294,7 +1310,7 @@ function appendOrgText(orgText: string): void {
   void persistSource(appendAgendaItemToSource(currentSource, orgText));
 }
 
-function openAddPanel(prefillDate: string | null = null): void {
+function openAddPanel(prefillDate: string | null = null, prefillTitle: string | null = null): void {
   if (!addPanelEl || !addPanelRefs) return;
   disarmDeleteBtn();
 
@@ -1311,7 +1327,7 @@ function openAddPanel(prefillDate: string | null = null): void {
   addPanelEl.classList.remove("has-occurrence");
 
   const refs = addPanelRefs;
-  refs.titleInput.value = "";
+  refs.titleInput.value = prefillTitle ?? "";
   refs.when.input.value = isoToDisplayDate(prefillDate ?? "");
   refs.sched.input.value = "";
   refs.dead.input.value = "";
@@ -2040,7 +2056,7 @@ function setupNavigation(): void {
     if (action === "prev" || action === "next" || action === "today") {
       navigateWeek(action);
     } else if (action === "add") {
-      openAddPanel();
+      openQuickCapture();
     } else if (action === "add-on-date") {
       openAddPanel(btn.dataset.date ?? null);
     } else if (action === "toggle-hide-tags") {

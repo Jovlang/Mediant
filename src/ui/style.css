@@ -1093,8 +1093,15 @@ body {
   display: flex;
 }
 
-.quick-capture-input {
+.quick-capture-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
   width: min(34rem, 100%);
+}
+
+.quick-capture-input {
+  width: 100%;
   padding: 0.85rem 1rem;
   border: 1px solid color-mix(in srgb, var(--border-today) 34%, var(--border));
   border-radius: 0.55rem;
@@ -1117,11 +1124,26 @@ body {
 }
 
 .quick-capture-error {
-  position: absolute;
-  top: calc(18vh + 3.75rem);
-  width: min(34rem, calc(100% - 2rem));
+  min-height: 1.1rem;
   color: var(--accent-deadline);
   font-size: 0.8125rem;
+}
+
+.quick-capture-more {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  padding: 0.125rem 0;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+.quick-capture-more:hover {
+  opacity: 1;
+  color: var(--text);
 }
 
 /* ── Panel header / close (shared by add & edit panels) ─────────── */
