@@ -228,20 +228,6 @@ function buildAddPanel(): void {
   addPanelEl = document.createElement("dialog");
   addPanelEl.className = "add-panel";
 
-  // Header
-  const header = document.createElement("div");
-  header.className = "te-header";
-
-
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "te-close";
-  closeBtn.textContent = "\u00D7";
-  closeBtn.setAttribute("aria-label", t("close"));
-  closeBtn.addEventListener("click", closeAddPanel);
-
-  header.append(closeBtn);
-  addPanelEl.appendChild(header);
-
   // Form
   const form = document.createElement("div");
   form.className = "add-form";
