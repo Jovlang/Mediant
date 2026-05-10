@@ -54,7 +54,6 @@ function collectAllTags(): string[] {
 // ── Add-item panel ─────────────────────────────────────────────────
 
 let addPanelEl: HTMLDialogElement | null = null;
-let addPanelTitleEl: HTMLElement | null = null;
 let addPanelSaveBtnEl: HTMLButtonElement | null = null;
 let addPanelDeleteBtnEl: HTMLButtonElement | null = null;
 let deleteArmedTimer: number | null = null;
@@ -233,9 +232,6 @@ function buildAddPanel(): void {
   const header = document.createElement("div");
   header.className = "te-header";
 
-  const title = document.createElement("span");
-  title.textContent = t("addItem");
-  addPanelTitleEl = title;
 
   const closeBtn = document.createElement("button");
   closeBtn.className = "te-close";
@@ -243,7 +239,7 @@ function buildAddPanel(): void {
   closeBtn.setAttribute("aria-label", t("close"));
   closeBtn.addEventListener("click", closeAddPanel);
 
-  header.append(title, closeBtn);
+  header.append(closeBtn);
   addPanelEl.appendChild(header);
 
   // Form
@@ -1327,7 +1323,6 @@ function openAddPanel(prefillDate: string | null = null): void {
   editingSchedRepeater = null;
   editingDeadRepeater = null;
   editingCheckboxItems = [];
-  if (addPanelTitleEl) addPanelTitleEl.textContent = t("addItem");
   if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
   addPanelEl.classList.remove("is-editing");
   addPanelEl.classList.remove("has-occurrence");
@@ -1387,7 +1382,6 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   const refs = addPanelRefs;
 
   const type = entry.todo ? "todo" : "event";
-  if (addPanelTitleEl) addPanelTitleEl.textContent = type === "todo" ? t("editTask") : t("editEvent");
   selectRadioValue(refs.typeGroup, type);
   refs.typeGroup.style.display = "none";
 
