@@ -42,6 +42,8 @@
 
   --badge-text-w: 2.35rem;
   --gap-badge: 0.72rem;
+
+  --fab-bg: rgba(255, 255, 255, 0.78);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -65,6 +67,8 @@
     --deadline-urgency-warning: #f97316;
     --deadline-urgency-caution: #f4c15c;
     --deadline-urgency-calm: #7086a1;
+
+    --fab-bg: rgba(26, 27, 30, 0.82);
   }
 }
 
@@ -1184,7 +1188,7 @@ body {
 /* ── Add-item panel ────────────────────────────────────────────────── */
 
 .add-item-fab {
-  background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+  background: var(--fab-bg);
   backdrop-filter: blur(20px) saturate(1.5);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
   border: 1px solid var(--border-light);
