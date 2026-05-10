@@ -1137,8 +1137,6 @@ body {
   font-weight: 600;
   font-size: 0.9375rem;
   flex-shrink: 0;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border-light);
 }
 
 .te-close {
@@ -1190,7 +1188,9 @@ body {
   right: 0;
   bottom: 0;
   width: 18rem;
-  background: var(--bg-card);
+  background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
   z-index: 101;
   transform: translateX(100%);
