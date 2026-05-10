@@ -1181,6 +1181,7 @@ body {
   padding: 0;
   border: none;
   background: var(--bg-card);
+  color: var(--text);
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
   overflow-y: auto;
   transition: transform 0.25s ease;
