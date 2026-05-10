@@ -64,6 +64,17 @@
   }
 }
 
+#safe-area-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top);
+  background: var(--bg);
+  z-index: 999;
+  pointer-events: none;
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--bg);
@@ -71,7 +82,7 @@ body {
   line-height: 1.5;
   max-width: 54rem;
   margin: 0 auto;
-  padding: 1.25rem 1rem 1.75rem;
+  padding: calc(env(safe-area-inset-top) + 1.25rem) 1rem calc(env(safe-area-inset-bottom) + 1.75rem);
 }
 
 /* ── Header / Navigation ──────────────────────────────────────────── */
