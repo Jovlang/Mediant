@@ -57,7 +57,6 @@ let addPanelEl: HTMLDialogElement | null = null;
 let addPanelSaveBtnEl: HTMLButtonElement | null = null;
 let addPanelDeleteBtnEl: HTMLButtonElement | null = null;
 let deleteArmedTimer: number | null = null;
-let lastPanelFocusEl: HTMLElement | null = null;
 let editingLine: number | null = null;
 let editingBaseDate: string | null = null;
 let editingLevel: number = 1;
@@ -1198,17 +1197,11 @@ function editSaveBaseEpoch(): number {
   return sourceEpoch;
 }
 
-function rememberFocusBeforePanelOpen(): void {
-  const active = document.activeElement;
-  lastPanelFocusEl = active instanceof HTMLElement && !addPanelEl?.contains(active) ? active : null;
-}
-
 function restoreFocusAfterPanelClose(): void {
   const active = document.activeElement;
   if (active instanceof HTMLElement && addPanelEl?.contains(active)) {
     active.blur();
   }
-  lastPanelFocusEl = null;
 }
 
 function queueEditSourceSave(updated: string): Promise<boolean> {
@@ -1295,7 +1288,6 @@ function appendOrgText(orgText: string): void {
 
 function openAddPanel(prefillDate: string | null = null): void {
   if (!addPanelEl || !addPanelRefs) return;
-  rememberFocusBeforePanelOpen();
   disarmDeleteBtn();
 
   editingLine = null;
@@ -1344,7 +1336,6 @@ function tsToDateTimeDisplay(ts: { date: string; startTime: string | null; endTi
 
 function openEditPanel(sourceLine: number, baseDate: string | null = null): void {
   if (!addPanelEl || !addPanelRefs) return;
-  rememberFocusBeforePanelOpen();
   disarmDeleteBtn();
 
   const entry = entries.find(e => e.sourceLineNumber === sourceLine);
@@ -2021,6 +2012,10 @@ function closeSettingsMenusForClick(target: EventTarget | null): void {
 }
 
 function setupNavigation(): void {
+  document.addEventListener("click", () => {
+    if (document.activeElement instanceof HTMLButtonElement) document.activeElement.blur();
+  });
+
   document.addEventListener("click", (e) => {
     closeSettingsMenusForClick(e.target);
 
@@ -2034,16 +2029,8 @@ function setupNavigation(): void {
       navigateWeek(action);
     } else if (action === "add") {
       openAddPanel();
-      if (btn instanceof HTMLElement) {
-        btn.blur();
-        lastPanelFocusEl = null;
-      }
     } else if (action === "add-on-date") {
       openAddPanel(btn.dataset.date ?? null);
-      if (btn instanceof HTMLElement) {
-        btn.blur();
-        lastPanelFocusEl = null;
-      }
     } else if (action === "toggle-hide-tags") {
       toggleHideTags();
     } else if (action === "toggle-hide-empty-days") {
@@ -2062,13 +2049,7 @@ function setupNavigation(): void {
     } else if (action === "edit") {
       const line = Number(btn.dataset.line);
       const baseDate = btn.dataset.baseDate ?? null;
-      if (line) {
-        openEditPanel(line, baseDate);
-        if (btn instanceof HTMLElement) {
-          btn.blur();
-          lastPanelFocusEl = null;
-        }
-      }
+      if (line) openEditPanel(line, baseDate);
     } else if (action === "toggle-done") {
       e.stopPropagation();
       const line = Number(btn.dataset.line);
