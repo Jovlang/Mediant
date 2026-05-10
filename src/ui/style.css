@@ -1181,7 +1181,7 @@ body {
 .add-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: transparent;
   z-index: 100;
   opacity: 0;
   pointer-events: none;
