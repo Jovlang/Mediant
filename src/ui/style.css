@@ -472,9 +472,6 @@ body {
   padding: 0.95rem var(--section-padding-x) 0.4rem;
   font-weight: 600;
   font-size: 0.95rem;
-}
-
-.overdue-header {
   color: var(--accent-deadline);
 }
 
@@ -513,25 +510,15 @@ body {
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--accent-deadline);
-  letter-spacing: -0.01em;
-  min-width: 0;
 }
 
 .overdue-item .item-kind {
-  display: inline-flex;
-  justify-content: center;
-  min-width: 0;
   font-size: 0.6625rem;
   font-weight: 500;
   color: var(--accent-deadline);
-  border-radius: 0.25rem;
-  padding: 0 0.2rem;
-  line-height: 1.4;
-  opacity: 0.82;
 }
 
 .overdue-item > .item-title {
-  justify-self: start;
   min-width: 0;
   font-weight: 500;
 }
