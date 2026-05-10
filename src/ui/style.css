@@ -1725,7 +1725,8 @@ body {
   .add-input,
   .tag-picker-input,
   .occurrence-input,
-  .datetime-text-input {
+  .datetime-text-input,
+  .edit-checkbox-text {
     font-size: 1rem;
   }
 }
