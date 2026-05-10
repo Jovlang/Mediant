@@ -420,6 +420,35 @@ If LINE has no visible time, prefix a compact START marker."
             'kept)
            (t 'kept)))))))
 
+(defun mediant-org-agenda--remove-empty-day-headers ()
+  "Remove day header lines whose sections have no remaining event lines.
+Only called when `org-agenda-show-all-dates' is nil."
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (let ((bol (line-beginning-position)))
+        (if (get-text-property bol 'org-agenda-date-header)
+            (let ((header-start (line-beginning-position))
+                  (header-end (min (point-max) (1+ (line-end-position))))
+                  (has-events nil))
+              (save-excursion
+                (forward-line 1)
+                (while (and (not (eobp)) (not has-events))
+                  (let ((pos (line-beginning-position)))
+                    (cond
+                     ((get-text-property pos 'org-agenda-date-header)
+                      (goto-char (point-max)))
+                     ((and (get-text-property pos 'org-marker)
+                           (eq (get-text-property pos 'org-agenda-type) 'agenda))
+                      (setq has-events t))
+                     ((get-text-property pos 'mediant-org-agenda-synthetic)
+                      (setq has-events t))
+                     (t (forward-line 1))))))
+              (if has-events
+                  (forward-line 1)
+                (delete-region header-start header-end)))
+          (forward-line 1))))))
+
 (defun mediant-org-agenda-apply ()
   "Apply Mediant recurrence exceptions to the current Org agenda buffer."
   (when (derived-mode-p 'org-agenda-mode)
@@ -430,7 +459,9 @@ If LINE has no visible time, prefix a compact START marker."
           (let ((result (mediant-org-agenda--process-line insertions)))
             (unless (eq result 'deleted)
               (forward-line 1)))))
-      (mediant-org-agenda--insert-moved-lines insertions))))
+      (mediant-org-agenda--insert-moved-lines insertions)
+      (unless org-agenda-show-all-dates
+        (mediant-org-agenda--remove-empty-day-headers)))))
 
 ;;;###autoload
 (define-minor-mode mediant-org-agenda-mode
