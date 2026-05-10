@@ -1332,8 +1332,6 @@ function openAddPanel(prefillDate: string | null = null): void {
   refs.syncVisibility();
 
   addPanelEl.showModal();
-  (document.activeElement as HTMLElement | null)?.blur();
-  setTimeout(() => refs.titleInput.focus(), 250);
 }
 
 function tsToTimeDisplay(ts: { startTime: string | null; endTime: string | null }): string {
@@ -1420,8 +1418,6 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   refs.syncVisibility();
 
   addPanelEl.showModal();
-  (document.activeElement as HTMLElement | null)?.blur();
-  setTimeout(() => refs.titleInput.focus(), 250);
 }
 
 function isoToDisplayDate(iso: string): string {

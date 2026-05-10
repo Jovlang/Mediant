@@ -1208,6 +1208,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+  transition: opacity 0.15s ease 0.2s;
+}
+
+@starting-style {
+  .add-panel[open] .add-form {
+    opacity: 0;
+  }
 }
 
 .add-field {
