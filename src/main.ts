@@ -2054,7 +2054,7 @@ function setupNavigation(): void {
     if (action === "prev" || action === "next" || action === "today") {
       navigateWeek(action);
     } else if (action === "add") {
-      openQuickCapture();
+      openAddPanel(null);
     } else if (action === "add-on-date") {
       openAddPanel(btn.dataset.date ?? null);
     } else if (action === "toggle-hide-tags") {
