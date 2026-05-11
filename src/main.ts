@@ -250,11 +250,18 @@ function makePanelSection(title: string, icon: "occurrence" | "details" | "dates
   mark.setAttribute("aria-hidden", "true");
 
   const text = document.createElement("span");
+  text.className = "add-section-label";
   text.textContent = title;
 
   heading.append(mark, text);
   section.appendChild(heading);
   return section;
+}
+
+function syncDetailsSection(detailsSection: HTMLElement, isTodo: boolean): void {
+  detailsSection.dataset.detailKind = isTodo ? "task" : "event";
+  const label = detailsSection.querySelector<HTMLElement>(".add-section-label");
+  if (label) label.textContent = isTodo ? t("sectionTaskDetails") : t("sectionEventDetails");
 }
 
 function buildAddPanel(): void {
@@ -347,6 +354,7 @@ function buildAddPanel(): void {
     const isTodo = checkedRadioValue(typeGroup.container, "add-type", "event") === "todo";
     const hasSchedDate = hasParsedDate(schedInput.input);
     const hasDeadDate = hasParsedDate(deadInput.input);
+    syncDetailsSection(detailsSection, isTodo);
     whenInput.container.style.display = isTodo ? "none" : "";
     repeatSelect.container.style.display = isTodo ? "none" : "";
     schedInput.container.style.display = isTodo ? "" : "none";

@@ -70,6 +70,7 @@ const messages = {
     // Add/edit panel — fields
     sectionOccurrence: "Occurrence controls",
     sectionTaskDetails: "Task details",
+    sectionEventDetails: "Event details",
     sectionDates: "Dates",
     sectionMetadata: "Metadata",
     sectionChecklist: "Checklist",
@@ -190,6 +191,7 @@ const messages = {
     type: "Type",
     sectionOccurrence: "Forekomstvalg",
     sectionTaskDetails: "Oppgavedetaljer",
+    sectionEventDetails: "Hendelsesdetaljer",
     sectionDates: "Datoer",
     sectionMetadata: "Metadata",
     sectionChecklist: "Sjekkliste",
