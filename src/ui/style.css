@@ -1967,7 +1967,7 @@ body {
 .occurrence-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.34rem;
 }
 
 .occurrence-row {
@@ -1979,7 +1979,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.52rem;
-  min-height: 1.85rem;
+  min-height: 1.65rem;
   font-size: 0.8125rem;
   color: var(--text);
   cursor: pointer;
