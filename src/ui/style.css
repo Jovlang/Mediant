@@ -1382,7 +1382,7 @@ body {
   font-family: inherit;
   font-size: 0.875rem;
   line-height: 1.35;
-  background: color-mix(in srgb, var(--bg-card) 74%, var(--bg-panel));
+  background-color: color-mix(in srgb, var(--bg-card) 74%, var(--bg-panel));
   box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.04), 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease;
 }
@@ -1393,14 +1393,16 @@ body {
 
 .add-input:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--text-dim) 24%, var(--border));
-  background: color-mix(in srgb, var(--bg-card) 86%, var(--bg-panel));
+  background-color: color-mix(in srgb, var(--bg-card) 86%, var(--bg-panel));
 }
 
 .add-input:disabled {
   cursor: not-allowed;
-  opacity: 0.58;
-  color: var(--text-dim);
-  background: color-mix(in srgb, var(--bg-panel) 76%, var(--bg-card));
+  opacity: 0.62;
+  color: color-mix(in srgb, var(--text-dim) 66%, transparent);
+  border-color: color-mix(in srgb, var(--border) 34%, transparent);
+  background-color: color-mix(in srgb, var(--bg-panel) 86%, var(--bg-card));
+  box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.025);
 }
 
 .add-select {
@@ -1422,6 +1424,14 @@ body {
 
 .add-select:hover:not(:disabled) {
   color: var(--text);
+}
+
+.add-select:disabled {
+  color: color-mix(in srgb, var(--text-dim) 50%, transparent);
+  background-color: color-mix(in srgb, var(--bg-panel) 90%, var(--bg-card));
+  background-image:
+    linear-gradient(45deg, transparent 50%, color-mix(in srgb, var(--text-dim) 34%, transparent) 50%),
+    linear-gradient(135deg, color-mix(in srgb, var(--text-dim) 34%, transparent) 50%, transparent 50%);
 }
 
 .datetime-preview {
