@@ -876,7 +876,7 @@ function levelToPriority(level: number): "A" | "B" | "C" | null {
 
 function priorityDisplay(priority: "A" | "B" | "C" | null): string {
   const level = priorityToLevel(priority);
-  return level === 0 ? t("priorityNone") : "!".repeat(level);
+  return level === 0 ? "∅" : "!".repeat(level);
 }
 
 function syncPriorityStepper(container: HTMLElement): void {
@@ -890,6 +890,7 @@ function syncPriorityStepper(container: HTMLElement): void {
   }
   if (dec) dec.disabled = level === 0;
   if (inc) inc.disabled = level === 3;
+  container.classList.toggle("is-empty", level === 0);
 }
 
 function makePriorityStepper(): { container: HTMLElement } {

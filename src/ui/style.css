@@ -1497,6 +1497,15 @@ body {
   background: var(--bg);
 }
 
+.priority-stepper-field.is-empty .priority-stepper {
+  grid-template-columns: 2rem;
+}
+
+.priority-stepper-field.is-empty .priority-stepper-dec,
+.priority-stepper-field.is-empty .priority-stepper-value {
+  display: none;
+}
+
 .priority-stepper-btn {
   width: 2rem;
   height: 2rem;

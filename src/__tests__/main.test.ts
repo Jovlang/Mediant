@@ -244,10 +244,11 @@ describe("main.ts integration", () => {
     expect(document.querySelector<HTMLElement>(".te-header span")?.textContent).toBe("Add item");
     expect(document.querySelector<HTMLInputElement>("#add-title")?.value).toBe("");
     expect(document.querySelector<HTMLInputElement>("input[name='add-type']:checked")?.value).toBe("event");
-    expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("None");
+    expect(document.querySelector<HTMLElement>(".priority-stepper-field")?.classList.contains("is-empty")).toBe(true);
     expect(document.querySelector<HTMLButtonElement>(".priority-stepper-dec")?.disabled).toBe(true);
     const priorityInc = document.querySelector<HTMLButtonElement>(".priority-stepper-inc");
     priorityInc!.click();
+    expect(document.querySelector<HTMLElement>(".priority-stepper-field")?.classList.contains("is-empty")).toBe(false);
     expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!");
     priorityInc!.click();
     expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!!");
