@@ -69,8 +69,8 @@ const messages = {
 
     // Add/edit panel — fields
     sectionOccurrence: "Occurrence controls",
-    sectionTaskDetails: "Task details",
-    sectionEventDetails: "Event details",
+    sectionTaskDetails: "Task",
+    sectionEventDetails: "Event",
     sectionDates: "Dates",
     sectionMetadata: "Metadata",
     sectionChecklist: "Checklist",
@@ -189,9 +189,9 @@ const messages = {
     tapAgainToDelete: "Trykk igjen for å slette",
 
     type: "Type",
-    sectionOccurrence: "Forekomstvalg",
-    sectionTaskDetails: "Oppgavedetaljer",
-    sectionEventDetails: "Hendelsesdetaljer",
+    sectionOccurrence: "Forekomst",
+    sectionTaskDetails: "Oppgave",
+    sectionEventDetails: "Hendelse",
     sectionDates: "Datoer",
     sectionMetadata: "Metadata",
     sectionChecklist: "Sjekkliste",

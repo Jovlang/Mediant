@@ -1314,6 +1314,10 @@ body {
   display: none;
 }
 
+.add-section-dates > .add-section-title {
+  display: none;
+}
+
 .add-section-icon {
   display: inline-flex;
   align-items: center;
