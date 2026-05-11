@@ -423,10 +423,14 @@ function buildAddPanel(): void {
 
   const overrideRow = document.createElement("div");
   overrideRow.className = "occurrence-row";
+  const occurrenceInputLabel = document.createElement("label");
+  occurrenceInputLabel.className = "add-label";
+  occurrenceInputLabel.htmlFor = "occurrence-move-input";
+  occurrenceInputLabel.textContent = t("moveToDateTime");
   const occurrenceInput = document.createElement("input");
   occurrenceInput.type = "text";
+  occurrenceInput.id = "occurrence-move-input";
   occurrenceInput.className = "add-input occurrence-input";
-  occurrenceInput.placeholder = t("moveToDateTime");
   const occurrencePreview = document.createElement("div");
   occurrencePreview.className = "datetime-preview occurrence-preview";
   occurrenceInput.addEventListener("input", () => {
@@ -442,7 +446,7 @@ function buildAddPanel(): void {
   clearOverrideBtn.textContent = t("clearOverride");
   clearOverrideBtn.addEventListener("click", () => clearException("override"));
 
-  occActions.append(skipCheckboxRow, endSeriesCheckboxRow, overrideRow, occurrencePreview, clearOverrideBtn);
+  occActions.append(skipCheckboxRow, endSeriesCheckboxRow, occurrenceInputLabel, overrideRow, occurrencePreview, clearOverrideBtn);
   occurrenceSection.appendChild(occActions);
 
   const noteLabel = document.createElement("label");
