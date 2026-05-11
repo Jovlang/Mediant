@@ -31,6 +31,7 @@ let serverMode = false;
 let serverVersion: string | null = null;
 let agendaLoaded = false;
 let activeTagFilters = new Set<string>();
+let activePriorityFilter: "A" | "B" | "C" | null = null;
 let hideTags = localStorage.getItem("mediant-hide-tags") === "true";
 let hideEmptyDays = localStorage.getItem("mediant-hide-empty-days") === "true";
 let hideCompletedAndSkipped = localStorage.getItem("mediant-hide-completed") === "true";
@@ -55,6 +56,7 @@ function collectAllTags(): string[] {
 // ── Add-item panel ─────────────────────────────────────────────────
 
 let addPanelEl: HTMLDialogElement | null = null;
+let addPanelHeadingEl: HTMLElement | null = null;
 let addPanelSaveBtnEl: HTMLButtonElement | null = null;
 let addPanelDeleteBtnEl: HTMLButtonElement | null = null;
 let deleteArmedTimer: number | null = null;
@@ -248,6 +250,20 @@ function buildAddPanel(): void {
   focusSentinel.className = "focus-sentinel";
   addPanelEl.appendChild(focusSentinel);
 
+  const header = document.createElement("div");
+  header.className = "te-header";
+  const heading = document.createElement("span");
+  heading.textContent = t("addItem");
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "te-close";
+  closeBtn.textContent = "×";
+  closeBtn.setAttribute("aria-label", t("close"));
+  closeBtn.addEventListener("click", closeAddPanel);
+  header.append(heading, closeBtn);
+  addPanelEl.appendChild(header);
+  addPanelHeadingEl = heading;
+
   // Form
   const form = document.createElement("div");
   form.className = "add-form";
@@ -302,24 +318,12 @@ function buildAddPanel(): void {
   form.appendChild(deadRepeatSelect.container);
 
   // Priority
-  const priorityGroup = makeRadioGroup(t("priority"), "add-priority", [
-    { value: "A", label: "A" },
-    { value: "B", label: "B" },
-    { value: "C", label: "C" },
-    { value: "", label: t("priorityNone"), checked: true },
-  ]);
+  const priorityGroup = makePriorityStepper();
   form.appendChild(priorityGroup.container);
 
   // Tags
   const tagPicker = makeTagPicker(t("tags"), "add-tags");
   form.appendChild(tagPicker.container);
-
-  // Wire priority radios to editingPriority
-  const priorityRadios = priorityGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-priority']");
-  priorityRadios.forEach(r => r.addEventListener("change", () => {
-    editingPriority = (r.value === "A" || r.value === "B" || r.value === "C") ? r.value : null;
-    scheduleEditAutosave();
-  }));
 
   // Show/hide fields based on type
   const typeRadios = typeGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-type']");
@@ -856,6 +860,80 @@ function makeRadioGroup(label: string | null, name: string, options: { value: st
   return { container };
 }
 
+function priorityToLevel(priority: "A" | "B" | "C" | null): number {
+  if (priority === "A") return 3;
+  if (priority === "B") return 2;
+  if (priority === "C") return 1;
+  return 0;
+}
+
+function levelToPriority(level: number): "A" | "B" | "C" | null {
+  if (level >= 3) return "A";
+  if (level === 2) return "B";
+  if (level === 1) return "C";
+  return null;
+}
+
+function priorityDisplay(priority: "A" | "B" | "C" | null): string {
+  const level = priorityToLevel(priority);
+  return level === 0 ? t("priorityNone") : "!".repeat(level);
+}
+
+function syncPriorityStepper(container: HTMLElement): void {
+  const value = container.querySelector<HTMLElement>(".priority-stepper-value");
+  const dec = container.querySelector<HTMLButtonElement>(".priority-stepper-dec");
+  const inc = container.querySelector<HTMLButtonElement>(".priority-stepper-inc");
+  const level = priorityToLevel(editingPriority);
+  if (value) {
+    value.textContent = priorityDisplay(editingPriority);
+    value.dataset.priority = editingPriority ?? "";
+  }
+  if (dec) dec.disabled = level === 0;
+  if (inc) inc.disabled = level === 3;
+}
+
+function makePriorityStepper(): { container: HTMLElement } {
+  const container = document.createElement("div");
+  container.className = "add-field priority-stepper-field";
+
+  const lbl = document.createElement("label");
+  lbl.className = "add-label";
+  lbl.textContent = t("priority");
+
+  const controls = document.createElement("div");
+  controls.className = "priority-stepper";
+
+  const dec = document.createElement("button");
+  dec.type = "button";
+  dec.className = "priority-stepper-btn priority-stepper-dec";
+  dec.textContent = "-";
+  dec.setAttribute("aria-label", t("decreasePriority"));
+
+  const value = document.createElement("span");
+  value.className = "priority-stepper-value";
+  value.setAttribute("aria-live", "polite");
+
+  const inc = document.createElement("button");
+  inc.type = "button";
+  inc.className = "priority-stepper-btn priority-stepper-inc";
+  inc.textContent = "+";
+  inc.setAttribute("aria-label", t("increasePriority"));
+
+  const changePriority = (delta: number): void => {
+    const next = Math.max(0, Math.min(3, priorityToLevel(editingPriority) + delta));
+    editingPriority = levelToPriority(next);
+    syncPriorityStepper(container);
+    scheduleEditAutosave();
+  };
+  dec.addEventListener("click", () => changePriority(-1));
+  inc.addEventListener("click", () => changePriority(1));
+
+  controls.append(dec, value, inc);
+  container.append(lbl, controls);
+  syncPriorityStepper(container);
+  return { container };
+}
+
 function selectRadioValue(container: HTMLElement, value: string): void {
   const radios = container.querySelectorAll<HTMLInputElement>("input[type='radio']");
   radios.forEach(radio => {
@@ -1321,6 +1399,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   editingDeadRepeater = null;
   editingCheckboxItems = [];
   if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
+  if (addPanelHeadingEl) addPanelHeadingEl.textContent = t("addItem");
   addPanelEl.classList.remove("is-editing");
   addPanelEl.classList.remove("has-occurrence");
 
@@ -1337,13 +1416,14 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   refs.schedRepeatSelect.value = "";
   refs.deadRepeatSelect.value = "";
   rebuildCheckboxUI(refs.checkboxSection);
-  selectRadioValue(refs.typeGroup, "todo");
+  selectRadioValue(refs.typeGroup, "event");
   refs.typeGroup.style.display = "";
-  selectRadioValue(refs.priorityGroup, "");
+  syncPriorityStepper(refs.priorityGroup);
   refs.syncVisibility();
 
   refs.titleInput.setAttribute("autofocus", "");
   addPanelEl.showModal();
+  addPanelEl.classList.add("is-open");
   refs.titleInput.removeAttribute("autofocus");
 }
 
@@ -1371,6 +1451,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   editingPriority = entry.priority;
   editingTodoState = entry.todo === "DONE" ? "DONE" : "TODO";
   if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
+  if (addPanelHeadingEl) addPanelHeadingEl.textContent = entry.todo ? t("editTask") : t("editEvent");
   addPanelEl.classList.add("is-editing");
   addPanelEl.classList.toggle("has-occurrence", baseDate !== null && entryHasRepeater(entry));
   refreshOccurrenceSection({ resetOccurrenceInput: true });
@@ -1384,8 +1465,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   refs.titleInput.value = entry.title;
   refs.tagPicker.setTags([...entry.tags]);
 
-  const prioVal = entry.priority ?? "";
-  selectRadioValue(refs.priorityGroup, prioVal);
+  syncPriorityStepper(refs.priorityGroup);
 
   refs.when.input.value = "";
   refs.sched.input.value = "";
@@ -1430,6 +1510,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   refs.syncVisibility();
 
   addPanelEl.showModal();
+  addPanelEl.classList.add("is-open");
 }
 
 function isoToDisplayDate(iso: string): string {
@@ -1616,6 +1697,7 @@ async function clearException(which: "override" | "note"): Promise<void> {
 function closeAddPanel(): void {
   if (!addPanelEl) return;
   disarmDeleteBtn();
+  addPanelEl.classList.remove("is-open");
   addPanelEl.close();
 
   restoreFocusAfterPanelClose();
@@ -1657,15 +1739,23 @@ function entryMatchesTagFilters(entry: Pick<OrgEntry, "tags">): boolean {
   return [...activeTagFilters].every(tag => entry.tags.includes(tag));
 }
 
+function entryMatchesPriorityFilter(entry: Pick<OrgEntry, "priority">): boolean {
+  return activePriorityFilter === null || entry.priority === activePriorityFilter;
+}
+
+function entryMatchesActiveFilters(entry: Pick<OrgEntry, "tags" | "priority">): boolean {
+  return entryMatchesTagFilters(entry) && entryMatchesPriorityFilter(entry);
+}
+
 function filterWeekByTags(week: readonly AgendaDay[]): readonly AgendaDay[] {
   return week.map(day => ({
     ...day,
-    items: day.items.filter(item => entryMatchesTagFilters(item.entry)),
+    items: day.items.filter(item => entryMatchesActiveFilters(item.entry)),
   }));
 }
 
-function filterByTags<T extends { entry: Pick<OrgEntry, "tags"> }>(items: T[]): T[] {
-  return items.filter(item => entryMatchesTagFilters(item.entry));
+function filterByTags<T extends { entry: Pick<OrgEntry, "tags" | "priority"> }>(items: T[]): T[] {
+  return items.filter(item => entryMatchesActiveFilters(item.entry));
 }
 
 function toggleTagFilter(tag: string): void {
@@ -1675,8 +1765,14 @@ function toggleTagFilter(tag: string): void {
 }
 
 function clearTagFilters(): void {
-  if (activeTagFilters.size === 0) return;
+  if (activeTagFilters.size === 0 && activePriorityFilter === null) return;
   activeTagFilters.clear();
+  activePriorityFilter = null;
+  render();
+}
+
+function togglePriorityFilter(priority: "A" | "B" | "C"): void {
+  activePriorityFilter = activePriorityFilter === priority ? null : priority;
   render();
 }
 
@@ -2000,6 +2096,7 @@ function render(): void {
 
   renderAgenda(container, filteredWeek, filteredDeadlines, filteredOverdue, filteredSomeday, today, {
     activeTagFilters: [...activeTagFilters].sort(),
+    activePriorityFilter,
     hideTags,
     hideEmptyDays,
     hideCompletedAndSkipped,
@@ -2070,6 +2167,9 @@ function setupNavigation(): void {
     } else if (action === "toggle-tag-filter") {
       const tag = btn.dataset.tag;
       if (tag) toggleTagFilter(tag);
+    } else if (action === "toggle-priority-filter") {
+      const priority = btn.dataset.priority;
+      if (priority === "A" || priority === "B" || priority === "C") togglePriorityFilter(priority);
     } else if (action === "clear-tag-filters") {
       clearTagFilters();
     } else if (action === "edit") {

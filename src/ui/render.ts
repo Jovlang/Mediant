@@ -12,6 +12,7 @@ import { t, type Locale, getLocale, setLocale, SUPPORTED_LOCALES } from "../i18n
 
 export interface RenderAgendaOptions {
   readonly activeTagFilters?: readonly string[];
+  readonly activePriorityFilter?: "A" | "B" | "C" | null;
   readonly hideTags?: boolean;
   readonly hideEmptyDays?: boolean;
   readonly hideCompletedAndSkipped?: boolean;
@@ -151,15 +152,15 @@ function renderHeader(startDate: Date, endDate: Date, options: RenderAgendaOptio
   header.append(nav, todayBtn, actions);
 
   if (!document.querySelector(".add-item-fab")) {
-    const addBtn = el("button", "add-item-fab");
+    const addBtn = el("button", "add-item-fab add-item-btn");
     addBtn.textContent = t("addLabel");
     addBtn.dataset.action = "add";
     addBtn.setAttribute("aria-label", t("addAria"));
     document.body.appendChild(addBtn);
   }
 
-  if ((options.activeTagFilters?.length ?? 0) > 0) {
-    header.appendChild(renderActiveTagFilters(options.activeTagFilters ?? []));
+  if ((options.activeTagFilters?.length ?? 0) > 0 || options.activePriorityFilter) {
+    header.appendChild(renderActiveFilters(options.activeTagFilters ?? [], options.activePriorityFilter ?? null));
   }
   return header;
 }
@@ -263,7 +264,7 @@ function renderSettingsMenu(options: RenderAgendaOptions): HTMLElement {
   return menu;
 }
 
-function renderActiveTagFilters(tags: readonly string[]): HTMLElement {
+function renderActiveFilters(tags: readonly string[], priority: "A" | "B" | "C" | null): HTMLElement {
   const row = el("div", "active-tag-filters");
 
   const label = el("span", "active-tag-filters-label");
@@ -272,6 +273,9 @@ function renderActiveTagFilters(tags: readonly string[]): HTMLElement {
 
   for (const tag of tags) {
     row.appendChild(renderTag(tag, { selected: true }));
+  }
+  if (priority) {
+    row.appendChild(renderPriorityBadge(priority, { selected: true }));
   }
 
   const clearBtn = el("button", "clear-tag-filters");
@@ -594,13 +598,19 @@ function renderTitle(
   title.setAttribute("role", "button");
   title.setAttribute("tabindex", "0");
   if (entry.priority) {
-    const badge = el("span", `item-priority priority-${entry.priority}`);
-    badge.textContent = entry.priority;
-    title.appendChild(badge);
+    title.appendChild(renderPriorityBadge(entry.priority, {
+      selected: (currentRenderOptions.activePriorityFilter ?? null) === entry.priority,
+    }));
     title.appendChild(document.createTextNode(" "));
   }
   title.appendChild(document.createTextNode(entry.title));
   return title;
+}
+
+function priorityMarks(priority: "A" | "B" | "C"): string {
+  if (priority === "A") return "!!!";
+  if (priority === "B") return "!!";
+  return "!";
 }
 
 function renderCheckboxItems(
@@ -637,7 +647,7 @@ function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "hideT
   return currentRenderOptions;
 }
 
-let currentRenderOptions: Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags" | "hideCompletedAndSkipped"> = {};
+let currentRenderOptions: Pick<RenderAgendaOptions, "activeTagFilters" | "activePriorityFilter" | "hideTags" | "hideCompletedAndSkipped"> = {};
 
 function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags">): HTMLElement {
   const badges = el("span", "tag-badges");
@@ -695,6 +705,28 @@ function renderTag(
   return span;
 }
 
+function renderPriorityBadge(
+  priority: "A" | "B" | "C",
+  options: { selected?: boolean } = {},
+): HTMLElement {
+  const badge = el("span", `item-priority priority-${priority}`);
+  const marks = priorityMarks(priority);
+  badge.dataset.priority = priority;
+  badge.dataset.action = "toggle-priority-filter";
+  badge.textContent = marks;
+  badge.setAttribute("role", "button");
+  badge.setAttribute("tabindex", "0");
+  badge.setAttribute("aria-pressed", options.selected ? "true" : "false");
+  badge.setAttribute(
+    "aria-label",
+    options.selected
+      ? t("removePriorityFilter", { priority: marks })
+      : t("filterByPriority", { priority: marks }),
+  );
+  if (options.selected) badge.classList.add("is-selected");
+  return badge;
+}
+
 export function renderAgenda(
   container: HTMLElement,
   week: readonly AgendaDay[],
@@ -706,6 +738,7 @@ export function renderAgenda(
 ): void {
   currentRenderOptions = {
     activeTagFilters: options.activeTagFilters ?? [],
+    activePriorityFilter: options.activePriorityFilter ?? null,
     hideTags: options.hideTags ?? false,
     hideCompletedAndSkipped: options.hideCompletedAndSkipped ?? false,
   };

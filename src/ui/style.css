@@ -706,13 +706,18 @@ body {
 /* ── Priority badges ──────────────────────────────────────────────── */
 
 .item-priority {
-  display: inline-block;
-  font-size: 0.675rem;
-  font-weight: 600;
-  border-radius: 999px;
-  padding: 0.02rem 0.34rem;
-  line-height: 1.4;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  min-width: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
   vertical-align: baseline;
+  cursor: pointer;
+  border-radius: 3px;
+  text-decoration: none;
 }
 
 .item-priority.priority-A {
@@ -729,6 +734,15 @@ body {
 
 .item-done .item-priority {
   color: var(--text-done);
+}
+
+.item-priority:focus-visible {
+  outline: 2px solid var(--border-today);
+  outline-offset: 2px;
+}
+
+.item-priority.is-selected {
+  box-shadow: inset 0 -1px 0 currentColor;
 }
 
 /* ── Tag badges ───────────────────────────────────────────────────── */
@@ -1470,6 +1484,65 @@ body {
 .add-radio-group input[value="C"]:checked + .add-radio-label {
   background: #2563eb;
   border-color: #2563eb;
+}
+
+.priority-stepper {
+  display: inline-grid;
+  grid-template-columns: 2rem minmax(3.35rem, auto) 2rem;
+  align-items: center;
+  width: max-content;
+  border: 1px solid var(--border-light);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.priority-stepper-btn {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.priority-stepper-btn:hover:not(:disabled),
+.priority-stepper-btn:focus-visible {
+  background: color-mix(in srgb, var(--border-today) 14%, transparent);
+}
+
+.priority-stepper-btn:disabled {
+  color: var(--text-dim);
+  cursor: default;
+  opacity: 0.45;
+}
+
+.priority-stepper-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0 0.65rem;
+  border-left: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.priority-stepper-value[data-priority="A"] {
+  color: #dc2626;
+}
+
+.priority-stepper-value[data-priority="B"] {
+  color: #d97706;
+}
+
+.priority-stepper-value[data-priority="C"] {
+  color: #2563eb;
 }
 
 /* ── Edit panel checkboxes ──────────────────────────────────────── */

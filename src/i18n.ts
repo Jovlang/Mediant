@@ -43,6 +43,8 @@ const messages = {
     clear: "Clear",
     filterByTag: "Filter by tag {tag}",
     removeTagFilter: "Remove tag filter {tag}",
+    filterByPriority: "Filter by priority {priority}",
+    removePriorityFilter: "Remove priority filter {priority}",
 
     // Day rows
     addEventOn: "Add event on {date}",
@@ -71,6 +73,8 @@ const messages = {
     typeTodo: "Task",
     priority: "Priority",
     priorityNone: "None",
+    increasePriority: "Increase priority",
+    decreasePriority: "Decrease priority",
     title: "What",
     when: "When",
     scheduled: "Scheduled",
@@ -156,6 +160,8 @@ const messages = {
     clear: "Tøm",
     filterByTag: "Filtrer på etikett {tag}",
     removeTagFilter: "Fjern etikettfilter {tag}",
+    filterByPriority: "Filtrer på prioritet {priority}",
+    removePriorityFilter: "Fjern prioritetsfilter {priority}",
 
     addEventOn: "Legg til hendelse {date}",
     overdue: "Forfalt",
@@ -181,6 +187,8 @@ const messages = {
     typeTodo: "Oppgave",
     priority: "Prioritet",
     priorityNone: "Ingen",
+    increasePriority: "Øk prioritet",
+    decreasePriority: "Senk prioritet",
     title: "Hva",
     when: "Når",
     scheduled: "Planlagt",

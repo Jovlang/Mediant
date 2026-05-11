@@ -53,7 +53,7 @@ describe("main.ts integration", () => {
         "** TODO Rent",
         "DEADLINE: <2026-04-01 Wed +1w>",
         "",
-        "** TODO Focus block :work:",
+        "** TODO [#B] Focus block :work:",
         "SCHEDULED: <2026-04-20 Mon 11:00>",
         "",
         "** TODO Yoga :work:health:",
@@ -170,6 +170,15 @@ describe("main.ts integration", () => {
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Inbox"))).toBe(true);
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Focus block"))).toBe(true);
 
+    const focusPriority = Array.from(document.querySelectorAll<HTMLElement>(".item-priority[data-priority='B']"))
+      .find(el => el.closest(".timed-item, .scheduled-item, .allday-item, .deadline-item, .overdue-item, .someday-item")) ?? null;
+    expect(focusPriority?.textContent).toBe("!!");
+    focusPriority!.click();
+    await flush();
+    expect(document.querySelector(".active-tag-filters .item-priority[data-priority='B']")).not.toBeNull();
+    expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Focus block"))).toBe(true);
+    expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Yoga"))).toBe(false);
+
     const workTagAfterClear = document.querySelector<HTMLElement>(".tag[data-tag='work']");
     expect(workTagAfterClear).not.toBeNull();
     workTagAfterClear!.click();
@@ -235,7 +244,13 @@ describe("main.ts integration", () => {
     expect(document.querySelector<HTMLElement>(".te-header span")?.textContent).toBe("Add item");
     expect(document.querySelector<HTMLInputElement>("#add-title")?.value).toBe("");
     expect(document.querySelector<HTMLInputElement>("input[name='add-type']:checked")?.value).toBe("event");
-    expect(Array.from(document.querySelectorAll<HTMLElement>("input[name='add-priority'] + .add-radio-label")).map(label => label.textContent)).toEqual(["A", "B", "C", "None"]);
+    expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("None");
+    expect(document.querySelector<HTMLButtonElement>(".priority-stepper-dec")?.disabled).toBe(true);
+    const priorityInc = document.querySelector<HTMLButtonElement>(".priority-stepper-inc");
+    priorityInc!.click();
+    expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!");
+    priorityInc!.click();
+    expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!!");
     expect((document.querySelector<HTMLInputElement>("input[name='add-type']")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
     expect((document.querySelector<HTMLInputElement>("#add-when")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
     expect((document.querySelector<HTMLInputElement>("#add-sched")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");

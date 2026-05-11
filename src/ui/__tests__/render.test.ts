@@ -128,7 +128,7 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".someday-header")).toBeNull();
     expect(container.querySelector(".overdue-section .item-time")?.textContent).toBe("-2d");
     expect(container.querySelector(".overdue-section .item-title")?.getAttribute("data-base-date")).toBe("2026-04-18");
-    expect(container.querySelector(".overdue-section .item-title .item-priority")?.textContent).toBe("B");
+    expect(container.querySelector(".overdue-section .item-title .item-priority")?.textContent).toBe("!!");
     const overdueNote = container.querySelector(".overdue-section .item-instance-note") as HTMLElement | null;
     expect(overdueNote?.textContent).toBe("Call before paying");
     expect(overdueNote?.closest(".item-title-stack")).not.toBeNull();
@@ -139,7 +139,7 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".deadlines-section .item-title")?.getAttribute("data-base-date")).toBe("2026-04-21");
     expect(container.querySelector(".deadlines-section .item-time")?.textContent).toBe("1d");
     expect(container.querySelector(".deadlines-section .deadline-item")?.classList.contains("deadline-urgency-critical")).toBe(true);
-    expect(container.querySelector(".deadlines-section .item-title .item-priority")?.textContent).toBe("A");
+    expect(container.querySelector(".deadlines-section .item-title .item-priority")?.textContent).toBe("!!!");
     const deadlineNote = container.querySelector(".deadlines-section .item-instance-note") as HTMLElement | null;
     expect(deadlineNote?.textContent).toBe("Bring receipt");
     expect(deadlineNote?.closest(".item-title-stack")).not.toBeNull();
@@ -414,7 +414,7 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".timed-section .checkbox-list")).not.toBeNull();
     expect(container.querySelector(".tag")?.textContent).toContain("music");
     const timedRows = container.querySelectorAll<HTMLElement>(".timed-item");
-    expect(timedRows[0]?.querySelector(".item-title .item-priority")?.textContent).toBe("B");
+    expect(timedRows[0]?.querySelector(".item-title .item-priority")?.textContent).toBe("!!");
     expect(timedRows[1]?.querySelector(".item-title .item-priority")).toBeNull();
   });
 
@@ -606,7 +606,7 @@ describe("renderAgenda", () => {
     expect(row).not.toBeNull();
     expect(row?.classList.contains("has-state")).toBe(true);
     expect(row?.querySelector(".item-state")?.textContent).toBe("TODO");
-    expect(row?.querySelector(".item-title .item-priority")?.textContent).toBe("C");
+    expect(row?.querySelector(".item-title .item-priority")?.textContent).toBe("!");
     expect(row?.querySelector(".item-title")?.textContent).toContain("Pay bills");
   });
 
@@ -624,6 +624,7 @@ describe("renderAgenda", () => {
 
     renderAgenda(container, week, [], [], [], new Date(2026, 3, 20, 8, 0), {
       activeTagFilters: ["work"],
+      activePriorityFilter: "B",
       monthAhead: true,
     });
 
@@ -632,6 +633,8 @@ describe("renderAgenda", () => {
     expect(filterRow?.textContent).toContain("Filtering:");
     expect(filterRow?.querySelector(".tag[data-tag='work']")?.classList.contains("is-selected")).toBe(true);
     expect(filterRow?.querySelector(".tag[data-tag='work']")?.textContent).toBe("#work");
+    expect(filterRow?.querySelector(".item-priority[data-priority='B']")?.classList.contains("is-selected")).toBe(true);
+    expect(filterRow?.querySelector(".item-priority[data-priority='B']")?.textContent).toBe("!!");
     expect(container.querySelector(".agenda-settings-menu .agenda-settings-summary")?.textContent).toBe("Settings");
     expect(container.querySelector(".agenda-settings-menu .month-ahead-toggle")?.textContent).toBe("Show fewer days");
     expect(container.querySelector(".agenda-settings-menu .month-ahead-toggle")?.classList.contains("is-on")).toBe(true);
