@@ -590,6 +590,7 @@ function rebuildCheckboxUI(container: HTMLElement): void {
         e.preventDefault();
         editingCheckboxItems.splice(ci, 1);
         rebuildCheckboxUI(container);
+        scheduleEditAutosave();
         // Focus the previous item, or the next if this was first
         const rows = container.querySelectorAll<HTMLElement>(".edit-checkbox-text");
         const target = ci > 0 ? rows[ci - 1] : rows[0];
@@ -607,6 +608,7 @@ function rebuildCheckboxUI(container: HTMLElement): void {
       e.preventDefault();
       editingCheckboxItems.splice(ci, 1);
       rebuildCheckboxUI(container);
+      scheduleEditAutosave();
     });
 
     row.append(cb, text, removeBtn);

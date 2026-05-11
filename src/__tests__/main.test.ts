@@ -59,6 +59,8 @@ describe("main.ts integration", () => {
         "** TODO Yoga :work:health:",
         "SCHEDULED: <2026-04-21 Tue 17:00 .+1w>",
         "Body line.",
+        "- [X] Mat",
+        "- [ ] Water",
         "",
       ].join("\n"),
     );
@@ -331,6 +333,15 @@ describe("main.ts integration", () => {
     expect((schedRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
     expect((deadRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
     expect(checkboxSection?.style.display).toBe("");
+
+    const removeButtons = document.querySelectorAll<HTMLButtonElement>(".edit-checkbox-remove");
+    expect(removeButtons).toHaveLength(2);
+    removeButtons[0].click();
+    await flush();
+    const sourceAfterChecklistRemoval = localStorage.getItem("mediant-org-source") ?? "";
+    expect(sourceAfterChecklistRemoval).not.toContain("- [X] Mat");
+    expect(sourceAfterChecklistRemoval).toContain("- [ ] Water");
+    expect(sourceAfterChecklistRemoval).toContain("Body line.");
 
     tagInput!.focus();
     tagInput!.value = "wo";
