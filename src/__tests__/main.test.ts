@@ -254,6 +254,12 @@ describe("main.ts integration", () => {
     expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!");
     priorityInc!.click();
     expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!!");
+    priorityInc!.click();
+    expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!!!");
+    expect(priorityInc?.disabled).toBe(true);
+    const priorityDec = document.querySelector<HTMLButtonElement>(".priority-stepper-dec");
+    priorityDec!.click();
+    expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!!");
     expect((document.querySelector<HTMLInputElement>("input[name='add-type']")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
     expect((document.querySelector<HTMLInputElement>("#add-when")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
     expect((document.querySelector<HTMLInputElement>("#add-sched")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");

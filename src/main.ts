@@ -238,6 +238,25 @@ function hasParsedDate(input: HTMLInputElement): boolean {
   return Boolean(parseDateTime(input.value.trim())?.date);
 }
 
+function makePanelSection(title: string, icon: "occurrence" | "details" | "dates" | "metadata" | "checklist"): HTMLElement {
+  const section = document.createElement("section");
+  section.className = `add-section add-section-${icon}`;
+
+  const heading = document.createElement("h2");
+  heading.className = "add-section-title";
+
+  const mark = document.createElement("span");
+  mark.className = "add-section-icon";
+  mark.setAttribute("aria-hidden", "true");
+
+  const text = document.createElement("span");
+  text.textContent = title;
+
+  heading.append(mark, text);
+  section.appendChild(heading);
+  return section;
+}
+
 function buildAddPanel(): void {
   addPanelEl = document.createElement("dialog");
   addPanelEl.className = "add-panel";
@@ -254,26 +273,38 @@ function buildAddPanel(): void {
   form.className = "add-form";
 
   // Occurrence section (per-occurrence exceptions on a repeating entry)
-  const occurrenceSection = document.createElement("div");
-  occurrenceSection.className = "occurrence-section";
+  const occurrenceSection = makePanelSection(t("sectionOccurrence"), "occurrence");
+  occurrenceSection.classList.add("occurrence-section");
   form.appendChild(occurrenceSection);
+
+  const detailsSection = makePanelSection(t("sectionTaskDetails"), "details");
+  form.appendChild(detailsSection);
+
+  const datesSection = makePanelSection(t("sectionDates"), "dates");
+  form.appendChild(datesSection);
+
+  const metadataSection = makePanelSection(t("sectionMetadata"), "metadata");
+  form.appendChild(metadataSection);
+
+  const checklistSection = makePanelSection(t("sectionChecklist"), "checklist");
+  form.appendChild(checklistSection);
 
   // Type toggle
   const typeGroup = makeRadioGroup(null, "add-type", [
     { value: "todo", label: t("typeTodo"), checked: true },
     { value: "event", label: t("typeEvent") },
   ]);
-  form.appendChild(typeGroup.container);
+  detailsSection.appendChild(typeGroup.container);
 
   // Title
   const titleInput = makeTextInput(t("title"), "add-title");
-  form.appendChild(titleInput.container);
+  detailsSection.appendChild(titleInput.container);
 
   // Event: when
   const whenInput = makeDateTimeInput(t("when"), "add-when", {
     onChange: () => scheduleEditAutosave(),
   });
-  form.appendChild(whenInput.container);
+  datesSection.appendChild(whenInput.container);
 
   // TODO: scheduled / deadline (combined date+time)
   const schedInput = makeDateTimeInput(t("scheduled"), "add-sched", {
@@ -282,7 +313,7 @@ function buildAddPanel(): void {
       scheduleEditAutosave();
     },
   });
-  form.appendChild(schedInput.container);
+  datesSection.appendChild(schedInput.container);
 
   const deadInput = makeDateTimeInput(t("deadlineField"), "add-dead", {
     onChange: () => {
@@ -290,25 +321,25 @@ function buildAddPanel(): void {
       scheduleEditAutosave();
     },
   });
-  form.appendChild(deadInput.container);
+  datesSection.appendChild(deadInput.container);
 
   // Repeat (event only)
   const repeatSelect = makeSelect(t("repeat"), "add-repeat", eventRepeatOptions());
-  form.appendChild(repeatSelect.container);
+  datesSection.appendChild(repeatSelect.container);
 
   const schedRepeatSelect = makeSelect(t("scheduledRepeat"), "add-sched-repeat", todoRepeatOptions());
-  form.appendChild(schedRepeatSelect.container);
+  datesSection.appendChild(schedRepeatSelect.container);
 
   const deadRepeatSelect = makeSelect(t("deadlineRepeat"), "add-dead-repeat", todoRepeatOptions());
-  form.appendChild(deadRepeatSelect.container);
+  datesSection.appendChild(deadRepeatSelect.container);
 
   // Priority
   const priorityGroup = makePriorityStepper();
-  form.appendChild(priorityGroup.container);
+  metadataSection.appendChild(priorityGroup.container);
 
   // Tags
   const tagPicker = makeTagPicker(t("tags"), "add-tags");
-  form.appendChild(tagPicker.container);
+  metadataSection.appendChild(tagPicker.container);
 
   // Show/hide fields based on type
   const typeRadios = typeGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-type']");
@@ -323,6 +354,7 @@ function buildAddPanel(): void {
     deadInput.container.style.display = isTodo ? "" : "none";
     deadRepeatSelect.container.style.display = isTodo && hasDeadDate ? "" : "none";
     checkboxSection.style.display = isTodo ? "" : "none";
+    checklistSection.style.display = isTodo ? "" : "none";
     updateDateTimePreview(whenInput.input, whenInput.preview);
     updateDateTimePreview(schedInput.input, schedInput.preview);
     updateDateTimePreview(deadInput.input, deadInput.preview);
@@ -353,7 +385,7 @@ function buildAddPanel(): void {
   // Checkbox section
   const checkboxSection = document.createElement("div");
   checkboxSection.className = "add-field edit-checkboxes";
-  form.appendChild(checkboxSection);
+  checklistSection.appendChild(checkboxSection);
   syncVisibility();
 
   const occurrenceMeta = document.createElement("div");
@@ -558,6 +590,7 @@ function rebuildCheckboxUI(container: HTMLElement): void {
     removeBtn.className = "edit-checkbox-remove";
     removeBtn.textContent = "\u00d7";
     removeBtn.title = "Remove item";
+    removeBtn.setAttribute("aria-label", "Remove item");
     removeBtn.addEventListener("click", (e) => {
       e.preventDefault();
       editingCheckboxItems.splice(ci, 1);
@@ -861,7 +894,7 @@ function levelToPriority(level: number): "A" | "B" | "C" | null {
 
 function priorityDisplay(priority: "A" | "B" | "C" | null): string {
   const level = priorityToLevel(priority);
-  return level === 0 ? "∅" : "!".repeat(level);
+  return level === 0 ? t("priorityNone") : "!".repeat(level);
 }
 
 function syncPriorityStepper(container: HTMLElement): void {
@@ -875,6 +908,8 @@ function syncPriorityStepper(container: HTMLElement): void {
   }
   if (dec) dec.disabled = level === 0;
   if (inc) inc.disabled = level === 3;
+  if (dec) dec.setAttribute("aria-disabled", level === 0 ? "true" : "false");
+  if (inc) inc.setAttribute("aria-disabled", level === 3 ? "true" : "false");
   container.classList.toggle("is-empty", level === 0);
 }
 

@@ -68,6 +68,11 @@ const messages = {
     tapAgainToDelete: "Tap again to delete",
 
     // Add/edit panel — fields
+    sectionOccurrence: "Occurrence controls",
+    sectionTaskDetails: "Task details",
+    sectionDates: "Dates",
+    sectionMetadata: "Metadata",
+    sectionChecklist: "Checklist",
     type: "Type",
     typeEvent: "Event",
     typeTodo: "Task",
@@ -183,6 +188,11 @@ const messages = {
     tapAgainToDelete: "Trykk igjen for å slette",
 
     type: "Type",
+    sectionOccurrence: "Forekomstvalg",
+    sectionTaskDetails: "Oppgavedetaljer",
+    sectionDates: "Datoer",
+    sectionMetadata: "Metadata",
+    sectionChecklist: "Sjekkliste",
     typeEvent: "Hendelse",
     typeTodo: "Oppgave",
     priority: "Prioritet",
