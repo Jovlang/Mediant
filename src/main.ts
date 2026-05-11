@@ -631,7 +631,7 @@ function makeSelect(label: string, id: string, options: { value: string; label: 
 
   const select = document.createElement("select");
   select.id = id;
-  select.className = "add-input";
+  select.className = "add-input add-select";
   for (const opt of options) {
     const o = document.createElement("option");
     o.value = opt.value;
