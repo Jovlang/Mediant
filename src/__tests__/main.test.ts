@@ -241,7 +241,7 @@ describe("main.ts integration", () => {
 
     keydownHandler!(makeKeydownEvent("a", document.body));
     await waitFor(() => document.querySelector(".add-panel.is-open") !== null);
-    expect(document.querySelector<HTMLElement>(".te-header span")?.textContent).toBe("Add item");
+    expect(document.querySelector(".add-panel .te-header")).toBeNull();
     expect(document.querySelector<HTMLInputElement>("#add-title")?.value).toBe("");
     expect(document.querySelector<HTMLInputElement>("input[name='add-type']:checked")?.value).toBe("event");
     expect(document.querySelector<HTMLElement>(".priority-stepper-field")?.classList.contains("is-empty")).toBe(true);
@@ -265,7 +265,7 @@ describe("main.ts integration", () => {
     expect(wednesdayHeader).not.toBeNull();
     wednesdayHeader!.click();
     await waitFor(() => document.querySelector(".add-panel.is-open") !== null);
-    expect(document.querySelector<HTMLElement>(".te-header span")?.textContent).toBe("Add item");
+    expect(document.querySelector(".add-panel .te-header")).toBeNull();
     expect(document.querySelector<HTMLInputElement>("input[name='add-type']:checked")?.value).toBe("event");
     const whenInput = document.querySelector<HTMLInputElement>("#add-when");
     expect(whenInput?.value).toBe("22/04/2026");
@@ -310,7 +310,7 @@ describe("main.ts integration", () => {
     const deadRepeatSelect = document.querySelector<HTMLSelectElement>("#add-dead-repeat");
     const deadInput = document.querySelector<HTMLInputElement>("#add-dead");
     const checkboxSection = document.querySelector<HTMLElement>(".edit-checkboxes");
-    expect(document.querySelector<HTMLElement>(".te-header span")?.textContent).toBe("Edit task");
+    expect(document.querySelector(".add-panel .te-header")).toBeNull();
     expect(titleInput?.value).toBe("Yoga");
     expect(document.querySelector<HTMLInputElement>("input[name='add-type']:checked")?.value).toBe("todo");
     expect((document.querySelector<HTMLInputElement>("input[name='add-type']")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
@@ -608,7 +608,7 @@ describe("main.ts integration", () => {
     title!.click();
     await waitFor(() => document.querySelector(".add-panel.is-open") !== null);
 
-    expect(document.querySelector<HTMLElement>(".te-header span")?.textContent).toBe("Edit event");
+    expect(document.querySelector(".add-panel .te-header")).toBeNull();
     expect(document.querySelector<HTMLInputElement>("input[name='add-type']:checked")?.value).toBe("event");
     expect((document.querySelector<HTMLInputElement>("input[name='add-type']")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
     expect((document.querySelector<HTMLElement>(".edit-checkboxes") as HTMLElement | null)?.style.display).toBe("none");

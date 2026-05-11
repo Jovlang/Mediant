@@ -56,7 +56,6 @@ function collectAllTags(): string[] {
 // ── Add-item panel ─────────────────────────────────────────────────
 
 let addPanelEl: HTMLDialogElement | null = null;
-let addPanelHeadingEl: HTMLElement | null = null;
 let addPanelSaveBtnEl: HTMLButtonElement | null = null;
 let addPanelDeleteBtnEl: HTMLButtonElement | null = null;
 let deleteArmedTimer: number | null = null;
@@ -249,20 +248,6 @@ function buildAddPanel(): void {
   focusSentinel.setAttribute("aria-hidden", "true");
   focusSentinel.className = "focus-sentinel";
   addPanelEl.appendChild(focusSentinel);
-
-  const header = document.createElement("div");
-  header.className = "te-header";
-  const heading = document.createElement("span");
-  heading.textContent = t("addItem");
-  const closeBtn = document.createElement("button");
-  closeBtn.type = "button";
-  closeBtn.className = "te-close";
-  closeBtn.textContent = "×";
-  closeBtn.setAttribute("aria-label", t("close"));
-  closeBtn.addEventListener("click", closeAddPanel);
-  header.append(heading, closeBtn);
-  addPanelEl.appendChild(header);
-  addPanelHeadingEl = heading;
 
   // Form
   const form = document.createElement("div");
@@ -1400,7 +1385,6 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   editingDeadRepeater = null;
   editingCheckboxItems = [];
   if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
-  if (addPanelHeadingEl) addPanelHeadingEl.textContent = t("addItem");
   addPanelEl.classList.remove("is-editing");
   addPanelEl.classList.remove("has-occurrence");
 
@@ -1452,7 +1436,6 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   editingPriority = entry.priority;
   editingTodoState = entry.todo === "DONE" ? "DONE" : "TODO";
   if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
-  if (addPanelHeadingEl) addPanelHeadingEl.textContent = entry.todo ? t("editTask") : t("editEvent");
   addPanelEl.classList.add("is-editing");
   addPanelEl.classList.toggle("has-occurrence", baseDate !== null && entryHasRepeater(entry));
   refreshOccurrenceSection({ resetOccurrenceInput: true });
