@@ -717,6 +717,8 @@ body {
   vertical-align: baseline;
   cursor: pointer;
   border-radius: 3px;
+  padding: 0.06rem 0.12rem;
+  margin: -0.06rem -0.02rem;
   text-decoration: none;
 }
 
@@ -742,7 +744,8 @@ body {
 }
 
 .item-priority:hover {
-  background: color-mix(in srgb, currentColor 9%, transparent);
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 18%, transparent);
 }
 
 .item-priority.is-selected {
@@ -1825,8 +1828,16 @@ body {
 }
 
 .item-title[data-action="edit"]:hover {
+  text-decoration: none;
+}
+
+.item-title[data-action="edit"]:hover .item-title-text {
   text-decoration: underline;
   text-decoration-color: var(--text-dim);
+}
+
+.item-title[data-action="edit"]:has(.item-priority:hover) .item-title-text {
+  text-decoration: none;
 }
 
 /* Prevent iOS auto-zoom on input focus (triggered when font-size < 16px) */

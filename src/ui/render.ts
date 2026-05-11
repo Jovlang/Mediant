@@ -603,7 +603,9 @@ function renderTitle(
     }));
     title.appendChild(document.createTextNode(" "));
   }
-  title.appendChild(document.createTextNode(entry.title));
+  const titleText = el("span", "item-title-text");
+  titleText.textContent = entry.title;
+  title.appendChild(titleText);
   return title;
 }
 
