@@ -1450,7 +1450,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   refs.schedRepeatSelect.value = "";
   refs.deadRepeatSelect.value = "";
   rebuildCheckboxUI(refs.checkboxSection);
-  selectRadioValue(refs.typeGroup, "event");
+  selectRadioValue(refs.typeGroup, "todo");
   refs.typeGroup.style.display = "";
   syncPriorityStepper(refs.priorityGroup);
   refs.syncVisibility();
