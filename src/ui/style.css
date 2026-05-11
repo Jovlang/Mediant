@@ -1305,6 +1305,10 @@ body {
   text-transform: uppercase;
 }
 
+.add-panel:not(.is-editing) .add-section-details > .add-section-title {
+  display: none;
+}
+
 .add-section-icon {
   display: inline-flex;
   align-items: center;
