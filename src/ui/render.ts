@@ -344,14 +344,14 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
 
   // Header
   const header = el("header", "day-header");
-  header.dataset.action = "add-on-date";
-  header.dataset.date = formatDateKey(day.date);
-  header.tabIndex = 0;
-  header.setAttribute("role", "button");
   const label = el("span", "date-label");
   const dayText = `${DAY_NAMES[day.date.getDay()]} ${formatDayMonth(day.date)}`;
   label.textContent = dayText;
-  header.setAttribute("aria-label", t("addEventOn", { date: dayText }));
+  label.dataset.action = "add-on-date";
+  label.dataset.date = formatDateKey(day.date);
+  label.tabIndex = 0;
+  label.setAttribute("role", "button");
+  label.setAttribute("aria-label", t("addEventOn", { date: dayText }));
   header.appendChild(label);
 
   card.appendChild(header);

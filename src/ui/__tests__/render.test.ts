@@ -115,11 +115,13 @@ describe("renderAgenda", () => {
       "someday-section",
     ]);
     const firstDayHeader = container.querySelector<HTMLElement>(".day-header");
-    expect(firstDayHeader?.dataset.action).toBe("add-on-date");
-    expect(firstDayHeader?.dataset.date).toBe("2026-04-20");
-    expect(firstDayHeader?.tabIndex).toBe(0);
-    expect(firstDayHeader?.getAttribute("role")).toBe("button");
-    expect(firstDayHeader?.getAttribute("aria-label")).toBe("Add event on Monday 20 April");
+    expect(firstDayHeader?.dataset.action).toBeUndefined();
+    const firstDayLabel = firstDayHeader?.querySelector<HTMLElement>(".date-label");
+    expect(firstDayLabel?.dataset.action).toBe("add-on-date");
+    expect(firstDayLabel?.dataset.date).toBe("2026-04-20");
+    expect(firstDayLabel?.tabIndex).toBe(0);
+    expect(firstDayLabel?.getAttribute("role")).toBe("button");
+    expect(firstDayLabel?.getAttribute("aria-label")).toBe("Add event on Monday 20 April");
     const allDayMarker = container.querySelector<HTMLElement>(".allday-item .item-all-day-marker");
     expect(allDayMarker?.getAttribute("aria-label")).toBe("All-day");
     expect(allDayMarker?.querySelector("svg")).not.toBeNull();
@@ -252,7 +254,7 @@ describe("renderAgenda", () => {
 
     expect(container.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("10.–16. mai");
     expect(container.querySelector<HTMLElement>(".date-label")?.textContent).toBe("søndag 10. mai");
-    expect(container.querySelector<HTMLElement>(".day-header")?.getAttribute("aria-label")).toBe("Legg til hendelse søndag 10. mai");
+    expect(container.querySelector<HTMLElement>(".date-label")?.getAttribute("aria-label")).toBe("Legg til hendelse søndag 10. mai");
 
     renderAgenda(container, makeWeek([[], [makeItem({ title: "Mandag", date: new Date(2026, 4, 11) })]], new Date(2026, 4, 10)), [], [], [], new Date(2026, 4, 10, 12, 30));
     expect(container.querySelectorAll<HTMLElement>(".date-label")[1]?.textContent).toBe("mandag 11. mai");

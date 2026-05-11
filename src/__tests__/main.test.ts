@@ -262,8 +262,8 @@ describe("main.ts integration", () => {
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     await flush();
 
-    const wednesdayHeader = Array.from(document.querySelectorAll<HTMLElement>(".day-header"))
-      .find(header => header.dataset.date === "2026-04-22") ?? null;
+    const wednesdayHeader = Array.from(document.querySelectorAll<HTMLElement>(".date-label"))
+      .find(label => label.dataset.date === "2026-04-22") ?? null;
     expect(wednesdayHeader).not.toBeNull();
     wednesdayHeader!.click();
     await waitFor(() => document.querySelector(".add-panel.is-open") !== null);
