@@ -1316,8 +1316,8 @@ body {
   line-height: 1;
 }
 
-.add-section-details .add-section-icon {
-  display: none;
+.add-section-details .add-section-icon::before {
+  content: "•";
 }
 
 .add-section-occurrence .add-section-icon::before {
@@ -1949,8 +1949,8 @@ body {
   color: var(--text);
   font-family: inherit;
   box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.035), 0 1px 0 rgba(255, 255, 255, 0.28);
-  resize: vertical;
-  min-height: 3rem;
+  min-height: 2.25rem;
+  width: 100%;
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 

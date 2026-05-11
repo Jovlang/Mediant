@@ -103,7 +103,7 @@ interface AddPanelRefs {
   endSeriesCheckbox: HTMLInputElement;
   occurrenceInput: HTMLInputElement;
   occurrencePreview: HTMLElement;
-  noteTextarea: HTMLTextAreaElement;
+  noteTextarea: HTMLInputElement;
   clearOverrideBtn: HTMLButtonElement;
 }
 let addPanelRefs: AddPanelRefs | null = null;
@@ -454,9 +454,9 @@ function buildAddPanel(): void {
   noteLabel.textContent = t("noteForOccurrence");
   occurrenceSection.appendChild(noteLabel);
 
-  const noteTextarea = document.createElement("textarea");
+  const noteTextarea = document.createElement("input");
+  noteTextarea.type = "text";
   noteTextarea.className = "occurrence-note";
-  noteTextarea.rows = 2;
   noteTextarea.addEventListener("input", () => {
     const text = noteTextarea.value.trim();
     if (text) void applyNote(text);
