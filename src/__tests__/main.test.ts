@@ -150,7 +150,8 @@ describe("main.ts integration", () => {
     expect(workTag).not.toBeNull();
     workTag!.click();
     await flush();
-    expect(document.querySelector(".active-tag-filters .tag[data-tag='work']")).not.toBeNull();
+    expect(document.querySelector(".active-tag-filters")).toBeNull();
+    expect(document.querySelector(".tag[data-tag='work']")?.classList.contains("is-selected")).toBe(true);
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Inbox"))).toBe(false);
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Yoga"))).toBe(true);
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Focus block"))).toBe(true);
@@ -160,7 +161,8 @@ describe("main.ts integration", () => {
     expect(healthTag).not.toBeNull();
     healthTag!.click();
     await flush();
-    expect(document.querySelector(".active-tag-filters .tag[data-tag='health']")).not.toBeNull();
+    expect(document.querySelector(".active-tag-filters")).toBeNull();
+    expect(document.querySelector(".tag[data-tag='health']")?.classList.contains("is-selected")).toBe(true);
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Yoga"))).toBe(true);
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Focus block"))).toBe(false);
 
@@ -175,7 +177,8 @@ describe("main.ts integration", () => {
     expect(focusPriority?.textContent).toBe("!!");
     focusPriority!.click();
     await flush();
-    expect(document.querySelector(".active-tag-filters .item-priority[data-priority='B']")).not.toBeNull();
+    expect(document.querySelector(".active-tag-filters")).toBeNull();
+    expect(document.querySelector(".item-priority[data-priority='B']")?.classList.contains("is-selected")).toBe(true);
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Focus block"))).toBe(true);
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Yoga"))).toBe(false);
 
@@ -183,11 +186,10 @@ describe("main.ts integration", () => {
     expect(workTagAfterClear).not.toBeNull();
     workTagAfterClear!.click();
     await flush();
-    expect(document.querySelector(".active-tag-filters .tag[data-tag='work']")).not.toBeNull();
+    expect(document.querySelector(".active-tag-filters")).toBeNull();
+    expect(document.querySelector(".tag[data-tag='work']")?.classList.contains("is-selected")).toBe(true);
 
-    const clearFiltersBtn = document.querySelector<HTMLButtonElement>(".clear-tag-filters");
-    expect(clearFiltersBtn).not.toBeNull();
-    clearFiltersBtn!.click();
+    keydownHandler!(makeKeydownEvent("x", document.body));
     await flush();
     expect(Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(el => el.textContent?.includes("Inbox"))).toBe(true);
 

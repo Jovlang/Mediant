@@ -312,7 +312,7 @@ describe("renderAgenda", () => {
     });
 
     expect(container.querySelector(".timed-item .tag[data-tag='work']")).toBeNull();
-    expect(container.querySelector(".active-tag-filters .tag[data-tag='work']")).not.toBeNull();
+    expect(container.querySelector(".active-tag-filters")).toBeNull();
 
     const toggle = container.querySelector<HTMLButtonElement>(".hide-tags-toggle");
     expect(toggle?.textContent).toBe("Show tags");
@@ -610,10 +610,10 @@ describe("renderAgenda", () => {
     expect(row?.querySelector(".item-title")?.textContent).toContain("Pay bills");
   });
 
-  it("renders active tag filters in the header", () => {
+  it("marks active filters on visible filter controls without rendering a header summary", () => {
     const container = document.createElement("div");
     const week = makeWeek([
-      [makeItem({ title: "Tagged", date: new Date(2026, 3, 20, 9, 0), startTime: "09:00", tags: ["work"] })],
+      [makeItem({ title: "Tagged", date: new Date(2026, 3, 20, 9, 0), startTime: "09:00", tags: ["work"], priority: "B" })],
       [],
       [],
       [],
@@ -629,12 +629,11 @@ describe("renderAgenda", () => {
     });
 
     const filterRow = container.querySelector(".active-tag-filters");
-    expect(filterRow).not.toBeNull();
-    expect(filterRow?.textContent).toContain("Filtering:");
-    expect(filterRow?.querySelector(".tag[data-tag='work']")?.classList.contains("is-selected")).toBe(true);
-    expect(filterRow?.querySelector(".tag[data-tag='work']")?.textContent).toBe("#work");
-    expect(filterRow?.querySelector(".item-priority[data-priority='B']")?.classList.contains("is-selected")).toBe(true);
-    expect(filterRow?.querySelector(".item-priority[data-priority='B']")?.textContent).toBe("!!");
+    expect(filterRow).toBeNull();
+    expect(container.querySelector(".tag[data-tag='work']")?.classList.contains("is-selected")).toBe(true);
+    expect(container.querySelector(".tag[data-tag='work']")?.textContent).toBe("#work");
+    expect(container.querySelector(".item-priority[data-priority='B']")?.classList.contains("is-selected")).toBe(true);
+    expect(container.querySelector(".item-priority[data-priority='B']")?.textContent).toBe("!!");
     expect(container.querySelector(".agenda-settings-menu .agenda-settings-summary")?.textContent).toBe("Settings");
     expect(container.querySelector(".agenda-settings-menu .month-ahead-toggle")?.textContent).toBe("Show fewer days");
     expect(container.querySelector(".agenda-settings-menu .month-ahead-toggle")?.classList.contains("is-on")).toBe(true);

@@ -159,9 +159,6 @@ function renderHeader(startDate: Date, endDate: Date, options: RenderAgendaOptio
     document.body.appendChild(addBtn);
   }
 
-  if ((options.activeTagFilters?.length ?? 0) > 0 || options.activePriorityFilter) {
-    header.appendChild(renderActiveFilters(options.activeTagFilters ?? [], options.activePriorityFilter ?? null));
-  }
   return header;
 }
 
@@ -262,27 +259,6 @@ function renderSettingsMenu(options: RenderAgendaOptions): HTMLElement {
   });
 
   return menu;
-}
-
-function renderActiveFilters(tags: readonly string[], priority: "A" | "B" | "C" | null): HTMLElement {
-  const row = el("div", "active-tag-filters");
-
-  const label = el("span", "active-tag-filters-label");
-  label.textContent = t("filtering");
-  row.appendChild(label);
-
-  for (const tag of tags) {
-    row.appendChild(renderTag(tag, { selected: true }));
-  }
-  if (priority) {
-    row.appendChild(renderPriorityBadge(priority, { selected: true }));
-  }
-
-  const clearBtn = el("button", "clear-tag-filters");
-  clearBtn.textContent = t("clear");
-  clearBtn.dataset.action = "clear-tag-filters";
-  row.appendChild(clearBtn);
-  return row;
 }
 
 // ── Deadlines ────────────────────────────────────────────────────────
