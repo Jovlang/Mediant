@@ -104,8 +104,7 @@ interface AddPanelRefs {
   occurrencePreview: HTMLElement;
   noteTextarea: HTMLInputElement;
   clearOverrideBtn: HTMLButtonElement;
-  schedSummonRow: HTMLElement;
-  deadSummonRow: HTMLElement;
+  datesSummonRow: HTMLElement;
   prioritySummonRow: HTMLElement;
   repeatSummonRow: HTMLElement;
   schedRepeatSummonRow: HTMLElement;
@@ -343,8 +342,6 @@ function buildAddPanel(): void {
   });
   datesSection.appendChild(schedInput.container);
 
-  const schedSummonRow = document.createElement("div");
-  schedSummonRow.className = "field-summon-row";
   const schedSummonBtn = document.createElement("button");
   schedSummonBtn.type = "button";
   schedSummonBtn.className = "field-summon-btn";
@@ -354,8 +351,6 @@ function buildAddPanel(): void {
     syncVisibility();
     schedInput.input.focus();
   });
-  schedSummonRow.appendChild(schedSummonBtn);
-  datesSection.appendChild(schedSummonRow);
 
   const deadInput = makeDateTimeInput(t("deadlineField"), "add-dead", {
     onChange: () => {
@@ -365,8 +360,6 @@ function buildAddPanel(): void {
   });
   datesSection.appendChild(deadInput.container);
 
-  const deadSummonRow = document.createElement("div");
-  deadSummonRow.className = "field-summon-row";
   const deadSummonBtn = document.createElement("button");
   deadSummonBtn.type = "button";
   deadSummonBtn.className = "field-summon-btn";
@@ -376,8 +369,11 @@ function buildAddPanel(): void {
     syncVisibility();
     deadInput.input.focus();
   });
-  deadSummonRow.appendChild(deadSummonBtn);
-  datesSection.appendChild(deadSummonRow);
+
+  const datesSummonRow = document.createElement("div");
+  datesSummonRow.className = "field-summon-row";
+  datesSummonRow.append(schedSummonBtn, deadSummonBtn);
+  datesSection.appendChild(datesSummonRow);
 
   // Repeat (event only)
   const repeatSelect = makeSelect(t("repeat"), "add-repeat", eventRepeatOptions());
@@ -435,11 +431,12 @@ function buildAddPanel(): void {
     repeatSelect.container.style.display = showRepeat ? "" : "none";
     repeatSummonRow.style.display = !isTodo && !showRepeat ? "" : "none";
     schedInput.container.style.display = showSched ? "" : "none";
-    schedSummonRow.style.display = isTodo && !showSched ? "" : "none";
+    schedSummonBtn.style.display = isTodo && !showSched ? "" : "none";
     schedRepeatSelect.container.style.display = showSchedRepeat ? "" : "none";
     schedRepeatSummonRow.style.display = isTodo && hasSchedDate && !showSchedRepeat ? "" : "none";
     deadInput.container.style.display = showDead ? "" : "none";
-    deadSummonRow.style.display = isTodo && !showDead ? "" : "none";
+    deadSummonBtn.style.display = isTodo && !showDead ? "" : "none";
+    datesSummonRow.style.display = isTodo && (!showSched || !showDead) ? "" : "none";
     deadRepeatSelect.container.style.display = showDeadRepeat ? "" : "none";
     deadRepeatSummonRow.style.display = isTodo && hasDeadDate && !showDeadRepeat ? "" : "none";
     const showPriority = editingPriority !== null || revealedPriority;
@@ -667,8 +664,7 @@ function buildAddPanel(): void {
     occurrencePreview,
     noteTextarea,
     clearOverrideBtn,
-    schedSummonRow,
-    deadSummonRow,
+    datesSummonRow,
     prioritySummonRow,
     repeatSummonRow,
     schedRepeatSummonRow,
