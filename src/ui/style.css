@@ -662,6 +662,10 @@ body {
   margin-bottom: 0.2rem;
 }
 
+.someday-section .day-header .date-label:hover {
+  text-decoration: none;
+}
+
 .someday-item {
   --global-row-fringe-color: transparent;
   grid-template-columns: auto 1fr;
