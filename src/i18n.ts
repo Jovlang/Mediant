@@ -129,7 +129,7 @@ const messages = {
     addDetails: "Add details",
 
     // Input screen
-    someday: "Someday",
+    someday: "Tasks",
 
     appTitle: "Mediant",
     loadAgenda: "Load agenda",
@@ -250,7 +250,7 @@ const messages = {
     couldNotSaveTask: "Kunne ikke lagre oppgaven.",
     addDetails: "Legg til detaljer",
 
-    someday: "Muligheter",
+    someday: "Oppgaver",
 
     appTitle: "Mediant",
     loadAgenda: "Last inn agenda",
@@ -370,7 +370,7 @@ const messages = {
     couldNotSaveTask: "Impossibile salvare l'attività.",
     addDetails: "Aggiungi dettagli",
 
-    someday: "Prima o poi",
+    someday: "Attività",
 
     appTitle: "Mediant",
     loadAgenda: "Carica agenda",
@@ -490,7 +490,7 @@ const messages = {
     couldNotSaveTask: "Aufgabe konnte nicht gespeichert werden.",
     addDetails: "Details hinzufügen",
 
-    someday: "Irgendwann",
+    someday: "Aufgaben",
 
     appTitle: "Mediant",
     loadAgenda: "Agenda laden",
