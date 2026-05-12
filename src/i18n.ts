@@ -245,7 +245,7 @@ const messages = {
     clearOverride: "Fjern overstyring",
     noteForOccurrence: "Notat for denne forekomsten",
 
-    quickTaskCapture: "Hurtigregistrering",
+    quickTaskCapture: "Legg til oppgave",
     couldNotSaveTask: "Kunne ikke lagre oppgaven.",
 
     someday: "Oppgaver",
