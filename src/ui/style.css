@@ -1892,8 +1892,8 @@ body:has(.add-panel[open]) {
 }
 
 .add-save-btn {
-  flex: 1;
-  padding: 0.38rem 0.5rem;
+  padding: 0.38rem 1.5rem;
+  margin-left: auto;
   transition: filter 110ms ease, transform 110ms ease, opacity 110ms ease;
 }
 
