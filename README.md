@@ -53,7 +53,7 @@ It gives you:
 * tag and priority filtering
 * recurring tasks with per-occurrence exceptions
 * optional browser notifications for timed events
-* English and Norwegian UI strings
+* English, Norwegian, Italian, and German UI strings
 
 The interface tries to stay quiet. Features are available, but they should not make the default view feel like a dashboard, a team workspace, or a database admin panel.
 
@@ -296,6 +296,8 @@ Press `q` to open quick capture.
 Type a task, press `Enter`, and Mediant appends it as an undated `TODO` under `* Tasks`.
 
 The field stays focused so you can enter several tasks quickly.
+
+You can prefix the text with `!`, `!!`, or `!!!` to set priority C, B, or A. Trailing `#word` tokens become Org tags on the heading.
 
 ### Add a task or event
 
@@ -605,7 +607,7 @@ src/
     notifications.ts   — Browser notification preference and timer scheduling
     style.css          — Styles
 
-  i18n.ts              — English/Norwegian UI strings and locale persistence
+  i18n.ts              — English/Norwegian/Italian/German UI strings and locale persistence
   main.ts              — Entry point: hydrate, parse, generate, render
 
 server/
@@ -656,7 +658,7 @@ Mediant uses browser `localStorage` for UI preferences and, in static mode, the 
 | `mediant-hide-completed`  | Whether DONE entries and skipped occurrences are hidden.   |
 | `mediant-month-ahead`     | Whether the agenda shows 30 days instead of 7.             |
 | `mediant-notifications`   | Whether browser reminders are enabled.                     |
-| `mediant-locale`          | Selected UI locale: `en` or `no`.                          |
+| `mediant-locale`          | Selected UI locale: `en`, `nb`, `it`, or `de`.             |
 | `theme`                   | Light/dark mode preference.                                |
 
 In static mode, the Org source lives in the browser.
