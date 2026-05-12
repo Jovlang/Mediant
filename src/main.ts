@@ -385,13 +385,24 @@ function buildAddPanel(): void {
 
   const schedRepeatSelect = makeSelect(t("scheduledRepeat"), "add-sched-repeat", todoRepeatOptions());
   datesSection.appendChild(schedRepeatSelect.container);
-  const schedRepeatSummonRow = makeRepeatSummonRow(t("summonSchedRepeat"), () => { revealedSchedRepeat = true; syncVisibility(); schedRepeatSelect.select.focus(); });
-  datesSection.appendChild(schedRepeatSummonRow);
+  const schedRepeatSummonRow = document.createElement("button");
+  schedRepeatSummonRow.type = "button";
+  schedRepeatSummonRow.className = "field-summon-btn";
+  schedRepeatSummonRow.textContent = t("summonSchedRepeat");
+  schedRepeatSummonRow.addEventListener("click", () => { revealedSchedRepeat = true; syncVisibility(); schedRepeatSelect.select.focus(); });
 
   const deadRepeatSelect = makeSelect(t("deadlineRepeat"), "add-dead-repeat", todoRepeatOptions());
   datesSection.appendChild(deadRepeatSelect.container);
-  const deadRepeatSummonRow = makeRepeatSummonRow(t("summonDeadRepeat"), () => { revealedDeadRepeat = true; syncVisibility(); deadRepeatSelect.select.focus(); });
-  datesSection.appendChild(deadRepeatSummonRow);
+  const deadRepeatSummonRow = document.createElement("button");
+  deadRepeatSummonRow.type = "button";
+  deadRepeatSummonRow.className = "field-summon-btn";
+  deadRepeatSummonRow.textContent = t("summonDeadRepeat");
+  deadRepeatSummonRow.addEventListener("click", () => { revealedDeadRepeat = true; syncVisibility(); deadRepeatSelect.select.focus(); });
+
+  const repeatSummonPairRow = document.createElement("div");
+  repeatSummonPairRow.className = "field-summon-row";
+  repeatSummonPairRow.append(schedRepeatSummonRow, deadRepeatSummonRow);
+  datesSection.appendChild(repeatSummonPairRow);
 
   // Tags (summoned on demand)
   const tagPicker = makeTagPicker(t("tags"), "add-tags");
@@ -452,6 +463,7 @@ function buildAddPanel(): void {
     datesSummonRow.style.display = isTodo && (!showSched || !showDead) ? "" : "none";
     deadRepeatSelect.container.style.display = showDeadRepeat ? "" : "none";
     deadRepeatSummonRow.style.display = isTodo && hasDeadDate && !showDeadRepeat ? "" : "none";
+    repeatSummonPairRow.style.display = schedRepeatSummonRow.style.display === "" || deadRepeatSummonRow.style.display === "" ? "" : "none";
     const hasTags = tagPicker.getTags().length > 0;
     const showTags = hasTags || revealedTags;
     const showPriority = editingPriority !== null || revealedPriority;
