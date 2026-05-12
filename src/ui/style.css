@@ -434,6 +434,11 @@ body {
   min-width: 0;
 }
 
+.has-state > .item-lead,
+.has-all-day-marker > .item-lead {
+  justify-content: flex-end;
+}
+
 .allday-item .item-lead {
   align-items: center;
   align-self: center;
