@@ -406,26 +406,6 @@ body {
   gap: 0 0.8rem;
 }
 
-.item-all-day-marker {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: start;
-  width: 1rem;
-  height: 1.4em;
-  color: color-mix(in srgb, var(--text-dim) 58%, #7aa2c8 42%);
-}
-
-.item-all-day-marker svg {
-  width: 0.98rem;
-  height: 0.98rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .item-lead {
   display: inline-flex;
   align-items: baseline;
@@ -434,8 +414,7 @@ body {
   min-width: 0;
 }
 
-.has-state > .item-lead,
-.has-all-day-marker > .item-lead {
+.has-state > .item-lead {
   justify-content: flex-end;
 }
 

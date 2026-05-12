@@ -122,9 +122,9 @@ describe("renderAgenda", () => {
     expect(firstDayLabel?.tabIndex).toBe(0);
     expect(firstDayLabel?.getAttribute("role")).toBe("button");
     expect(firstDayLabel?.getAttribute("aria-label")).toBe("Add event on Monday 20 April");
-    const allDayMarker = container.querySelector<HTMLElement>(".allday-item .item-all-day-marker");
-    expect(allDayMarker?.getAttribute("aria-label")).toBe("All-day");
-    expect(allDayMarker?.querySelector("svg")).not.toBeNull();
+    const allDayRow = container.querySelector<HTMLElement>(".allday-item");
+    expect(allDayRow?.querySelector(".item-all-day-marker")).toBeNull();
+    expect(allDayRow?.querySelector(".item-metadata")?.textContent).toBe("All-day");
 
     expect(container.querySelector(".overdue-header")?.textContent).toBe("Overdue");
     expect(container.querySelector(".someday-header")).toBeNull();
@@ -188,6 +188,7 @@ describe("renderAgenda", () => {
           title: "Nasjonaldagen",
           date: new Date(2026, 4, 17),
           category: "all-day",
+          tags: ["helligdag"],
         }),
         makeItem({
           title: "Levér eksamen i arrkomp",
@@ -232,8 +233,9 @@ describe("renderAgenda", () => {
       "18:30·#musikk·#sosialt",
       "12:00–13:00·#musikk·#sosialt",
     ]);
-    expect(container.querySelector(".allday-item .item-metadata")).toBeNull();
-    expect(container.querySelector(".allday-item .item-lead .item-all-day-marker")).not.toBeNull();
+    expect(container.querySelector(".allday-item .item-lead")?.textContent).toBe("");
+    expect(container.querySelector(".allday-item .item-all-day-marker")).toBeNull();
+    expect(container.querySelector(".allday-item .item-metadata")?.textContent).toBe("All-day·#helligdag");
     const deadlineRows = Array.from(container.querySelectorAll<HTMLElement>(".day-deadline-item"));
     expect(deadlineRows.map(row => row.querySelector(".item-metadata")?.textContent)).toEqual(["#studie", "#økonomi"]);
     expect(deadlineRows.every(row => row.querySelector(".item-lead .item-state") !== null)).toBe(true);

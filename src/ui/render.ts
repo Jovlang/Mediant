@@ -451,21 +451,15 @@ function renderItem(
   const hasTime = showTime === "always" || (showTime === "optional" && item.startTime);
   const stateBadge = badges.find((el) => el.classList.contains("item-state"))
     ?? (item.entry.todo ? renderStateBadge(item.entry) : null);
-  const allDayMarker = badges.find((el) => el.classList.contains("item-all-day-marker")) ?? null;
 
   if (hasTime) row.classList.add("has-time");
   if (stateBadge) {
     row.classList.add("has-state");
   }
-  if (allDayMarker) {
-    row.classList.add("has-all-day-marker");
-  }
 
   const lead = el("span", "item-lead");
   if (stateBadge) {
     lead.appendChild(stateBadge);
-  } else if (allDayMarker) {
-    lead.appendChild(allDayMarker);
   }
 
   const title = renderTitle(item.entry);
@@ -485,6 +479,7 @@ function renderItem(
 function metadataForItem(item: AgendaItem, hasTime: boolean): string[] {
   const parts: string[] = [];
   if (hasTime) parts.push(formatTimeRange(item.startTime, item.endTime));
+  if (item.category === "all-day") parts.push(t("allDay"));
   return parts;
 }
 
@@ -517,9 +512,7 @@ function moveDirection(item: AgendaItem): "earlier" | "later" {
 
 function renderItemForCategory(item: AgendaItem): HTMLElement {
   if (item.category === "all-day") {
-    const badges = [renderAllDayMarker()];
-    if (item.entry.todo) badges.push(renderStateBadge(item.entry));
-    return renderItem(item, "allday-item", badges);
+    return renderItem(item, "allday-item", item.entry.todo ? renderStateBadge(item.entry) : undefined);
   }
   if (item.category === "timed") return renderItem(item, "timed-item", undefined, "always");
   if (item.category === "scheduled") {
@@ -527,14 +520,6 @@ function renderItemForCategory(item: AgendaItem): HTMLElement {
   }
 
   return renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional");
-}
-
-function renderAllDayMarker(): HTMLElement {
-  const marker = el("span", "item-all-day-marker");
-  marker.title = t("allDay");
-  marker.setAttribute("aria-label", t("allDay"));
-  marker.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>`;
-  return marker;
 }
 
 // ── State badge ─────────────────────────────────────────────────────
