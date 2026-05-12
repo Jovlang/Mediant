@@ -457,11 +457,6 @@ function renderItem(
     row.classList.add("has-state");
   }
 
-  const lead = el("span", "item-lead");
-  if (stateBadge) {
-    lead.appendChild(stateBadge);
-  }
-
   const title = renderTitle(item.entry);
   if (item.baseDate) title.dataset.baseDate = item.baseDate;
   if (item.override) {
@@ -471,13 +466,16 @@ function renderItem(
   const checklist = item.entry.checkboxItems.length > 0
     ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber)
     : null;
-  const metadata = metadataForItem(item, hasTime);
-  row.append(lead, renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist, metadata));
+  const metadata = metadataForItem(item, hasTime, stateBadge);
+  row.append(renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist, metadata));
   return row;
 }
 
-function metadataForItem(item: AgendaItem, hasTime: boolean): string[] {
-  const parts: string[] = [];
+type MetadataPart = string | HTMLElement;
+
+function metadataForItem(item: AgendaItem, hasTime: boolean, stateBadge: HTMLElement | null): MetadataPart[] {
+  const parts: MetadataPart[] = [];
+  if (stateBadge) parts.push(stateBadge);
   if (hasTime) parts.push(formatTimeRange(item.startTime, item.endTime));
   if (item.category === "all-day") parts.push(t("allDay"));
   return parts;
@@ -631,7 +629,7 @@ function renderTitleWithTags(
   tags: readonly string[],
   instanceNote: string | null = null,
   checklist: HTMLElement | null = null,
-  metadata: readonly string[] = [],
+  metadata: readonly MetadataPart[] = [],
 ): HTMLElement {
   if (currentRenderOptions.hideTags && !instanceNote && !checklist && metadata.length === 0) return title;
   if (tags.length === 0 && !instanceNote && !checklist && metadata.length === 0) return title;
@@ -650,13 +648,18 @@ function renderTitleWithTags(
   return stack;
 }
 
-function renderMetadata(metadata: readonly string[], tags: readonly string[]): HTMLElement {
+function renderMetadata(metadata: readonly MetadataPart[], tags: readonly string[]): HTMLElement {
   const row = el("span", "item-metadata");
-  for (const text of metadata) {
+  for (const part of metadata) {
     appendMetadataSeparator(row);
-    const item = el("span", "item-meta-text");
-    item.textContent = text;
-    row.appendChild(item);
+    if (typeof part === "string") {
+      const item = el("span", "item-meta-text");
+      item.textContent = part;
+      row.appendChild(item);
+    } else {
+      part.classList.add("item-meta-state");
+      row.appendChild(part);
+    }
   }
   if (!currentRenderOptions.hideTags) {
     for (const tag of tags) {
