@@ -1823,7 +1823,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return Boolean(el.closest("input, textarea, select, [contenteditable='true']"));
 }
 
-type ShortcutAction = "next" | "prev" | "today" | "add" | "quick-capture" | "hide-empty-days" | "hide-completed" | "month-ahead" | "clear-filters";
+type ShortcutAction = "next" | "prev" | "today" | "add" | "quick-capture" | "hide-empty-days" | "hide-completed" | "hide-deadlines" | "month-ahead" | "clear-filters";
 
 const SHORTCUT_ACTIONS: Record<string, ShortcutAction> = {
   n: "next",
@@ -1833,6 +1833,7 @@ const SHORTCUT_ACTIONS: Record<string, ShortcutAction> = {
   q: "quick-capture",
   h: "hide-empty-days",
   d: "hide-completed",
+  u: "hide-deadlines",
   m: "month-ahead",
   x: "clear-filters",
 };
@@ -1883,6 +1884,9 @@ async function init(): Promise<void> {
     } else if (action === "hide-completed") {
       e.preventDefault();
       toggleHideCompletedAndSkipped();
+    } else if (action === "hide-deadlines") {
+      e.preventDefault();
+      toggleHideDeadlines();
     } else if (action === "month-ahead") {
       e.preventDefault();
       toggleMonthAhead();
