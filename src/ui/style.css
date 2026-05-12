@@ -227,6 +227,29 @@ body {
   background: color-mix(in srgb, var(--bg-card) 82%, var(--text) 6%);
 }
 
+.settings-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 0.1rem 0;
+}
+
+.language-btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.language-btn-group .language-btn {
+  font-size: 0.75rem;
+  padding: 0.45rem 0.4rem;
+}
+
+.language-btn--active {
+  background: color-mix(in srgb, var(--accent, #5b8dee) 18%, var(--bg-card)) !important;
+  border-color: color-mix(in srgb, var(--accent, #5b8dee) 50%, transparent) !important;
+  color: var(--accent, #5b8dee) !important;
+}
+
 .agenda-nav-today {
   background: var(--bg-card);
   border: none;
@@ -831,7 +854,6 @@ body {
 .hide-empty-days-toggle,
 .hide-completed-toggle,
 .month-ahead-toggle,
-.language-toggle,
 .clear-tag-filters {
   border: 1px solid var(--border);
   border-radius: 999px;

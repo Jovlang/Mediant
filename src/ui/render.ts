@@ -217,19 +217,29 @@ function createMonthAheadToggle(options: RenderAgendaOptions): HTMLButtonElement
   return btn;
 }
 
-function createLanguageToggle(): HTMLButtonElement {
-  const btn = el("button", "language-toggle");
+function createLanguageButtons(): [HTMLHRElement, HTMLDivElement] {
+  const divider = document.createElement("hr");
+  divider.className = "settings-divider";
+
+  const group = el("div", "language-btn-group") as HTMLDivElement;
   const current = getLocale();
-  const next = SUPPORTED_LOCALES[(SUPPORTED_LOCALES.indexOf(current) + 1) % SUPPORTED_LOCALES.length] as Locale;
-  const switchKeys = { en: "switchToEnglish", nb: "switchToNorwegian", it: "switchToItalian", de: "switchToGerman" } as const;
-  const label = t(switchKeys[next]);
-  btn.textContent = label;
-  btn.setAttribute("aria-label", label);
-  btn.addEventListener("click", () => {
-    setLocale(next);
-    if (typeof location !== "undefined") location.reload();
-  });
-  return btn;
+  const labelKeys = { en: "languageEnglish", nb: "languageNorwegian", it: "languageItalian", de: "languageGerman" } as const;
+
+  for (const locale of SUPPORTED_LOCALES) {
+    const btn = el("button", "language-btn");
+    if (locale === current) btn.classList.add("language-btn--active");
+    const label = t(labelKeys[locale]);
+    btn.textContent = label;
+    btn.setAttribute("aria-label", label);
+    btn.setAttribute("aria-pressed", String(locale === current));
+    btn.addEventListener("click", () => {
+      setLocale(locale);
+      if (typeof location !== "undefined") location.reload();
+    });
+    group.appendChild(btn);
+  }
+
+  return [divider, group];
 }
 
 function renderSettingsMenu(options: RenderAgendaOptions): HTMLElement {
@@ -249,7 +259,7 @@ function renderSettingsMenu(options: RenderAgendaOptions): HTMLElement {
     createHideDeadlinesToggle(options),
     createMonthAheadToggle(options),
     createNotificationToggle({ label: true }),
-    createLanguageToggle(),
+    ...createLanguageButtons(),
   );
   menu.appendChild(panel);
 
