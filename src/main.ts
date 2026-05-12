@@ -118,6 +118,7 @@ interface AddPanelRefs {
   occSummonRow: HTMLElement;
 }
 let addPanelRefs: AddPanelRefs | null = null;
+let addPanelSaved = false;
 
 let revealedSched = false;
 let revealedDead = false;
@@ -632,6 +633,7 @@ function buildAddPanel(): void {
     if (editingLine !== null) {
       replaceOrgBlock(editingLine, orgText);
     } else {
+      addPanelSaved = true;
       appendOrgText(orgText);
     }
     closeAddPanel();
@@ -1594,6 +1596,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   editingLine = null;
   editingBaseDate = null;
   editingLevel = 1;
+  addPanelSaved = false;
   editingPriority = null;
   editingTodoState = "TODO";
   editingSchedRepeater = null;
@@ -1916,6 +1919,10 @@ async function clearException(which: "override" | "note"): Promise<void> {
 
 function closeAddPanel(): void {
   if (!addPanelEl) return;
+  if (editingLine === null && !addPanelSaved) {
+    const orgText = buildPanelOrgText({ focusInvalid: false });
+    if (orgText !== null) appendOrgText(orgText);
+  }
   disarmDeleteBtn();
   addPanelEl.classList.remove("is-open");
   addPanelEl.close();
