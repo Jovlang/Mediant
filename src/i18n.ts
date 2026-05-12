@@ -122,6 +122,9 @@ const messages = {
     moveToDateTime: "Move to date/time",
     clearOverride: "Clear override",
     noteForOccurrence: "Note for this occurrence",
+    summonScheduled: "+ Scheduled",
+    summonMove: "+ Move",
+    summonNote: "+ Note",
 
     // Quick capture
     quickTaskCapture: "Quick task capture",
@@ -244,6 +247,9 @@ const messages = {
     moveToDateTime: "Flytt til dato/klokkeslett",
     clearOverride: "Fjern overstyring",
     noteForOccurrence: "Notat for denne forekomsten",
+    summonScheduled: "+ Planlagt",
+    summonMove: "+ Flytt",
+    summonNote: "+ Notat",
 
     quickTaskCapture: "Legg til oppgave",
     couldNotSaveTask: "Kunne ikke lagre oppgaven.",
@@ -363,6 +369,9 @@ const messages = {
     moveToDateTime: "Sposta a data/ora",
     clearOverride: "Cancella sostituzione",
     noteForOccurrence: "Nota per questa ricorrenza",
+    summonScheduled: "+ Pianificato",
+    summonMove: "+ Sposta",
+    summonNote: "+ Nota",
 
     quickTaskCapture: "Acquisizione rapida attività",
     couldNotSaveTask: "Impossibile salvare l'attività.",
@@ -482,6 +491,9 @@ const messages = {
     moveToDateTime: "Zu Datum/Uhrzeit verschieben",
     clearOverride: "Überschreibung löschen",
     noteForOccurrence: "Notiz für diese Wiederholung",
+    summonScheduled: "+ Geplant",
+    summonMove: "+ Verschieben",
+    summonNote: "+ Notiz",
 
     quickTaskCapture: "Schnelle Aufgabenerfassung",
     couldNotSaveTask: "Aufgabe konnte nicht gespeichert werden.",

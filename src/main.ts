@@ -104,8 +104,18 @@ interface AddPanelRefs {
   occurrencePreview: HTMLElement;
   noteTextarea: HTMLInputElement;
   clearOverrideBtn: HTMLButtonElement;
+  schedSummonRow: HTMLElement;
+  occMoveSummonBtn: HTMLButtonElement;
+  occNoteSummonBtn: HTMLButtonElement;
+  occMoveFieldsWrapper: HTMLElement;
+  occNoteFieldsWrapper: HTMLElement;
+  occSummonRow: HTMLElement;
 }
 let addPanelRefs: AddPanelRefs | null = null;
+
+let revealedSched = false;
+let revealedOccMove = false;
+let revealedOccNote = false;
 let queuedEditSource: string | null = null;
 let queuedEditEpoch: number | null = null;
 let inFlightEditSource: string | null = null;
@@ -309,6 +319,20 @@ function buildAddPanel(): void {
   });
   datesSection.appendChild(schedInput.container);
 
+  const schedSummonRow = document.createElement("div");
+  schedSummonRow.className = "field-summon-row";
+  const schedSummonBtn = document.createElement("button");
+  schedSummonBtn.type = "button";
+  schedSummonBtn.className = "field-summon-btn";
+  schedSummonBtn.textContent = t("summonScheduled");
+  schedSummonBtn.addEventListener("click", () => {
+    revealedSched = true;
+    syncVisibility();
+    schedInput.input.focus();
+  });
+  schedSummonRow.appendChild(schedSummonBtn);
+  datesSection.appendChild(schedSummonRow);
+
   const deadInput = makeDateTimeInput(t("deadlineField"), "add-dead", {
     onChange: () => {
       syncVisibility();
@@ -341,10 +365,12 @@ function buildAddPanel(): void {
     const isTodo = checkedRadioValue(typeGroup.container, "add-type", "event") === "todo";
     const hasSchedDate = hasParsedDate(schedInput.input);
     const hasDeadDate = hasParsedDate(deadInput.input);
+    const showSched = isTodo && (hasSchedDate || revealedSched);
     syncDetailsSection(detailsSection, isTodo);
     whenInput.container.style.display = isTodo ? "none" : "";
     repeatSelect.container.style.display = isTodo ? "none" : "";
-    schedInput.container.style.display = isTodo ? "" : "none";
+    schedInput.container.style.display = showSched ? "" : "none";
+    schedSummonRow.style.display = isTodo && !showSched ? "" : "none";
     schedRepeatSelect.container.style.display = isTodo && hasSchedDate ? "" : "none";
     deadInput.container.style.display = isTodo ? "" : "none";
     deadRepeatSelect.container.style.display = isTodo && hasDeadDate ? "" : "none";
@@ -416,6 +442,9 @@ function buildAddPanel(): void {
   endSeriesCheckbox.addEventListener("change", () => void toggleOccurrenceIsLast());
   endSeriesCheckboxRow.append(endSeriesCheckbox, endSeriesCheckboxText);
 
+  const occMoveFieldsWrapper = document.createElement("div");
+  occMoveFieldsWrapper.className = "occ-optional-fields";
+
   const overrideRow = document.createElement("div");
   overrideRow.className = "occurrence-row";
   const occurrenceInputLabel = document.createElement("label");
@@ -441,13 +470,16 @@ function buildAddPanel(): void {
   clearOverrideBtn.textContent = t("clearOverride");
   clearOverrideBtn.addEventListener("click", () => clearException("override"));
 
-  occActions.append(skipCheckboxRow, endSeriesCheckboxRow, occurrenceInputLabel, overrideRow, occurrencePreview, clearOverrideBtn);
+  occMoveFieldsWrapper.append(occurrenceInputLabel, overrideRow, occurrencePreview, clearOverrideBtn);
+  occActions.append(skipCheckboxRow, endSeriesCheckboxRow, occMoveFieldsWrapper);
   occurrenceSection.appendChild(occActions);
+
+  const occNoteFieldsWrapper = document.createElement("div");
+  occNoteFieldsWrapper.className = "occ-optional-fields";
 
   const noteLabel = document.createElement("label");
   noteLabel.className = "add-label";
   noteLabel.textContent = t("noteForOccurrence");
-  occurrenceSection.appendChild(noteLabel);
 
   const noteTextarea = document.createElement("input");
   noteTextarea.type = "text";
@@ -457,7 +489,35 @@ function buildAddPanel(): void {
     if (text) void applyNote(text);
     else void clearException("note");
   });
-  occurrenceSection.appendChild(noteTextarea);
+
+  occNoteFieldsWrapper.append(noteLabel, noteTextarea);
+  occurrenceSection.appendChild(occNoteFieldsWrapper);
+
+  const occSummonRow = document.createElement("div");
+  occSummonRow.className = "field-summon-row";
+
+  const occMoveSummonBtn = document.createElement("button");
+  occMoveSummonBtn.type = "button";
+  occMoveSummonBtn.className = "field-summon-btn";
+  occMoveSummonBtn.textContent = t("summonMove");
+  occMoveSummonBtn.addEventListener("click", () => {
+    revealedOccMove = true;
+    refreshOccurrenceSection();
+    occurrenceInput.focus();
+  });
+
+  const occNoteSummonBtn = document.createElement("button");
+  occNoteSummonBtn.type = "button";
+  occNoteSummonBtn.className = "field-summon-btn";
+  occNoteSummonBtn.textContent = t("summonNote");
+  occNoteSummonBtn.addEventListener("click", () => {
+    revealedOccNote = true;
+    refreshOccurrenceSection();
+    noteTextarea.focus();
+  });
+
+  occSummonRow.append(occMoveSummonBtn, occNoteSummonBtn);
+  occurrenceSection.appendChild(occSummonRow);
 
   // Save button
   const saveBtn = document.createElement("button");
@@ -526,6 +586,12 @@ function buildAddPanel(): void {
     occurrencePreview,
     noteTextarea,
     clearOverrideBtn,
+    schedSummonRow,
+    occMoveSummonBtn,
+    occNoteSummonBtn,
+    occMoveFieldsWrapper,
+    occNoteFieldsWrapper,
+    occSummonRow,
   };
 }
 
@@ -1402,6 +1468,9 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   if (!addPanelEl || !addPanelRefs) return;
   disarmDeleteBtn();
 
+  revealedSched = false;
+  revealedOccMove = false;
+  revealedOccNote = false;
   editingLine = null;
   editingBaseDate = null;
   editingLevel = 1;
@@ -1452,6 +1521,10 @@ function tsToDateTimeDisplay(ts: { date: string; startTime: string | null; endTi
 function openEditPanel(sourceLine: number, baseDate: string | null = null): void {
   if (!addPanelEl || !addPanelRefs) return;
   disarmDeleteBtn();
+
+  revealedSched = false;
+  revealedOccMove = false;
+  revealedOccNote = false;
 
   const entry = entries.find(e => e.sourceLineNumber === sourceLine);
   if (!entry) return;
@@ -1635,6 +1708,14 @@ function refreshOccurrenceSection(opts: { resetOccurrenceInput?: boolean } = {})
   refs.endSeriesCheckbox.checked = isSeriesLast;
   refs.endSeriesCheckbox.disabled = nextBaseKey === null;
   refs.clearOverrideBtn.style.display = override ? "" : "none";
+
+  const showMove = revealedOccMove || override !== null;
+  const showNote = revealedOccNote || note !== null;
+  refs.occMoveFieldsWrapper.style.display = showMove ? "" : "none";
+  refs.occNoteFieldsWrapper.style.display = showNote ? "" : "none";
+  refs.occMoveSummonBtn.style.display = showMove ? "none" : "";
+  refs.occNoteSummonBtn.style.display = showNote ? "none" : "";
+  refs.occSummonRow.style.display = showMove && showNote ? "none" : "";
 
   // Autosave stores parsed notes trimmed, so avoid normalizing a focused
   // textarea while the user is typing a space before the next word.

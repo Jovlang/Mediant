@@ -2079,6 +2079,40 @@ body {
   justify-content: flex-end;
 }
 
+/* ── Optional field summon buttons ─────────────────────────────────── */
+
+.field-summon-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.field-summon-btn {
+  padding: 0.22rem 0.65rem;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px dashed color-mix(in srgb, var(--border) 50%, transparent);
+  border-radius: 0.45rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 110ms ease, border-color 110ms ease, color 110ms ease, background 110ms ease;
+}
+
+.field-summon-btn:hover {
+  opacity: 1;
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--border) 80%, var(--border-today) 20%);
+  background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+}
+
+.occ-optional-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.34rem;
+}
+
 /* ── Edit button ───────────────────────────────────────────────────── */
 
 .item-title[data-action="edit"] {
