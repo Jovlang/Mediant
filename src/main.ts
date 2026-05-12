@@ -372,11 +372,6 @@ function buildAddPanel(): void {
     deadInput.input.focus();
   });
 
-  const datesSummonRow = document.createElement("div");
-  datesSummonRow.className = "field-summon-row";
-  datesSummonRow.append(schedSummonBtn, deadSummonBtn);
-  datesSection.appendChild(datesSummonRow);
-
   // Repeat (event only)
   const repeatSelect = makeSelect(t("repeat"), "add-repeat", eventRepeatOptions());
   datesSection.appendChild(repeatSelect.container);
@@ -399,10 +394,10 @@ function buildAddPanel(): void {
   deadRepeatSummonRow.textContent = t("summonDeadRepeat");
   deadRepeatSummonRow.addEventListener("click", () => { revealedDeadRepeat = true; syncVisibility(); deadRepeatSelect.select.focus(); });
 
-  const repeatSummonPairRow = document.createElement("div");
-  repeatSummonPairRow.className = "field-summon-row";
-  repeatSummonPairRow.append(schedRepeatSummonRow, deadRepeatSummonRow);
-  datesSection.appendChild(repeatSummonPairRow);
+  const datesSummonRow = document.createElement("div");
+  datesSummonRow.className = "field-summon-row";
+  datesSummonRow.append(schedSummonBtn, deadSummonBtn, schedRepeatSummonRow, deadRepeatSummonRow);
+  datesSection.appendChild(datesSummonRow);
 
   // Tags (summoned on demand)
   const tagPicker = makeTagPicker(t("tags"), "add-tags");
@@ -460,10 +455,9 @@ function buildAddPanel(): void {
     schedRepeatSummonRow.style.display = isTodo && hasSchedDate && !showSchedRepeat ? "" : "none";
     deadInput.container.style.display = showDead ? "" : "none";
     deadSummonBtn.style.display = isTodo && !showDead ? "" : "none";
-    datesSummonRow.style.display = isTodo && (!showSched || !showDead) ? "" : "none";
     deadRepeatSelect.container.style.display = showDeadRepeat ? "" : "none";
     deadRepeatSummonRow.style.display = isTodo && hasDeadDate && !showDeadRepeat ? "" : "none";
-    repeatSummonPairRow.style.display = schedRepeatSummonRow.style.display === "" || deadRepeatSummonRow.style.display === "" ? "" : "none";
+    datesSummonRow.style.display = [schedSummonBtn, deadSummonBtn, schedRepeatSummonRow, deadRepeatSummonRow].some(b => b.style.display === "") ? "" : "none";
     const hasTags = tagPicker.getTags().length > 0;
     const showTags = hasTags || revealedTags;
     const showPriority = editingPriority !== null || revealedPriority;
