@@ -1052,20 +1052,10 @@ function expandDate(raw: string): string {
   }
 
   const weekdayIndexes: Readonly<Record<string, number>> = {
-    sun: 0,
-    mon: 1,
-    tue: 2,
-    wed: 3,
-    thu: 4,
-    fri: 5,
-    sat: 6,
-    søn: 0,
-    man: 1,
-    tir: 2,
-    ons: 3,
-    tor: 4,
-    fre: 5,
-    lør: 6,
+    sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
+    søn: 0, man: 1, tir: 2, ons: 3, tor: 4, fre: 5, lør: 6,
+    dom: 0, lun: 1, mar: 2, mer: 3, gio: 4, ven: 5, sab: 6,
+    so:  0, mo:  1, di:  2, mi:  3, do:  4, fr:  5, sa:  6,
   };
   const idx = weekdayIndexes[raw.toLowerCase()] ?? -1;
   if (idx >= 0) {

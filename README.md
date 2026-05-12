@@ -378,8 +378,10 @@ Add and edit fields accept a few shorthand forms:
 | `DD/MM/YY`   | Day, month, two-digit year      |
 | `DD/MM/YYYY` | Full date                       |
 | `+N`         | N days from today               |
-| `mon`..`sun` | Next matching weekday           |
-| `man`..`søn` | Next matching Norwegian weekday |
+| `mon`..`sun` | Next matching weekday (English)  |
+| `man`..`søn` | Next matching weekday (Norwegian) |
+| `lun`..`dom` | Next matching weekday (Italian)  |
+| `mo`..`so`   | Next matching weekday (German)   |
 
 Ambiguous numeric forms resolve to the next future occurrence. Two-digit years are interpreted in the current century.
 
