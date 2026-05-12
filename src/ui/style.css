@@ -399,20 +399,11 @@ body {
 
 .allday-item {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 5ch minmax(0, 1fr);
   align-items: center;
   padding: 0.18rem var(--section-padding-x);
   font-size: 0.875rem;
-  gap: 0 0.75rem;
-}
-
-.allday-item.has-state,
-.allday-item.has-all-day-marker {
-  grid-template-columns: auto 1fr;
-}
-
-.allday-item.has-all-day-marker.has-state {
-  grid-template-columns: auto auto 1fr;
+  gap: 0 0.8rem;
 }
 
 .item-all-day-marker {
@@ -433,6 +424,23 @@ body {
   stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.item-lead {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  align-self: baseline;
+  min-width: 0;
+}
+
+.allday-item .item-lead {
+  align-items: center;
+  align-self: center;
+}
+
+.item-lead:empty {
+  min-height: 1rem;
 }
 
 .item-state {
@@ -466,18 +474,14 @@ body {
 .scheduled-item,
 .day-deadline-item {
   display: grid;
+  grid-template-columns: 5ch minmax(0, 1fr);
   align-items: baseline;
   padding: 0.2rem var(--section-padding-x);
   gap: 0 0.8rem;
 }
 
 .timed-item {
-  grid-template-columns: auto 1fr;
   font-size: 0.875rem;
-}
-
-.timed-item.has-state {
-  grid-template-columns: auto auto 1fr;
 }
 
 .timed-item + .timed-item,
@@ -495,11 +499,28 @@ body {
 .timed-item .item-time,
 .scheduled-item .item-time,
 .day-deadline-item .item-time {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
   font-family: var(--font-mono);
   font-size: 0.78rem;
   color: var(--text);
   opacity: 0.54;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
+  line-height: 1.08;
+  white-space: nowrap;
+}
+
+.item-time-end {
+  position: relative;
+}
+
+.item-time-end::before {
+  content: "–";
+  position: absolute;
+  left: -0.68ch;
+  color: currentColor;
+  opacity: 0.65;
 }
 
 .timed-item > .item-title,
@@ -620,17 +641,7 @@ body {
 /* ── Scheduled items ──────────────────────────────────────────────── */
 
 .scheduled-item {
-  grid-template-columns: 1fr;
   font-size: 0.875rem;
-}
-
-.scheduled-item.has-time,
-.scheduled-item.has-state {
-  grid-template-columns: auto 1fr;
-}
-
-.scheduled-item.has-time.has-state {
-  grid-template-columns: auto auto 1fr;
 }
 
 .scheduled-item > .item-title,
@@ -642,12 +653,7 @@ body {
 /* ── Day deadline items (deadlines within day cards) ─────────────── */
 
 .day-deadline-item {
-  grid-template-columns: auto 1fr;
   font-size: 0.875rem;
-}
-
-.day-deadline-item.has-time {
-  grid-template-columns: auto auto 1fr;
 }
 
 .day-deadline-item > .item-title,
@@ -861,6 +867,16 @@ body {
   line-height: 1.35;
   letter-spacing: -0.01em;
   color: var(--text-dim);
+}
+
+.item-title-stack > .item-secondary {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--text-dim);
+  opacity: 0.72;
 }
 
 

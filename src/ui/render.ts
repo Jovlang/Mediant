@@ -447,30 +447,28 @@ function renderItem(
   if (item.entry.todo === "DONE") row.classList.add("item-done");
   if (item.skipped) row.classList.add("item-skipped");
 
-  const children: HTMLElement[] = [];
   const badges = badge ? (Array.isArray(badge) ? badge : [badge]) : [];
-
   const hasTime = showTime === "always" || (showTime === "optional" && item.startTime);
-  if (hasTime) {
-    if (showTime === "optional") row.classList.add("has-time");
-    const time = el("span", "item-time");
-    time.textContent = formatTimeRange(item.startTime, item.endTime);
-    children.push(time);
-  }
+  const stateBadge = badges.find((el) => el.classList.contains("item-state"))
+    ?? (item.entry.todo ? renderStateBadge(item.entry) : null);
+  const allDayMarker = badges.find((el) => el.classList.contains("item-all-day-marker")) ?? null;
 
-  if (badges.some((el) => el.classList.contains("item-state"))) {
+  if (hasTime) row.classList.add("has-time");
+  if (stateBadge) {
     row.classList.add("has-state");
   }
-  if (badges.some((el) => el.classList.contains("item-all-day-marker"))) {
+  if (allDayMarker) {
     row.classList.add("has-all-day-marker");
   }
 
-  if (badge) {
-    children.push(...badges);
-  } else if (item.entry.todo) {
-    row.classList.add("has-state");
-    const stateBadge = renderStateBadge(item.entry);
-    children.push(stateBadge);
+  const lead = el("span", "item-lead");
+  const timeOwnsLead = hasTime && !stateBadge;
+  if (stateBadge) {
+    lead.appendChild(stateBadge);
+  } else if (timeOwnsLead) {
+    lead.appendChild(renderTimeRange(item.startTime, item.endTime));
+  } else if (allDayMarker) {
+    lead.appendChild(allDayMarker);
   }
 
   const title = renderTitle(item.entry);
@@ -482,8 +480,8 @@ function renderItem(
   const checklist = item.entry.checkboxItems.length > 0
     ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber)
     : null;
-  children.push(renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist));
-  row.append(...children);
+  const secondary = hasTime && !timeOwnsLead ? formatTimeRange(item.startTime, item.endTime) : null;
+  row.append(lead, renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist, secondary));
   return row;
 }
 
@@ -534,6 +532,24 @@ function renderAllDayMarker(): HTMLElement {
   marker.setAttribute("aria-label", t("allDay"));
   marker.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>`;
   return marker;
+}
+
+function renderTimeRange(start: string | null, end: string | null): HTMLElement {
+  const time = el("span", "item-time");
+  if (!start) return time;
+  if (!end) {
+    time.textContent = start;
+    return time;
+  }
+  time.classList.add("has-range");
+  const startLine = el("span", "item-time-start");
+  startLine.textContent = start;
+  const endLine = el("span", "item-time-end");
+  endLine.textContent = end;
+  time.append(startLine, endLine);
+  time.title = formatTimeRange(start, end);
+  time.setAttribute("aria-label", formatTimeRange(start, end));
+  return time;
 }
 
 // ── State badge ─────────────────────────────────────────────────────
@@ -663,12 +679,18 @@ function renderTitleWithTags(
   tags: readonly string[],
   instanceNote: string | null = null,
   checklist: HTMLElement | null = null,
+  secondary: string | null = null,
 ): HTMLElement {
-  if (currentRenderOptions.hideTags && !instanceNote && !checklist) return title;
-  if (tags.length === 0 && !instanceNote && !checklist) return title;
+  if (currentRenderOptions.hideTags && !instanceNote && !checklist && !secondary) return title;
+  if (tags.length === 0 && !instanceNote && !checklist && !secondary) return title;
 
   const stack = el("span", "item-title-stack");
   stack.appendChild(title);
+  if (secondary) {
+    const meta = el("span", "item-secondary");
+    meta.textContent = secondary;
+    stack.appendChild(meta);
+  }
   if (!currentRenderOptions.hideTags && tags.length > 0) stack.appendChild(renderTags(tags, optionsForTags()));
   if (instanceNote) {
     const note = el("span", "item-instance-note");

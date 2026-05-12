@@ -167,6 +167,60 @@ describe("renderAgenda", () => {
     expect(overdueState?.getAttribute("data-line")).toBe("7");
   });
 
+  it("uses a shared leading slot for in-day event and task rows", () => {
+    const container = document.createElement("div");
+    const week = makeWeek([
+      [
+        makeItem({
+          title: "Gå i toget med folkeswing",
+          date: new Date(2026, 4, 17, 12, 0),
+          startTime: "12:00",
+        }),
+        makeItem({
+          title: "Lang hendelse",
+          date: new Date(2026, 4, 17, 12, 0),
+          startTime: "12:00",
+          endTime: "14:00",
+        }),
+        makeItem({
+          title: "Nasjonaldagen",
+          date: new Date(2026, 4, 17),
+          category: "all-day",
+        }),
+        makeItem({
+          title: "Betal restskatten",
+          date: new Date(2026, 4, 17),
+          category: "deadline",
+          entry: makeEntry({ title: "Betal restskatten", todo: "TODO", sourceLineNumber: 17 }),
+        }),
+        makeItem({
+          title: "Summér forrige måneds dagligvarer",
+          date: new Date(2026, 4, 17),
+          category: "scheduled",
+          entry: makeEntry({ title: "Summér forrige måneds dagligvarer", todo: "TODO", sourceLineNumber: 18 }),
+        }),
+      ],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+    ]);
+
+    renderAgenda(container, week, [], [], [], new Date(2026, 4, 17, 9, 0));
+
+    const rows = Array.from(container.querySelectorAll<HTMLElement>(".allday-item, .timed-item, .scheduled-item, .day-deadline-item"));
+    expect(rows).toHaveLength(5);
+    expect(rows.every(row => row.firstElementChild?.classList.contains("item-lead"))).toBe(true);
+    expect(rows.every(row => row.children[1]?.classList.contains("item-title") || row.children[1]?.classList.contains("item-title-stack"))).toBe(true);
+    expect(container.querySelector(".timed-item .item-time")?.textContent).toBe("12:00");
+    expect(container.querySelector(".timed-item .item-time.has-range")?.getAttribute("aria-label")).toBe("12:00–14:00");
+    expect(container.querySelector(".allday-item .item-lead .item-all-day-marker")).not.toBeNull();
+    expect(container.querySelector(".day-deadline-item .item-lead .item-state")).not.toBeNull();
+    expect(container.querySelector(".scheduled-item .item-lead .item-state")).not.toBeNull();
+  });
+
   it("exposes list keys and row checkbox indexes so toggles can route source mutations", () => {
     const container = document.createElement("div");
     const entry = makeEntry({
@@ -353,7 +407,7 @@ describe("renderAgenda", () => {
 
     const timedSection = container.querySelector(".day-block.is-today .timed-section");
     expect(timedSection).not.toBeNull();
-    const children = Array.from(timedSection!.children).map((el) => (el as HTMLElement).className);
+    const children = Array.from(timedSection!.children).map((el) => (el as HTMLElement).classList[0]);
     expect(children).toEqual(["timed-item", "now-line", "timed-item"]);
     expect(timedSection!.querySelector(".now-time")?.textContent).toBe("12:30");
   });
@@ -518,8 +572,8 @@ describe("renderAgenda", () => {
     expect(state?.getAttribute("data-line")).toBe("42");
     expect(row?.querySelector(".item-kind")).toBeNull();
     expect(title?.textContent).toContain("Due today");
-    expect(title?.previousElementSibling).toBe(state);
-    expect(state?.previousElementSibling?.classList.contains("item-time")).toBe(true);
+    expect(state?.closest(".item-lead")).not.toBeNull();
+    expect(row?.querySelector(".item-title-stack > .item-secondary")?.textContent).toBe("16:00");
   });
 
   it("renders todo badges as compact status marks with done items filled", () => {
