@@ -39,6 +39,7 @@
   --deadline-urgency-caution: #aa8238;
   --deadline-urgency-calm: #647b92;
   --section-padding-x: 1.125rem;
+  --item-indent-x: 0.72rem;
   --item-gap-y: 0.45rem;
 
   --badge-text-w: 2.35rem;
@@ -400,6 +401,7 @@ body {
 .allday-item {
   display: block;
   padding: 0.18rem var(--section-padding-x);
+  padding-left: calc(var(--section-padding-x) + var(--item-indent-x));
   font-size: 0.875rem;
 }
 
@@ -447,6 +449,7 @@ body {
 .day-deadline-item {
   display: block;
   padding: 0.2rem var(--section-padding-x);
+  padding-left: calc(var(--section-padding-x) + var(--item-indent-x));
 }
 
 .timed-item {
@@ -784,6 +787,13 @@ body {
   line-height: 1;
   color: currentColor;
   opacity: 0.58;
+}
+
+.item-meta-tags {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  flex-wrap: wrap;
 }
 
 .tag {

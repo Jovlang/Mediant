@@ -229,8 +229,8 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".timed-item .item-time")).toBeNull();
     const timedMetadata = Array.from(container.querySelectorAll<HTMLElement>(".timed-item .item-metadata"));
     expect(timedMetadata.map(meta => meta.textContent)).toEqual([
-      "18:30·#musikk·#sosialt",
-      "12:00–13:00·#musikk·#sosialt",
+      "18:30·#musikk#sosialt",
+      "12:00–13:00·#musikk#sosialt",
     ]);
     expect(container.querySelector(".allday-item .item-all-day-marker")).toBeNull();
     expect(container.querySelector(".allday-item .item-metadata")?.textContent).toBe("All-day·#helligdag");
@@ -238,6 +238,7 @@ describe("renderAgenda", () => {
     expect(deadlineRows.map(row => row.querySelector(".item-metadata")?.textContent)).toEqual(["deadline·#studie", "deadline·#økonomi"]);
     expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-state-text") !== null)).toBe(true);
     expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-state-mark") === null)).toBe(true);
+    expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-meta-tags") !== null)).toBe(true);
     expect(container.querySelector(".scheduled-item .item-metadata .item-state-text")).not.toBeNull();
     expect(container.querySelector(".scheduled-item .item-metadata")?.textContent).toBe("scheduled·#økonomi");
   });

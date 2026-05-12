@@ -683,11 +683,15 @@ function renderMetadata(metadata: readonly MetadataPart[], tags: readonly string
     }
   }
   if (!currentRenderOptions.hideTags) {
-    for (const tag of tags) {
+    if (tags.length > 0) {
       appendMetadataSeparator(row);
-      row.appendChild(renderTag(tag, {
-        selected: (currentRenderOptions.activeTagFilters ?? []).includes(tag),
-      }));
+      const tagGroup = el("span", "item-meta-tags");
+      for (const tag of tags) {
+        tagGroup.appendChild(renderTag(tag, {
+          selected: (currentRenderOptions.activeTagFilters ?? []).includes(tag),
+        }));
+      }
+      row.appendChild(tagGroup);
     }
   }
   return row;
