@@ -124,7 +124,7 @@ describe("renderAgenda", () => {
     expect(firstDayLabel?.getAttribute("aria-label")).toBe("Add event on Monday 20 April");
     const allDayRow = container.querySelector<HTMLElement>(".allday-item");
     expect(allDayRow?.querySelector(".item-all-day-marker")).toBeNull();
-    expect(allDayRow?.querySelector(".item-metadata")?.textContent).toBe("All-day");
+    expect(allDayRow?.querySelector(".item-metadata")?.textContent).toBe("all day");
 
     expect(container.querySelector(".overdue-header")?.textContent).toBe("Overdue");
     expect(container.querySelector(".someday-header")).toBeNull();
@@ -233,7 +233,7 @@ describe("renderAgenda", () => {
       "12:00–13:00·#musikk#sosialt",
     ]);
     expect(container.querySelector(".allday-item .item-all-day-marker")).toBeNull();
-    expect(container.querySelector(".allday-item .item-metadata")?.textContent).toBe("All-day·#helligdag");
+    expect(container.querySelector(".allday-item .item-metadata")?.textContent).toBe("all day·#helligdag");
     const deadlineRows = Array.from(container.querySelectorAll<HTMLElement>(".day-deadline-item"));
     expect(deadlineRows.map(row => row.querySelector(".item-metadata")?.textContent)).toEqual(["deadline·#studie", "deadline·#økonomi"]);
     expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-state-text") !== null)).toBe(true);
