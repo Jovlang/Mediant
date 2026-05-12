@@ -662,6 +662,10 @@ body {
   margin-bottom: 0.2rem;
 }
 
+.someday-section .day-header .date-label {
+  cursor: default;
+}
+
 .someday-section .day-header .date-label:hover {
   text-decoration: none;
 }
