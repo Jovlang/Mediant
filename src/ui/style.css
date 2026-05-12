@@ -1588,7 +1588,7 @@ body {
 
 @media (prefers-color-scheme: dark) {
   .tag-picker-pill {
-    color: var(--text-dim);
+    color: color-mix(in srgb, #7aa2c8 60%, var(--text) 40%);
   }
 
   .tag-picker-pill-x {
