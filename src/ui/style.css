@@ -1270,7 +1270,7 @@ body {
   background: var(--bg-panel);
   color: var(--text);
   box-shadow: var(--panel-shadow);
-  overflow-y: auto;
+  overflow: hidden;
   transition: transform 0.25s ease;
 }
 
@@ -1291,10 +1291,14 @@ body {
 }
 
 .add-form {
+  flex: 1;
+  min-height: 0;
   padding: 1rem 1rem 1.65rem;
   display: flex;
   flex-direction: column;
   gap: 1.45rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   transition: opacity 0.15s ease 0.2s;
 }
 
