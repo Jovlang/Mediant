@@ -105,6 +105,7 @@ interface AddPanelRefs {
   noteTextarea: HTMLInputElement;
   clearOverrideBtn: HTMLButtonElement;
   schedSummonRow: HTMLElement;
+  deadSummonRow: HTMLElement;
   repeatSummonRow: HTMLElement;
   schedRepeatSummonRow: HTMLElement;
   deadRepeatSummonRow: HTMLElement;
@@ -117,6 +118,7 @@ interface AddPanelRefs {
 let addPanelRefs: AddPanelRefs | null = null;
 
 let revealedSched = false;
+let revealedDead = false;
 let revealedRepeat = false;
 let revealedSchedRepeat = false;
 let revealedDeadRepeat = false;
@@ -359,6 +361,20 @@ function buildAddPanel(): void {
   });
   datesSection.appendChild(deadInput.container);
 
+  const deadSummonRow = document.createElement("div");
+  deadSummonRow.className = "field-summon-row";
+  const deadSummonBtn = document.createElement("button");
+  deadSummonBtn.type = "button";
+  deadSummonBtn.className = "field-summon-btn";
+  deadSummonBtn.textContent = t("summonDeadline");
+  deadSummonBtn.addEventListener("click", () => {
+    revealedDead = true;
+    syncVisibility();
+    deadInput.input.focus();
+  });
+  deadSummonRow.appendChild(deadSummonBtn);
+  datesSection.appendChild(deadSummonRow);
+
   // Repeat (event only)
   const repeatSelect = makeSelect(t("repeat"), "add-repeat", eventRepeatOptions());
   datesSection.appendChild(repeatSelect.container);
@@ -393,6 +409,7 @@ function buildAddPanel(): void {
     const hasSchedRepeat = schedRepeatSelect.select.value !== "";
     const hasDeadRepeat = deadRepeatSelect.select.value !== "";
     const showSched = isTodo && (hasSchedDate || revealedSched);
+    const showDead = isTodo && (hasDeadDate || revealedDead);
     const showRepeat = !isTodo && (hasRepeat || revealedRepeat);
     const showSchedRepeat = isTodo && hasSchedDate && (hasSchedRepeat || revealedSchedRepeat);
     const showDeadRepeat = isTodo && hasDeadDate && (hasDeadRepeat || revealedDeadRepeat);
@@ -404,7 +421,8 @@ function buildAddPanel(): void {
     schedSummonRow.style.display = isTodo && !showSched ? "" : "none";
     schedRepeatSelect.container.style.display = showSchedRepeat ? "" : "none";
     schedRepeatSummonRow.style.display = isTodo && hasSchedDate && !showSchedRepeat ? "" : "none";
-    deadInput.container.style.display = isTodo ? "" : "none";
+    deadInput.container.style.display = showDead ? "" : "none";
+    deadSummonRow.style.display = isTodo && !showDead ? "" : "none";
     deadRepeatSelect.container.style.display = showDeadRepeat ? "" : "none";
     deadRepeatSummonRow.style.display = isTodo && hasDeadDate && !showDeadRepeat ? "" : "none";
     checkboxSection.style.display = isTodo ? "" : "none";
@@ -620,6 +638,7 @@ function buildAddPanel(): void {
     noteTextarea,
     clearOverrideBtn,
     schedSummonRow,
+    deadSummonRow,
     repeatSummonRow,
     schedRepeatSummonRow,
     deadRepeatSummonRow,
@@ -1505,6 +1524,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   disarmDeleteBtn();
 
   revealedSched = false;
+  revealedDead = false;
   revealedRepeat = false;
   revealedSchedRepeat = false;
   revealedDeadRepeat = false;
@@ -1562,6 +1582,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   disarmDeleteBtn();
 
   revealedSched = false;
+  revealedDead = false;
   revealedRepeat = false;
   revealedSchedRepeat = false;
   revealedDeadRepeat = false;
