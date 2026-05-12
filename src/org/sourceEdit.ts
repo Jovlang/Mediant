@@ -294,11 +294,34 @@ export function appendAgendaItemToSource(source: string, orgText: string): strin
 }
 
 export function appendQuickCaptureToTasks(source: string, rawText: string): string {
-  const headingText = sanitizeQuickCaptureHeading(rawText);
-  if (!headingText) return source;
+  const { priority, body, tags } = parseQuickCapture(rawText);
+  const headingText = sanitizeQuickCaptureHeading(body);
+  if (!headingText && priority === null && tags.length === 0) return source;
 
-  const taskLine = `** TODO ${headingText}`;
+  const priorityStr = priority !== null ? `[#${priority}] ` : "";
+  const tagsStr = tags.length > 0 ? `  :${tags.join(":")}:` : "";
+  const taskLine = `** TODO ${priorityStr}${headingText}${tagsStr}`;
   return appendChildUnderTopLevelHeading(source, "Tasks", taskLine);
+}
+
+function parseQuickCapture(rawText: string): { priority: string | null; body: string; tags: string[] } {
+  let text = rawText.replace(/\s+/g, " ").trim();
+
+  let priority: string | null = null;
+  const priorityMatch = text.match(/^(!{1,3})(?:\s|$)/);
+  if (priorityMatch) {
+    priority = ["C", "B", "A"][priorityMatch[1].length - 1];
+    text = text.slice(priorityMatch[0].length).trim();
+  }
+
+  const tags: string[] = [];
+  const words = text.split(" ");
+  while (words.length > 0 && /^#[\p{L}a-zA-Z0-9_@]+$/u.test(words[words.length - 1])) {
+    tags.unshift(words.pop()!.slice(1));
+  }
+  text = words.join(" ");
+
+  return { priority, body: text, tags };
 }
 
 function appendChildUnderTopLevelHeading(source: string, heading: string, childText: string): string {

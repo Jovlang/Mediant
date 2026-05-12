@@ -475,4 +475,54 @@ describe("appendQuickCaptureToTasks", () => {
     const source = "* Tasks\n";
     expect(appendQuickCaptureToTasks(source, " \n\t ")).toBe(source);
   });
+
+  it("parses leading ! as [#C] priority", () => {
+    const updated = appendQuickCaptureToTasks("", "! Buy milk");
+    expect(updated).toBe("* Tasks\n** TODO [#C] Buy milk\n");
+    const task = parseOrg(updated).find(e => e.todo === "TODO")!;
+    expect(task.priority).toBe("C");
+    expect(task.title).toBe("Buy milk");
+  });
+
+  it("parses leading !! as [#B] priority", () => {
+    const updated = appendQuickCaptureToTasks("", "!! Buy milk");
+    expect(updated).toBe("* Tasks\n** TODO [#B] Buy milk\n");
+    expect(parseOrg(updated).find(e => e.todo === "TODO")!.priority).toBe("B");
+  });
+
+  it("parses leading !!! as [#A] priority", () => {
+    const updated = appendQuickCaptureToTasks("", "!!! Buy milk");
+    expect(updated).toBe("* Tasks\n** TODO [#A] Buy milk\n");
+    expect(parseOrg(updated).find(e => e.todo === "TODO")!.priority).toBe("A");
+  });
+
+  it("does not treat !!!! as a priority marker", () => {
+    const updated = appendQuickCaptureToTasks("", "!!!! Buy milk");
+    expect(updated).toBe("* Tasks\n** TODO !!!! Buy milk\n");
+    expect(parseOrg(updated).find(e => e.todo === "TODO")!.priority).toBeNull();
+  });
+
+  it("parses trailing #tag as a real org tag", () => {
+    const updated = appendQuickCaptureToTasks("", "Buy milk #home");
+    expect(updated).toBe("* Tasks\n** TODO Buy milk  :home:\n");
+    const task = parseOrg(updated).find(e => e.todo === "TODO")!;
+    expect(task.tags).toContain("home");
+    expect(task.title).toBe("Buy milk");
+  });
+
+  it("parses multiple trailing #tags", () => {
+    const updated = appendQuickCaptureToTasks("", "Send report #work #urgent");
+    expect(updated).toBe("* Tasks\n** TODO Send report  :work:urgent:\n");
+    const task = parseOrg(updated).find(e => e.todo === "TODO")!;
+    expect(task.tags).toEqual(["work", "urgent"]);
+  });
+
+  it("combines priority and tags", () => {
+    const updated = appendQuickCaptureToTasks("", "!!! Ship it #work #release");
+    expect(updated).toBe("* Tasks\n** TODO [#A] Ship it  :work:release:\n");
+    const task = parseOrg(updated).find(e => e.todo === "TODO")!;
+    expect(task.priority).toBe("A");
+    expect(task.tags).toEqual(["work", "release"]);
+    expect(task.title).toBe("Ship it");
+  });
 });

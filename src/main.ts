@@ -41,7 +41,6 @@ let hideDeadlines = localStorage.getItem("mediant-hide-deadlines") === "true";
 let quickCaptureOverlayEl: HTMLElement | null = null;
 let quickCaptureInputEl: HTMLInputElement | null = null;
 let quickCaptureErrorEl: HTMLElement | null = null;
-let quickCaptureMoreBtnEl: HTMLButtonElement | null = null;
 let quickCaptureLastFocusEl: HTMLElement | null = null;
 
 /** Collect every unique tag from the current parsed entries. */
@@ -146,13 +145,7 @@ function buildQuickCaptureOverlay(): void {
   quickCaptureErrorEl.className = "quick-capture-error";
   quickCaptureErrorEl.setAttribute("role", "status");
 
-  quickCaptureMoreBtnEl = document.createElement("button");
-  quickCaptureMoreBtnEl.type = "button";
-  quickCaptureMoreBtnEl.className = "quick-capture-more";
-  quickCaptureMoreBtnEl.textContent = t("addDetails");
-  quickCaptureMoreBtnEl.addEventListener("click", switchToFullPanel);
-
-  box.append(quickCaptureInputEl, quickCaptureErrorEl, quickCaptureMoreBtnEl);
+  box.append(quickCaptureInputEl, quickCaptureErrorEl);
   quickCaptureOverlayEl.appendChild(box);
   document.body.appendChild(quickCaptureOverlayEl);
 }
@@ -179,12 +172,6 @@ function closeQuickCapture(): void {
 
 function isQuickCaptureOpen(): boolean {
   return quickCaptureOverlayEl?.classList.contains("is-open") ?? false;
-}
-
-function switchToFullPanel(): void {
-  const text = quickCaptureInputEl?.value.trim() ?? "";
-  closeQuickCapture();
-  openAddPanel(null, text || null);
 }
 
 async function submitQuickCapture(): Promise<void> {

@@ -126,7 +126,6 @@ const messages = {
     // Quick capture
     quickTaskCapture: "Quick task capture",
     couldNotSaveTask: "Could not save task.",
-    addDetails: "Add details",
 
     // Input screen
     someday: "Tasks",
@@ -248,7 +247,6 @@ const messages = {
 
     quickTaskCapture: "Hurtigregistrering",
     couldNotSaveTask: "Kunne ikke lagre oppgaven.",
-    addDetails: "Legg til detaljer",
 
     someday: "Oppgaver",
 
@@ -368,7 +366,6 @@ const messages = {
 
     quickTaskCapture: "Acquisizione rapida attività",
     couldNotSaveTask: "Impossibile salvare l'attività.",
-    addDetails: "Aggiungi dettagli",
 
     someday: "Attività",
 
@@ -488,7 +485,6 @@ const messages = {
 
     quickTaskCapture: "Schnelle Aufgabenerfassung",
     couldNotSaveTask: "Aufgabe konnte nicht gespeichert werden.",
-    addDetails: "Details hinzufügen",
 
     someday: "Aufgaben",
 
