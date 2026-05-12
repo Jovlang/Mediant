@@ -201,7 +201,7 @@ const messages = {
     taskOpenMeta: "oppgave",
     taskDoneMeta: "ferdig",
     nowMarker: "◄ nå",
-    allDay: "Hele dagen",
+    allDay: "hele dagen",
     markDone: "Marker som ferdig",
     markNotDone: "Marker som ikke ferdig",
     skippedDetail: "Hoppet over ({detail})",
