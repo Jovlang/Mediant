@@ -1130,25 +1130,13 @@ body {
 }
 
 .input-load-btn,
-.add-save-btn {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  background: var(--border-today);
-  color: white;
-  border: none;
-  border-radius: 0.45rem;
-  cursor: pointer;
-  letter-spacing: -0.01em;
-}
-
 .input-load-btn {
   align-self: flex-start;
   padding: 0.5rem 1.25rem;
   font-weight: 500;
 }
 
-.input-load-btn:hover,
-.add-save-btn:hover {
+.input-load-btn:hover {
   opacity: 0.9;
 }
 
@@ -1888,22 +1876,6 @@ body:has(.add-panel[open]) {
 .add-btn-row {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.45rem;
-}
-
-.add-save-btn {
-  padding: 0.38rem 1.5rem;
-  margin-left: auto;
-  transition: filter 110ms ease, transform 110ms ease, opacity 110ms ease;
-}
-
-.add-save-btn:hover {
-  filter: brightness(1.1);
-  opacity: 1;
-}
-
-.add-save-btn:active {
-  transform: translateY(1px);
 }
 
 .add-delete-btn {
@@ -1951,9 +1923,6 @@ body:has(.add-panel[open]) {
   border-top: 1px solid color-mix(in srgb, var(--border) 44%, transparent);
 }
 
-.add-panel.is-editing .add-save-btn {
-  display: none;
-}
 
 /* ── Occurrence section ─────────────────────────────────────────── */
 

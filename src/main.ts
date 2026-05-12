@@ -55,7 +55,6 @@ function collectAllTags(): string[] {
 // ── Add-item panel ─────────────────────────────────────────────────
 
 let addPanelEl: HTMLDialogElement | null = null;
-let addPanelSaveBtnEl: HTMLButtonElement | null = null;
 let addPanelDeleteBtnEl: HTMLButtonElement | null = null;
 let deleteArmedTimer: number | null = null;
 let editingLine: number | null = null;
@@ -118,7 +117,6 @@ interface AddPanelRefs {
   occSummonRow: HTMLElement;
 }
 let addPanelRefs: AddPanelRefs | null = null;
-let addPanelSaved = false;
 
 let revealedSched = false;
 let revealedDead = false;
@@ -622,23 +620,6 @@ function buildAddPanel(): void {
   occSummonRow.append(occNoteSummonBtn, occMoveSummonBtn, occCancelSummonBtn);
   occurrenceSection.appendChild(occSummonRow);
 
-  // Save button
-  const saveBtn = document.createElement("button");
-  saveBtn.className = "add-save-btn";
-  saveBtn.textContent = t("save");
-  saveBtn.addEventListener("click", () => {
-    const orgText = buildPanelOrgText({ focusInvalid: true });
-    if (orgText === null) return;
-
-    if (editingLine !== null) {
-      replaceOrgBlock(editingLine, orgText);
-    } else {
-      addPanelSaved = true;
-      appendOrgText(orgText);
-    }
-    closeAddPanel();
-  });
-
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "add-delete-btn";
   deleteBtn.textContent = t("delete");
@@ -657,9 +638,8 @@ function buildAddPanel(): void {
 
   const btnRow = document.createElement("div");
   btnRow.className = "add-btn-row";
-  btnRow.append(deleteBtn, saveBtn);
+  btnRow.append(deleteBtn);
   form.appendChild(btnRow);
-  addPanelSaveBtnEl = saveBtn;
 
   addPanelEl.appendChild(form);
   addPanelEl.addEventListener("cancel", (e) => { e.preventDefault(); closeAddPanel(); });
@@ -1596,13 +1576,11 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   editingLine = null;
   editingBaseDate = null;
   editingLevel = 1;
-  addPanelSaved = false;
   editingPriority = null;
   editingTodoState = "TODO";
   editingSchedRepeater = null;
   editingDeadRepeater = null;
   editingCheckboxItems = [];
-  if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
   addPanelEl.classList.remove("is-editing");
   addPanelEl.classList.remove("has-occurrence");
 
@@ -1664,7 +1642,6 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   editingLevel = entry.level;
   editingPriority = entry.priority;
   editingTodoState = entry.todo === "DONE" ? "DONE" : "TODO";
-  if (addPanelSaveBtnEl) addPanelSaveBtnEl.textContent = t("save");
   addPanelEl.classList.add("is-editing");
   addPanelEl.classList.toggle("has-occurrence", baseDate !== null && entryHasRepeater(entry));
   refreshOccurrenceSection({ resetOccurrenceInput: true });
@@ -1919,7 +1896,7 @@ async function clearException(which: "override" | "note"): Promise<void> {
 
 function closeAddPanel(): void {
   if (!addPanelEl) return;
-  if (editingLine === null && !addPanelSaved) {
+  if (editingLine === null) {
     const orgText = buildPanelOrgText({ focusInvalid: false });
     if (orgText !== null) appendOrgText(orgText);
   }
