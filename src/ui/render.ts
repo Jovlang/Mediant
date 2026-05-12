@@ -221,7 +221,8 @@ function createLanguageToggle(): HTMLButtonElement {
   const btn = el("button", "language-toggle");
   const current = getLocale();
   const next = SUPPORTED_LOCALES[(SUPPORTED_LOCALES.indexOf(current) + 1) % SUPPORTED_LOCALES.length] as Locale;
-  const label = next === "nb" ? t("switchToNorwegian") : t("switchToEnglish");
+  const switchKeys = { en: "switchToEnglish", nb: "switchToNorwegian", it: "switchToItalian", de: "switchToGerman" } as const;
+  const label = t(switchKeys[next]);
   btn.textContent = label;
   btn.setAttribute("aria-label", label);
   btn.addEventListener("click", () => {

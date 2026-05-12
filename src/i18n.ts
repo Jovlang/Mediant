@@ -1,6 +1,6 @@
-export type Locale = "en" | "nb";
+export type Locale = "en" | "nb" | "it" | "de";
 
-export const SUPPORTED_LOCALES: readonly Locale[] = ["en", "nb"] as const;
+export const SUPPORTED_LOCALES: readonly Locale[] = ["en", "nb", "it", "de"] as const;
 
 const LOCALE_STORAGE_KEY = "mediant-locale";
 
@@ -35,8 +35,12 @@ const messages = {
     language: "Language",
     languageEnglish: "English",
     languageNorwegian: "Norsk",
+    languageItalian: "Italiano",
+    languageGerman: "Deutsch",
     switchToEnglish: "Switch to English",
     switchToNorwegian: "Switch to Norsk",
+    switchToItalian: "Switch to Italiano",
+    switchToGerman: "Switch to Deutsch",
 
     // Tag filters
     filtering: "Filtering:",
@@ -159,8 +163,12 @@ const messages = {
     language: "Språk",
     languageEnglish: "English",
     languageNorwegian: "Norsk",
+    languageItalian: "Italiano",
+    languageGerman: "Deutsch",
     switchToEnglish: "Bytt til English",
     switchToNorwegian: "Bytt til Norsk",
+    switchToItalian: "Bytt til Italiano",
+    switchToGerman: "Bytt til Deutsch",
 
     filtering: "Filter:",
     clear: "Tøm",
@@ -245,6 +253,242 @@ const messages = {
 
     notificationStartsIn1Hour: "Starter om 1 time · {time}",
   },
+  it: {
+    today: "Oggi",
+    todayAria: "Oggi",
+    prev7Days: "7 giorni precedenti",
+    next7Days: "Prossimi 7 giorni",
+    prev30Days: "30 giorni precedenti",
+    next30Days: "Prossimi 30 giorni",
+    addLabel: "+Aggiungi",
+    addAria: "Aggiungi elemento",
+    settings: "Impostazioni",
+    viewOnGitHub: "Vedi su GitHub",
+
+    toggleNotifications: "Attiva/disattiva notifiche",
+    enableNotifications: "Attiva notifiche",
+    disableNotifications: "Disattiva notifiche",
+    hideEmptyDays: "Nascondi giorni vuoti",
+    showEmptyDays: "Mostra giorni vuoti",
+    hideTags: "Nascondi etichette",
+    showTags: "Mostra etichette",
+    hideCompletedAndSkipped: "Nascondi completati e saltati",
+    showCompletedAndSkipped: "Mostra completati e saltati",
+    hideDeadlines: "Nascondi scadenze imminenti",
+    showDeadlines: "Mostra scadenze imminenti",
+    showFewerDays: "Mostra meno giorni",
+    showMoreDays: "Mostra più giorni",
+    language: "Lingua",
+    languageEnglish: "English",
+    languageNorwegian: "Norsk",
+    languageItalian: "Italiano",
+    languageGerman: "Deutsch",
+    switchToEnglish: "Passa a English",
+    switchToNorwegian: "Passa a Norsk",
+    switchToItalian: "Passa a Italiano",
+    switchToGerman: "Passa a Deutsch",
+
+    filtering: "Filtrando:",
+    clear: "Cancella",
+    filterByTag: "Filtra per etichetta {tag}",
+    removeTagFilter: "Rimuovi filtro etichetta {tag}",
+    filterByPriority: "Filtra per priorità {priority}",
+    removePriorityFilter: "Rimuovi filtro priorità {priority}",
+
+    addEventOn: "Aggiungi evento il {date}",
+    overdue: "Scaduto",
+    deadline: "SCADENZA",
+    overdueScheduled: "PIANIFICATO",
+    nowMarker: "◄ ora",
+    allDay: "Tutto il giorno",
+    markDone: "Segna come fatto",
+    markNotDone: "Segna come non fatto",
+    skippedDetail: "Saltato ({detail})",
+    movedEarlier: "← Spostato",
+    movedLater: "→ Spostato",
+    close: "Chiudi",
+    addItem: "Aggiungi elemento",
+    editTask: "Modifica attività",
+    editEvent: "Modifica evento",
+    save: "Salva",
+    delete: "Elimina",
+    tapAgainToDelete: "Tocca di nuovo per eliminare",
+
+    type: "Tipo",
+    sectionOccurrence: "Controlli ricorrenza",
+    sectionTaskDetails: "Attività",
+    sectionEventDetails: "Evento",
+    sectionDates: "Date",
+    sectionMetadata: "Metadati",
+    sectionChecklist: "Lista di controllo",
+    typeEvent: "Evento",
+    typeTodo: "Attività",
+    priority: "Priorità",
+    priorityNone: "Nessuna",
+    increasePriority: "Aumenta priorità",
+    decreasePriority: "Diminuisci priorità",
+    title: "Cosa",
+    when: "Quando",
+    scheduled: "Pianificato",
+    deadlineField: "Scadenza",
+    repeat: "Ripeti",
+    scheduledRepeat: "Ripeti pianificato",
+    deadlineRepeat: "Ripeti scadenza",
+    tags: "Etichette",
+    checklist: "Lista di controllo",
+    addSubtask: "+ Aggiungi sottoattività",
+
+    repeatNone: "Nessuno",
+    repeatEveryDay: "Ogni giorno (+1d)",
+    repeatEveryWeek: "Ogni settimana (+1w)",
+    repeatEvery2Weeks: "Ogni 2 settimane (+2w)",
+    repeatEveryMonth: "Ogni mese (+1m)",
+    repeatEveryYear: "Ogni anno (+1y)",
+    repeatNextFutureDay: "Prossimo giorno futuro (++1d)",
+    repeatNextFutureWeek: "Prossima settimana futura (++1w)",
+    repeatNextFutureMonth: "Prossimo mese futuro (++1m)",
+    repeatNextFutureYear: "Prossimo anno futuro (++1y)",
+    repeatDayFromDone: "1 giorno dal completamento (.+1d)",
+    repeatWeekFromDone: "1 settimana dal completamento (.+1w)",
+    repeatMonthFromDone: "1 mese dal completamento (.+1m)",
+    repeatYearFromDone: "1 anno dal completamento (.+1y)",
+
+    addTagOption: "Aggiungi \"{tag}\"",
+
+    onSchedule: "In programma",
+    skipThisOccurrence: "Salta questa ricorrenza",
+    stopRepeatingAfter: "Smetti di ripetere dopo questa ricorrenza",
+    moveToDateTime: "Sposta a data/ora",
+    clearOverride: "Cancella sostituzione",
+    noteForOccurrence: "Nota per questa ricorrenza",
+
+    quickTaskCapture: "Acquisizione rapida attività",
+    couldNotSaveTask: "Impossibile salvare l'attività.",
+    addDetails: "Aggiungi dettagli",
+
+    appTitle: "Mediant",
+    loadAgenda: "Carica agenda",
+
+    notificationStartsIn1Hour: "Inizia tra 1 ora · {time}",
+  },
+  de: {
+    today: "Heute",
+    todayAria: "Heute",
+    prev7Days: "Vorherige 7 Tage",
+    next7Days: "Nächste 7 Tage",
+    prev30Days: "Vorherige 30 Tage",
+    next30Days: "Nächste 30 Tage",
+    addLabel: "+Hinzufügen",
+    addAria: "Element hinzufügen",
+    settings: "Einstellungen",
+    viewOnGitHub: "Auf GitHub ansehen",
+
+    toggleNotifications: "Benachrichtigungen umschalten",
+    enableNotifications: "Benachrichtigungen aktivieren",
+    disableNotifications: "Benachrichtigungen deaktivieren",
+    hideEmptyDays: "Leere Tage ausblenden",
+    showEmptyDays: "Leere Tage anzeigen",
+    hideTags: "Tags ausblenden",
+    showTags: "Tags anzeigen",
+    hideCompletedAndSkipped: "Erledigte und übersprungene ausblenden",
+    showCompletedAndSkipped: "Erledigte und übersprungene anzeigen",
+    hideDeadlines: "Bevorstehende Fristen ausblenden",
+    showDeadlines: "Bevorstehende Fristen anzeigen",
+    showFewerDays: "Weniger Tage anzeigen",
+    showMoreDays: "Mehr Tage anzeigen",
+    language: "Sprache",
+    languageEnglish: "English",
+    languageNorwegian: "Norsk",
+    languageItalian: "Italiano",
+    languageGerman: "Deutsch",
+    switchToEnglish: "Zu English wechseln",
+    switchToNorwegian: "Zu Norsk wechseln",
+    switchToItalian: "Zu Italiano wechseln",
+    switchToGerman: "Zu Deutsch wechseln",
+
+    filtering: "Filter:",
+    clear: "Löschen",
+    filterByTag: "Nach Tag filtern {tag}",
+    removeTagFilter: "Tag-Filter entfernen {tag}",
+    filterByPriority: "Nach Priorität filtern {priority}",
+    removePriorityFilter: "Prioritätsfilter entfernen {priority}",
+
+    addEventOn: "Ereignis hinzufügen am {date}",
+    overdue: "Überfällig",
+    deadline: "FRIST",
+    overdueScheduled: "GEPLANT",
+    nowMarker: "◄ jetzt",
+    allDay: "Ganztägig",
+    markDone: "Als erledigt markieren",
+    markNotDone: "Als nicht erledigt markieren",
+    skippedDetail: "Übersprungen ({detail})",
+    movedEarlier: "← Verschoben",
+    movedLater: "→ Verschoben",
+    close: "Schließen",
+    addItem: "Element hinzufügen",
+    editTask: "Aufgabe bearbeiten",
+    editEvent: "Ereignis bearbeiten",
+    save: "Speichern",
+    delete: "Löschen",
+    tapAgainToDelete: "Erneut tippen zum Löschen",
+
+    type: "Typ",
+    sectionOccurrence: "Wiederholungsoptionen",
+    sectionTaskDetails: "Aufgabe",
+    sectionEventDetails: "Ereignis",
+    sectionDates: "Daten",
+    sectionMetadata: "Metadaten",
+    sectionChecklist: "Checkliste",
+    typeEvent: "Ereignis",
+    typeTodo: "Aufgabe",
+    priority: "Priorität",
+    priorityNone: "Keine",
+    increasePriority: "Priorität erhöhen",
+    decreasePriority: "Priorität verringern",
+    title: "Was",
+    when: "Wann",
+    scheduled: "Geplant",
+    deadlineField: "Frist",
+    repeat: "Wiederholen",
+    scheduledRepeat: "Geplante Wiederholung",
+    deadlineRepeat: "Frist-Wiederholung",
+    tags: "Tags",
+    checklist: "Checkliste",
+    addSubtask: "+ Unteraufgabe hinzufügen",
+
+    repeatNone: "Keine",
+    repeatEveryDay: "Jeden Tag (+1d)",
+    repeatEveryWeek: "Jede Woche (+1w)",
+    repeatEvery2Weeks: "Alle 2 Wochen (+2w)",
+    repeatEveryMonth: "Jeden Monat (+1m)",
+    repeatEveryYear: "Jedes Jahr (+1y)",
+    repeatNextFutureDay: "Nächster zukünftiger Tag (++1d)",
+    repeatNextFutureWeek: "Nächste zukünftige Woche (++1w)",
+    repeatNextFutureMonth: "Nächster zukünftiger Monat (++1m)",
+    repeatNextFutureYear: "Nächstes zukünftiges Jahr (++1y)",
+    repeatDayFromDone: "1 Tag nach Erledigung (.+1d)",
+    repeatWeekFromDone: "1 Woche nach Erledigung (.+1w)",
+    repeatMonthFromDone: "1 Monat nach Erledigung (.+1m)",
+    repeatYearFromDone: "1 Jahr nach Erledigung (.+1y)",
+
+    addTagOption: "\"{tag}\" hinzufügen",
+
+    onSchedule: "Im Plan",
+    skipThisOccurrence: "Diese Wiederholung überspringen",
+    stopRepeatingAfter: "Nach dieser Wiederholung aufhören",
+    moveToDateTime: "Zu Datum/Uhrzeit verschieben",
+    clearOverride: "Überschreibung löschen",
+    noteForOccurrence: "Notiz für diese Wiederholung",
+
+    quickTaskCapture: "Schnelle Aufgabenerfassung",
+    couldNotSaveTask: "Aufgabe konnte nicht gespeichert werden.",
+    addDetails: "Details hinzufügen",
+
+    appTitle: "Mediant",
+    loadAgenda: "Agenda laden",
+
+    notificationStartsIn1Hour: "Beginnt in 1 Stunde · {time}",
+  },
 } as const;
 
 export type MessageKey = keyof typeof messages.en;
@@ -253,7 +497,7 @@ function detectInitialLocale(): Locale {
   try {
     if (typeof localStorage !== "undefined" && typeof localStorage.getItem === "function") {
       const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-      if (stored === "en" || stored === "nb") return stored;
+      if (stored && (SUPPORTED_LOCALES as readonly string[]).includes(stored)) return stored as Locale;
     }
   } catch {
     // localStorage may throw in some sandboxed contexts
@@ -261,6 +505,8 @@ function detectInitialLocale(): Locale {
   if (typeof navigator !== "undefined") {
     const lang = (navigator.language ?? "").toLowerCase();
     if (lang.startsWith("nb") || lang.startsWith("nn") || lang.startsWith("no")) return "nb";
+    if (lang.startsWith("it")) return "it";
+    if (lang.startsWith("de")) return "de";
   }
   return "en";
 }

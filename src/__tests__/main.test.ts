@@ -247,7 +247,7 @@ describe("main.ts integration", () => {
     await waitFor(() => document.querySelector(".add-panel.is-open") !== null);
     expect(document.querySelector(".add-panel .te-header")).toBeNull();
     expect(document.querySelector<HTMLInputElement>("#add-title")?.value).toBe("");
-    expect(document.querySelector<HTMLInputElement>("input[name='add-type']:checked")?.value).toBe("event");
+    expect(document.querySelector<HTMLInputElement>("input[name='add-type']:checked")?.value).toBe("todo");
     expect(document.querySelector<HTMLElement>(".priority-stepper-field")?.classList.contains("is-empty")).toBe(true);
     expect(document.querySelector<HTMLButtonElement>(".priority-stepper-dec")?.disabled).toBe(true);
     const priorityInc = document.querySelector<HTMLButtonElement>(".priority-stepper-inc");
@@ -263,9 +263,9 @@ describe("main.ts integration", () => {
     priorityDec!.click();
     expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!!");
     expect((document.querySelector<HTMLInputElement>("input[name='add-type']")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
-    expect((document.querySelector<HTMLInputElement>("#add-when")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
-    expect((document.querySelector<HTMLInputElement>("#add-sched")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
-    expect((document.querySelector<HTMLElement>(".edit-checkboxes") as HTMLElement | null)?.style.display).toBe("none");
+    expect((document.querySelector<HTMLInputElement>("#add-when")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
+    expect((document.querySelector<HTMLInputElement>("#add-sched")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
+    expect((document.querySelector<HTMLElement>(".edit-checkboxes") as HTMLElement | null)?.style.display).toBe("");
 
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     await flush();

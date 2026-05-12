@@ -1421,7 +1421,7 @@ function appendOrgText(orgText: string): void {
   void persistSource(appendAgendaItemToSource(currentSource, orgText));
 }
 
-function openAddPanel(prefillDate: string | null = null, prefillTitle: string | null = null): void {
+function openAddPanel(prefillDate: string | null = null, prefillTitle: string | null = null, defaultType: "todo" | "event" = "todo"): void {
   if (!addPanelEl || !addPanelRefs) return;
   disarmDeleteBtn();
 
@@ -1450,7 +1450,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   refs.schedRepeatSelect.value = "";
   refs.deadRepeatSelect.value = "";
   rebuildCheckboxUI(refs.checkboxSection);
-  selectRadioValue(refs.typeGroup, "todo");
+  selectRadioValue(refs.typeGroup, defaultType);
   refs.typeGroup.style.display = "";
   syncPriorityStepper(refs.priorityGroup);
   refs.syncVisibility();
@@ -2186,7 +2186,7 @@ function setupNavigation(): void {
     } else if (action === "add") {
       openAddPanel(null);
     } else if (action === "add-on-date") {
-      openAddPanel(btn.dataset.date ?? null);
+      openAddPanel(btn.dataset.date ?? null, null, "event");
     } else if (action === "toggle-hide-tags") {
       toggleHideTags();
     } else if (action === "toggle-hide-empty-days") {
