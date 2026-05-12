@@ -462,11 +462,8 @@ function renderItem(
   }
 
   const lead = el("span", "item-lead");
-  const timeOwnsLead = hasTime && !stateBadge;
   if (stateBadge) {
     lead.appendChild(stateBadge);
-  } else if (timeOwnsLead) {
-    lead.appendChild(renderTimeRange(item.startTime, item.endTime));
   } else if (allDayMarker) {
     lead.appendChild(allDayMarker);
   }
@@ -480,9 +477,18 @@ function renderItem(
   const checklist = item.entry.checkboxItems.length > 0
     ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber)
     : null;
-  const secondary = hasTime && !timeOwnsLead ? formatTimeRange(item.startTime, item.endTime) : null;
-  row.append(lead, renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist, secondary));
+  const metadata = metadataForItem(item, hasTime);
+  row.append(lead, renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist, metadata));
   return row;
+}
+
+function metadataForItem(item: AgendaItem, hasTime: boolean): string[] {
+  const parts: string[] = [];
+  if (hasTime) parts.push(formatTimeRange(item.startTime, item.endTime));
+  if (item.category === "all-day") parts.push(t("allDay"));
+  if (item.category === "scheduled") parts.push(t("scheduled"));
+  if (item.category === "deadline") parts.push(t("deadline"));
+  return parts;
 }
 
 function renderOverrideChip(
@@ -532,24 +538,6 @@ function renderAllDayMarker(): HTMLElement {
   marker.setAttribute("aria-label", t("allDay"));
   marker.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>`;
   return marker;
-}
-
-function renderTimeRange(start: string | null, end: string | null): HTMLElement {
-  const time = el("span", "item-time");
-  if (!start) return time;
-  if (!end) {
-    time.textContent = start;
-    return time;
-  }
-  time.classList.add("has-range");
-  const startLine = el("span", "item-time-start");
-  startLine.textContent = start;
-  const endLine = el("span", "item-time-end");
-  endLine.textContent = end;
-  time.append(startLine, endLine);
-  time.title = formatTimeRange(start, end);
-  time.setAttribute("aria-label", formatTimeRange(start, end));
-  return time;
 }
 
 // ── State badge ─────────────────────────────────────────────────────
@@ -654,44 +642,23 @@ function renderCheckboxItems(
   return list;
 }
 
-function optionsForTags(): Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags"> {
-  return currentRenderOptions;
-}
-
 let currentRenderOptions: Pick<RenderAgendaOptions, "activeTagFilters" | "activePriorityFilter" | "hideTags" | "hideCompletedAndSkipped"> = {};
-
-function renderTags(tags: readonly string[], options: Pick<RenderAgendaOptions, "activeTagFilters" | "hideTags">): HTMLElement {
-  const badges = el("span", "tag-badges");
-  if (options.hideTags) {
-    badges.hidden = true;
-    return badges;
-  }
-  for (const tag of tags) {
-    badges.appendChild(renderTag(tag, {
-      selected: (options.activeTagFilters ?? []).includes(tag),
-    }));
-  }
-  return badges;
-}
 
 function renderTitleWithTags(
   title: HTMLElement,
   tags: readonly string[],
   instanceNote: string | null = null,
   checklist: HTMLElement | null = null,
-  secondary: string | null = null,
+  metadata: readonly string[] = [],
 ): HTMLElement {
-  if (currentRenderOptions.hideTags && !instanceNote && !checklist && !secondary) return title;
-  if (tags.length === 0 && !instanceNote && !checklist && !secondary) return title;
+  if (currentRenderOptions.hideTags && !instanceNote && !checklist && metadata.length === 0) return title;
+  if (tags.length === 0 && !instanceNote && !checklist && metadata.length === 0) return title;
 
   const stack = el("span", "item-title-stack");
   stack.appendChild(title);
-  if (secondary) {
-    const meta = el("span", "item-secondary");
-    meta.textContent = secondary;
-    stack.appendChild(meta);
+  if (metadata.length > 0 || (!currentRenderOptions.hideTags && tags.length > 0)) {
+    stack.appendChild(renderMetadata(metadata, tags));
   }
-  if (!currentRenderOptions.hideTags && tags.length > 0) stack.appendChild(renderTags(tags, optionsForTags()));
   if (instanceNote) {
     const note = el("span", "item-instance-note");
     note.textContent = instanceNote;
@@ -699,6 +666,33 @@ function renderTitleWithTags(
   }
   if (checklist) stack.appendChild(checklist);
   return stack;
+}
+
+function renderMetadata(metadata: readonly string[], tags: readonly string[]): HTMLElement {
+  const row = el("span", "item-metadata");
+  for (const text of metadata) {
+    appendMetadataSeparator(row);
+    const item = el("span", "item-meta-text");
+    item.textContent = text;
+    row.appendChild(item);
+  }
+  if (!currentRenderOptions.hideTags) {
+    for (const tag of tags) {
+      appendMetadataSeparator(row);
+      row.appendChild(renderTag(tag, {
+        selected: (currentRenderOptions.activeTagFilters ?? []).includes(tag),
+      }));
+    }
+  }
+  return row;
+}
+
+function appendMetadataSeparator(row: HTMLElement): void {
+  if (!row.hasChildNodes()) return;
+  const separator = el("span", "item-meta-separator");
+  separator.textContent = "·";
+  separator.setAttribute("aria-hidden", "true");
+  row.appendChild(separator);
 }
 
 function renderTag(

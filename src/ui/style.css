@@ -399,7 +399,7 @@ body {
 
 .allday-item {
   display: grid;
-  grid-template-columns: 5ch minmax(0, 1fr);
+  grid-template-columns: 1.15rem minmax(0, 1fr);
   align-items: center;
   padding: 0.18rem var(--section-padding-x);
   font-size: 0.875rem;
@@ -479,7 +479,7 @@ body {
 .scheduled-item,
 .day-deadline-item {
   display: grid;
-  grid-template-columns: 5ch minmax(0, 1fr);
+  grid-template-columns: 1.15rem minmax(0, 1fr);
   align-items: baseline;
   padding: 0.2rem var(--section-padding-x);
   gap: 0 0.8rem;
@@ -499,33 +499,6 @@ body {
 .day-deadline-item + .scheduled-item,
 .day-deadline-item + .day-deadline-item {
   margin-top: var(--item-gap-y);
-}
-
-.timed-item .item-time,
-.scheduled-item .item-time,
-.day-deadline-item .item-time {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text);
-  opacity: 0.54;
-  letter-spacing: 0;
-  line-height: 1.08;
-  white-space: nowrap;
-}
-
-.item-time-end {
-  position: relative;
-}
-
-.item-time-end::before {
-  content: "–";
-  position: absolute;
-  left: -0.68ch;
-  color: currentColor;
-  opacity: 0.65;
 }
 
 .timed-item > .item-title,
@@ -799,13 +772,30 @@ body {
   box-shadow: inset 0 -1px 0 currentColor;
 }
 
-/* ── Tag badges ───────────────────────────────────────────────────── */
+/* ── Item metadata ────────────────────────────────────────────────── */
 
-.tag-badges {
+.item-metadata {
   display: flex;
-  gap: 0.35rem;
+  align-items: baseline;
+  gap: 0.32rem;
   flex-wrap: wrap;
-  max-width: 14rem;
+  max-width: 100%;
+  color: var(--text-dim);
+  opacity: 0.78;
+}
+
+.item-meta-text {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: currentColor;
+}
+
+.item-meta-separator {
+  font-size: 0.72rem;
+  line-height: 1;
+  color: currentColor;
+  opacity: 0.58;
 }
 
 .tag {
@@ -816,7 +806,7 @@ body {
   border-radius: 3px;
   font-weight: 500;
   line-height: 1.15;
-  color: color-mix(in srgb, var(--text-dim) 58%, #7aa2c8 42%);
+  color: color-mix(in srgb, var(--text-dim) 70%, #7aa2c8 30%);
   background: transparent;
   white-space: nowrap;
   cursor: pointer;
@@ -859,12 +849,6 @@ body {
   min-width: 0;
 }
 
-.item-title-stack > .tag-badges {
-  align-self: flex-start;
-  justify-content: flex-start;
-  max-width: 100%;
-}
-
 .item-title-stack > .item-instance-note {
   font-size: 0.8125rem;
   font-style: italic;
@@ -872,16 +856,6 @@ body {
   line-height: 1.35;
   letter-spacing: -0.01em;
   color: var(--text-dim);
-}
-
-.item-title-stack > .item-secondary {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: 0;
-  color: var(--text-dim);
-  opacity: 0.72;
 }
 
 
