@@ -123,6 +123,7 @@ const messages = {
     clearOverride: "Clear override",
     noteForOccurrence: "Note for this occurrence",
     summonScheduled: "+ Scheduled",
+    summonRepeat: "+ Repeat",
     summonMove: "+ Move",
     summonNote: "+ Note",
 
@@ -248,6 +249,7 @@ const messages = {
     clearOverride: "Fjern overstyring",
     noteForOccurrence: "Notat for denne forekomsten",
     summonScheduled: "+ Planlagt",
+    summonRepeat: "+ Gjenta",
     summonMove: "+ Flytt",
     summonNote: "+ Notat",
 
@@ -370,6 +372,7 @@ const messages = {
     clearOverride: "Cancella sostituzione",
     noteForOccurrence: "Nota per questa ricorrenza",
     summonScheduled: "+ Pianificato",
+    summonRepeat: "+ Ripeti",
     summonMove: "+ Sposta",
     summonNote: "+ Nota",
 
@@ -492,6 +495,7 @@ const messages = {
     clearOverride: "Überschreibung löschen",
     noteForOccurrence: "Notiz für diese Wiederholung",
     summonScheduled: "+ Geplant",
+    summonRepeat: "+ Wiederholen",
     summonMove: "+ Verschieben",
     summonNote: "+ Notiz",
 
