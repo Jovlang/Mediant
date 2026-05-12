@@ -928,8 +928,9 @@ body {
 .checkbox-list {
   display: block;
   position: relative;
-  padding: 0;
-  margin-top: 0.2rem;
+  padding: 0 0 0 0.58rem;
+  margin-top: 0.28rem;
+  margin-left: 0.12rem;
 }
 
 .checkbox-list-items {
