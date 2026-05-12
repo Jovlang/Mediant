@@ -72,6 +72,7 @@ interface TagPicker {
   getTags: () => string[];
   setTags: (tags: string[]) => void;
   onChange: (callback: (() => void) | null) => void;
+  focus: () => void;
 }
 
 interface DateTimeInput {
@@ -105,7 +106,7 @@ interface AddPanelRefs {
   noteTextarea: HTMLInputElement;
   clearOverrideBtn: HTMLButtonElement;
   datesSummonRow: HTMLElement;
-  prioritySummonRow: HTMLElement;
+  metadataSummonRow: HTMLElement;
   repeatSummonRow: HTMLElement;
   schedRepeatSummonRow: HTMLElement;
   deadRepeatSummonRow: HTMLElement;
@@ -120,6 +121,7 @@ let addPanelRefs: AddPanelRefs | null = null;
 
 let revealedSched = false;
 let revealedDead = false;
+let revealedTags = false;
 let revealedPriority = false;
 let revealedRepeat = false;
 let revealedSchedRepeat = false;
@@ -391,7 +393,7 @@ function buildAddPanel(): void {
   const deadRepeatSummonRow = makeRepeatSummonRow(t("summonDeadRepeat"), () => { revealedDeadRepeat = true; syncVisibility(); deadRepeatSelect.select.focus(); });
   datesSection.appendChild(deadRepeatSummonRow);
 
-  // Tags
+  // Tags (summoned on demand)
   const tagPicker = makeTagPicker(t("tags"), "add-tags");
   metadataSection.appendChild(tagPicker.container);
 
@@ -399,8 +401,16 @@ function buildAddPanel(): void {
   const priorityGroup = makePriorityStepper();
   metadataSection.appendChild(priorityGroup.container);
 
-  const prioritySummonRow = document.createElement("div");
-  prioritySummonRow.className = "field-summon-row";
+  const etiketterSummonBtn = document.createElement("button");
+  etiketterSummonBtn.type = "button";
+  etiketterSummonBtn.className = "field-summon-btn";
+  etiketterSummonBtn.textContent = t("summonTags");
+  etiketterSummonBtn.addEventListener("click", () => {
+    revealedTags = true;
+    syncVisibility();
+    tagPicker.focus();
+  });
+
   const prioritySummonBtn = document.createElement("button");
   prioritySummonBtn.type = "button";
   prioritySummonBtn.className = "field-summon-btn";
@@ -409,8 +419,11 @@ function buildAddPanel(): void {
     revealedPriority = true;
     syncVisibility();
   });
-  prioritySummonRow.appendChild(prioritySummonBtn);
-  metadataSection.appendChild(prioritySummonRow);
+
+  const metadataSummonRow = document.createElement("div");
+  metadataSummonRow.className = "field-summon-row";
+  metadataSummonRow.append(etiketterSummonBtn, prioritySummonBtn);
+  metadataSection.appendChild(metadataSummonRow);
 
   // Show/hide fields based on type
   const typeRadios = typeGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-type']");
@@ -439,9 +452,14 @@ function buildAddPanel(): void {
     datesSummonRow.style.display = isTodo && (!showSched || !showDead) ? "" : "none";
     deadRepeatSelect.container.style.display = showDeadRepeat ? "" : "none";
     deadRepeatSummonRow.style.display = isTodo && hasDeadDate && !showDeadRepeat ? "" : "none";
+    const hasTags = tagPicker.getTags().length > 0;
+    const showTags = hasTags || revealedTags;
     const showPriority = editingPriority !== null || revealedPriority;
+    tagPicker.container.style.display = showTags ? "" : "none";
     priorityGroup.container.style.display = showPriority ? "" : "none";
-    prioritySummonRow.style.display = showPriority ? "none" : "";
+    etiketterSummonBtn.style.display = showTags ? "none" : "";
+    prioritySummonBtn.style.display = showPriority ? "none" : "";
+    metadataSummonRow.style.display = showTags && showPriority ? "none" : "";
     checkboxSection.style.display = isTodo ? "" : "none";
     checklistSection.style.display = isTodo ? "" : "none";
     updateDateTimePreview(whenInput.input, whenInput.preview);
@@ -665,7 +683,7 @@ function buildAddPanel(): void {
     noteTextarea,
     clearOverrideBtn,
     datesSummonRow,
-    prioritySummonRow,
+    metadataSummonRow,
     repeatSummonRow,
     schedRepeatSummonRow,
     deadRepeatSummonRow,
@@ -996,6 +1014,7 @@ function makeTagPicker(label: string, id: string): TagPicker {
     onChange: (callback: (() => void) | null) => {
       onChange = callback;
     },
+    focus: () => { input.focus(); },
   };
 }
 
@@ -1558,6 +1577,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
 
   revealedSched = false;
   revealedDead = false;
+  revealedTags = false;
   revealedPriority = false;
   revealedRepeat = false;
   revealedSchedRepeat = false;
@@ -1618,6 +1638,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
 
   revealedSched = false;
   revealedDead = false;
+  revealedTags = false;
   revealedPriority = false;
   revealedRepeat = false;
   revealedSchedRepeat = false;

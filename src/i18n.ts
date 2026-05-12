@@ -124,6 +124,7 @@ const messages = {
     noteForOccurrence: "Note for this occurrence",
     summonScheduled: "+ Scheduled",
     summonDeadline: "+ Deadline",
+    summonTags: "+ Tags",
     summonPriority: "+ Priority",
     summonRepeat: "+ Repeat",
     summonSchedRepeat: "+ Scheduled repeat",
