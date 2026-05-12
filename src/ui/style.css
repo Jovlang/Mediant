@@ -422,7 +422,7 @@ body {
   align-self: start;
   width: 1rem;
   height: 1.4em;
-  color: #5E7296;
+  color: color-mix(in srgb, var(--text-dim) 58%, #7aa2c8 42%);
 }
 
 .item-all-day-marker svg {
