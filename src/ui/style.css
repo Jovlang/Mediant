@@ -804,7 +804,7 @@ body {
   border-radius: 3px;
   font-weight: 500;
   line-height: 1.15;
-  color: color-mix(in srgb, var(--text-dim) 78%, #7aa2c8 22%);
+  color: color-mix(in srgb, var(--text-dim) 58%, #7aa2c8 42%);
   background: transparent;
   white-space: nowrap;
   cursor: pointer;
@@ -1517,9 +1517,9 @@ body {
   padding: 0.12rem 0.14rem 0.12rem 0.34rem;
   border-radius: 999px;
   font-weight: 500;
-  color: color-mix(in srgb, var(--text) 74%, #7aa2c8 26%);
-  background: color-mix(in srgb, var(--bg-card) 58%, #7aa2c8 8%, var(--border) 34%);
-  border: 1px solid color-mix(in srgb, var(--border) 68%, #7aa2c8 18%);
+  color: color-mix(in srgb, var(--text) 62%, #7aa2c8 38%);
+  background: color-mix(in srgb, var(--bg-card) 52%, #7aa2c8 14%, var(--border) 34%);
+  border: 1px solid color-mix(in srgb, var(--border) 54%, #7aa2c8 32%);
   white-space: nowrap;
 }
 
