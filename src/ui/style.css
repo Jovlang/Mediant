@@ -419,6 +419,18 @@ body {
   transform: translateY(0.08rem);
 }
 
+.item-state-text {
+  width: auto;
+  height: auto;
+  min-width: 0;
+  color: currentColor;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.1;
+  transform: none;
+}
+
 .allday-item + .allday-item {
   margin-top: 0.55rem;
 }
@@ -744,15 +756,26 @@ body {
 }
 
 .item-meta-state {
-  width: 0.82rem;
-  height: 0.82rem;
-  min-width: 0.82rem;
-  transform: translateY(0.08rem);
+  width: auto;
+  height: auto;
+  min-width: 0;
+  color: color-mix(in srgb, var(--text-dim) 88%, var(--text) 12%);
+  opacity: 0.92;
+  transform: none;
 }
 
 .item-meta-state .item-state-mark {
   width: 0.76rem;
   height: 0.76rem;
+}
+
+.day-deadline-item .item-meta-state {
+  color: color-mix(in srgb, var(--deadline-urgency-critical) 74%, var(--text-dim) 26%);
+}
+
+.item-done .item-meta-state {
+  color: var(--text-done);
+  opacity: 0.7;
 }
 
 .item-meta-separator {

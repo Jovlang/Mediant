@@ -450,7 +450,7 @@ function renderItem(
   const badges = badge ? (Array.isArray(badge) ? badge : [badge]) : [];
   const hasTime = showTime === "always" || (showTime === "optional" && item.startTime);
   const stateBadge = badges.find((el) => el.classList.contains("item-state"))
-    ?? (item.entry.todo ? renderStateBadge(item.entry) : null);
+    ?? (item.entry.todo ? renderStateTextBadge(item.entry) : null);
 
   if (hasTime) row.classList.add("has-time");
   if (stateBadge) {
@@ -510,14 +510,14 @@ function moveDirection(item: AgendaItem): "earlier" | "later" {
 
 function renderItemForCategory(item: AgendaItem): HTMLElement {
   if (item.category === "all-day") {
-    return renderItem(item, "allday-item", item.entry.todo ? renderStateBadge(item.entry) : undefined);
+    return renderItem(item, "allday-item", item.entry.todo ? renderStateTextBadge(item.entry) : undefined);
   }
   if (item.category === "timed") return renderItem(item, "timed-item", undefined, "always");
   if (item.category === "scheduled") {
-    return renderItem(item, "scheduled-item", renderStateBadge(item.entry, "TODO"), "optional");
+    return renderItem(item, "scheduled-item", renderStateTextBadge(item.entry, "TODO"), "optional");
   }
 
-  return renderItem(item, "day-deadline-item", renderStateBadge(item.entry, "TODO"), "optional");
+  return renderItem(item, "day-deadline-item", renderStateTextBadge(item.entry, "TODO"), "optional");
 }
 
 // ── State badge ─────────────────────────────────────────────────────
@@ -542,6 +542,17 @@ function renderStateBadge(
     mark.setAttribute("aria-hidden", "true");
     state.prepend(mark);
   }
+  return state;
+}
+
+function renderStateTextBadge(
+  entry: { todo: "TODO" | "DONE" | null; sourceLineNumber: number },
+  fallback?: string,
+): HTMLElement {
+  const state = renderStateBadge(entry, fallback);
+  state.classList.add("item-state-text");
+  const mark = state.querySelector(".item-state-mark");
+  mark?.remove();
   return state;
 }
 

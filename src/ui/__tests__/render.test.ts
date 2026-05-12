@@ -236,8 +236,9 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".allday-item .item-metadata")?.textContent).toBe("All-day·#helligdag");
     const deadlineRows = Array.from(container.querySelectorAll<HTMLElement>(".day-deadline-item"));
     expect(deadlineRows.map(row => row.querySelector(".item-metadata")?.textContent)).toEqual(["TODO·#studie", "TODO·#økonomi"]);
-    expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-state") !== null)).toBe(true);
-    expect(container.querySelector(".scheduled-item .item-metadata .item-state")).not.toBeNull();
+    expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-state-text") !== null)).toBe(true);
+    expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-state-mark") === null)).toBe(true);
+    expect(container.querySelector(".scheduled-item .item-metadata .item-state-text")).not.toBeNull();
     expect(container.querySelector(".scheduled-item .item-metadata")?.textContent).toBe("TODO·#økonomi");
   });
 
@@ -593,6 +594,8 @@ describe("renderAgenda", () => {
     expect(row?.querySelector(".item-kind")).toBeNull();
     expect(title?.textContent).toContain("Due today");
     expect(state?.closest(".item-metadata")).not.toBeNull();
+    expect(state?.classList.contains("item-state-text")).toBe(true);
+    expect(state?.querySelector(".item-state-mark")).toBeNull();
     expect(row?.querySelector(".item-title-stack > .item-metadata")?.textContent).toBe("TODO·16:00");
   });
 
@@ -651,7 +654,10 @@ describe("renderAgenda", () => {
     const states = Array.from(container.querySelectorAll<HTMLElement>(".item-state"));
     expect(states.map(state => state.textContent)).toEqual(["TODO", "TODO", "DONE", "TODO", "TODO"]);
     expect(states.map(state => state.dataset.state)).toEqual(["TODO", "TODO", "DONE", "TODO", "TODO"]);
-    expect(states.every(state => state.querySelector(".item-state-mark") !== null)).toBe(true);
+    const metadataStates = states.filter(state => state.classList.contains("item-state-text"));
+    const markStates = states.filter(state => !state.classList.contains("item-state-text"));
+    expect(metadataStates.every(state => state.querySelector(".item-state-mark") === null)).toBe(true);
+    expect(markStates.every(state => state.querySelector(".item-state-mark") !== null)).toBe(true);
     expect(states[2]?.closest(".item-done")).not.toBeNull();
     expect(container.querySelector<HTMLElement>(".item-title-stack > .checkbox-list")).not.toBeNull();
   });
