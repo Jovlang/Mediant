@@ -263,13 +263,13 @@ function makePanelSection(title: string, icon: "occurrence" | "details" | "dates
   return section;
 }
 
-function makeRepeatSummonRow(onClick: () => void): HTMLElement {
+function makeRepeatSummonRow(label: string, onClick: () => void): HTMLElement {
   const row = document.createElement("div");
   row.className = "field-summon-row";
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "field-summon-btn";
-  btn.textContent = t("summonRepeat");
+  btn.textContent = label;
   btn.addEventListener("click", onClick);
   row.appendChild(btn);
   return row;
@@ -378,17 +378,17 @@ function buildAddPanel(): void {
   // Repeat (event only)
   const repeatSelect = makeSelect(t("repeat"), "add-repeat", eventRepeatOptions());
   datesSection.appendChild(repeatSelect.container);
-  const repeatSummonRow = makeRepeatSummonRow(() => { revealedRepeat = true; syncVisibility(); repeatSelect.select.focus(); });
+  const repeatSummonRow = makeRepeatSummonRow(t("summonRepeat"), () => { revealedRepeat = true; syncVisibility(); repeatSelect.select.focus(); });
   datesSection.appendChild(repeatSummonRow);
 
   const schedRepeatSelect = makeSelect(t("scheduledRepeat"), "add-sched-repeat", todoRepeatOptions());
   datesSection.appendChild(schedRepeatSelect.container);
-  const schedRepeatSummonRow = makeRepeatSummonRow(() => { revealedSchedRepeat = true; syncVisibility(); schedRepeatSelect.select.focus(); });
+  const schedRepeatSummonRow = makeRepeatSummonRow(t("summonSchedRepeat"), () => { revealedSchedRepeat = true; syncVisibility(); schedRepeatSelect.select.focus(); });
   datesSection.appendChild(schedRepeatSummonRow);
 
   const deadRepeatSelect = makeSelect(t("deadlineRepeat"), "add-dead-repeat", todoRepeatOptions());
   datesSection.appendChild(deadRepeatSelect.container);
-  const deadRepeatSummonRow = makeRepeatSummonRow(() => { revealedDeadRepeat = true; syncVisibility(); deadRepeatSelect.select.focus(); });
+  const deadRepeatSummonRow = makeRepeatSummonRow(t("summonDeadRepeat"), () => { revealedDeadRepeat = true; syncVisibility(); deadRepeatSelect.select.focus(); });
   datesSection.appendChild(deadRepeatSummonRow);
 
   // Priority
