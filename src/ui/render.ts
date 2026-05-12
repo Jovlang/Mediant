@@ -485,9 +485,6 @@ function renderItem(
 function metadataForItem(item: AgendaItem, hasTime: boolean): string[] {
   const parts: string[] = [];
   if (hasTime) parts.push(formatTimeRange(item.startTime, item.endTime));
-  if (item.category === "all-day") parts.push(t("allDay"));
-  if (item.category === "scheduled") parts.push(t("scheduled"));
-  if (item.category === "deadline") parts.push(t("deadline"));
   return parts;
 }
 

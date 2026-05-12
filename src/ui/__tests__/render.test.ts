@@ -192,7 +192,7 @@ describe("renderAgenda", () => {
         makeItem({
           title: "Levér eksamen i arrkomp",
           date: new Date(2026, 4, 17),
-          category: "scheduled",
+          category: "deadline",
           tags: ["studie"],
           entry: makeEntry({ title: "Levér eksamen i arrkomp", todo: "TODO", tags: ["studie"], sourceLineNumber: 17 }),
         }),
@@ -207,7 +207,8 @@ describe("renderAgenda", () => {
           title: "Summér forrige måneds dagligvarer",
           date: new Date(2026, 5, 1),
           category: "scheduled",
-          entry: makeEntry({ title: "Summér forrige måneds dagligvarer", todo: "TODO", sourceLineNumber: 19 }),
+          tags: ["økonomi"],
+          entry: makeEntry({ title: "Summér forrige måneds dagligvarer", todo: "TODO", tags: ["økonomi"], sourceLineNumber: 19 }),
         }),
       ],
       [],
@@ -231,12 +232,13 @@ describe("renderAgenda", () => {
       "18:30·#musikk·#sosialt",
       "12:00–13:00·#musikk·#sosialt",
     ]);
-    expect(container.querySelector(".allday-item .item-metadata")?.textContent).toBe("All-day");
+    expect(container.querySelector(".allday-item .item-metadata")).toBeNull();
     expect(container.querySelector(".allday-item .item-lead .item-all-day-marker")).not.toBeNull();
-    expect(container.querySelector(".day-deadline-item .item-lead .item-state")).not.toBeNull();
-    expect(container.querySelector(".day-deadline-item .item-metadata")?.textContent).toBe("DEADLINE·#økonomi");
+    const deadlineRows = Array.from(container.querySelectorAll<HTMLElement>(".day-deadline-item"));
+    expect(deadlineRows.map(row => row.querySelector(".item-metadata")?.textContent)).toEqual(["#studie", "#økonomi"]);
+    expect(deadlineRows.every(row => row.querySelector(".item-lead .item-state") !== null)).toBe(true);
     expect(container.querySelector(".scheduled-item .item-lead .item-state")).not.toBeNull();
-    expect(container.querySelector(".scheduled-item .item-metadata")?.textContent).toBe("Scheduled·#studie");
+    expect(container.querySelector(".scheduled-item .item-metadata")?.textContent).toBe("#økonomi");
   });
 
   it("exposes list keys and row checkbox indexes so toggles can route source mutations", () => {
@@ -591,7 +593,7 @@ describe("renderAgenda", () => {
     expect(row?.querySelector(".item-kind")).toBeNull();
     expect(title?.textContent).toContain("Due today");
     expect(state?.closest(".item-lead")).not.toBeNull();
-    expect(row?.querySelector(".item-title-stack > .item-metadata")?.textContent).toBe("16:00·DEADLINE");
+    expect(row?.querySelector(".item-title-stack > .item-metadata")?.textContent).toBe("16:00");
   });
 
   it("renders todo badges as compact status marks with done items filled", () => {
