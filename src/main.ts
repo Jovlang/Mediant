@@ -1529,7 +1529,7 @@ function scheduleEditAutosave(): void {
     // Add mode: create a draft entry on first save-worthy change
     const orgText = buildPanelOrgText({ focusInvalid: false });
     if (orgText === null) return;
-    const before = currentSource;
+    const before = editSaveBaseSource();
     const newSource = appendAgendaItemToSource(before, orgText);
     if (newSource === before) return;
     const oldLines = before.split("\n");
