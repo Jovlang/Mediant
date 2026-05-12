@@ -1517,9 +1517,9 @@ body {
   padding: 0.12rem 0.14rem 0.12rem 0.34rem;
   border-radius: 999px;
   font-weight: 500;
-  color: color-mix(in srgb, var(--text) 54%, var(--text-dim));
-  background: color-mix(in srgb, var(--bg-card) 52%, var(--border));
-  border: 1px solid color-mix(in srgb, var(--border) 56%, transparent);
+  color: color-mix(in srgb, var(--text) 82%, var(--text-dim));
+  background: color-mix(in srgb, var(--bg-card) 62%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
   white-space: nowrap;
 }
 
