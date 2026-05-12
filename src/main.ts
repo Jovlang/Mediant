@@ -878,9 +878,14 @@ function makeTagPicker(label: string, id: string): TagPicker {
   function showDropdown(): void {
     const query = input.value.trim().toLowerCase();
     const allTags = collectAllTags().filter(t => !selected.includes(t));
-    const matches = query
-      ? allTags.filter(t => t.toLowerCase().includes(query))
-      : allTags;
+    let matches: string[];
+    if (query) {
+      const prefix = allTags.filter(t => t.toLowerCase().startsWith(query));
+      const contains = allTags.filter(t => !t.toLowerCase().startsWith(query) && t.toLowerCase().includes(query));
+      matches = [...prefix, ...contains];
+    } else {
+      matches = allTags;
+    }
 
     dropdown.innerHTML = "";
     optionActions = [];
