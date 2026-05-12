@@ -657,6 +657,11 @@ body {
 
 /* ── Someday section (bottom of agenda) ──────────────────────────── */
 
+.someday-section .day-header {
+  padding-top: 0.6rem;
+  margin-bottom: 0.2rem;
+}
+
 .someday-item {
   --global-row-fringe-color: transparent;
   grid-template-columns: auto 1fr;
