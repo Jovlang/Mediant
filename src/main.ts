@@ -542,7 +542,7 @@ function buildAddPanel(): void {
   clearOverrideBtn.addEventListener("click", () => clearException("override"));
 
   occMoveFieldsWrapper.append(occurrenceInputLabel, overrideRow, occurrencePreview, clearOverrideBtn);
-  occActions.append(skipCheckboxRow, endSeriesCheckboxRow, occMoveFieldsWrapper);
+  occActions.append(skipCheckboxRow, endSeriesCheckboxRow);
   occurrenceSection.appendChild(occActions);
 
   const occNoteFieldsWrapper = document.createElement("div");
@@ -563,6 +563,7 @@ function buildAddPanel(): void {
 
   occNoteFieldsWrapper.append(noteLabel, noteTextarea);
   occurrenceSection.appendChild(occNoteFieldsWrapper);
+  occurrenceSection.appendChild(occMoveFieldsWrapper);
 
   const occSummonRow = document.createElement("div");
   occSummonRow.className = "field-summon-row";
@@ -596,7 +597,7 @@ function buildAddPanel(): void {
     noteTextarea.focus();
   });
 
-  occSummonRow.append(occCancelSummonBtn, occMoveSummonBtn, occNoteSummonBtn);
+  occSummonRow.append(occNoteSummonBtn, occMoveSummonBtn, occCancelSummonBtn);
   occurrenceSection.appendChild(occSummonRow);
 
   // Save button
