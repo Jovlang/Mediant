@@ -662,7 +662,6 @@ Mediant uses browser `localStorage` for UI preferences and, in static mode, the 
 | `mediant-month-ahead`     | Whether the agenda shows 30 days instead of 7.             |
 | `mediant-notifications`   | Whether browser reminders are enabled.                     |
 | `mediant-locale`          | Selected UI locale: `en`, `nb`, `it`, or `de`.             |
-| `theme`                   | Light/dark mode preference.                                |
 
 In static mode, the Org source lives in the browser.
 
