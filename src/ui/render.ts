@@ -553,6 +553,7 @@ function renderStateTextBadge(
   state.classList.add("item-state-text");
   const mark = state.querySelector(".item-state-mark");
   mark?.remove();
+  state.textContent = state.dataset.state?.toLowerCase() ?? state.textContent.toLowerCase();
   return state;
 }
 

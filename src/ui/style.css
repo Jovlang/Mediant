@@ -424,10 +424,10 @@ body {
   height: auto;
   min-width: 0;
   color: currentColor;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.655rem;
+  font-weight: 500;
   letter-spacing: 0;
-  line-height: 1.1;
+  line-height: 1.15;
   transform: none;
 }
 
@@ -759,8 +759,8 @@ body {
   width: auto;
   height: auto;
   min-width: 0;
-  color: color-mix(in srgb, var(--text-dim) 88%, var(--text) 12%);
-  opacity: 0.92;
+  color: var(--text-dim);
+  opacity: 0.66;
   transform: none;
 }
 
@@ -770,12 +770,13 @@ body {
 }
 
 .day-deadline-item .item-meta-state {
-  color: color-mix(in srgb, var(--deadline-urgency-critical) 74%, var(--text-dim) 26%);
+  color: color-mix(in srgb, var(--deadline-urgency-critical) 48%, var(--text-dim) 52%);
+  opacity: 0.82;
 }
 
 .item-done .item-meta-state {
   color: var(--text-done);
-  opacity: 0.7;
+  opacity: 0.58;
 }
 
 .item-meta-separator {

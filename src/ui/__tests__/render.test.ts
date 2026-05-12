@@ -235,11 +235,11 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".allday-item .item-all-day-marker")).toBeNull();
     expect(container.querySelector(".allday-item .item-metadata")?.textContent).toBe("All-day·#helligdag");
     const deadlineRows = Array.from(container.querySelectorAll<HTMLElement>(".day-deadline-item"));
-    expect(deadlineRows.map(row => row.querySelector(".item-metadata")?.textContent)).toEqual(["TODO·#studie", "TODO·#økonomi"]);
+    expect(deadlineRows.map(row => row.querySelector(".item-metadata")?.textContent)).toEqual(["todo·#studie", "todo·#økonomi"]);
     expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-state-text") !== null)).toBe(true);
     expect(deadlineRows.every(row => row.querySelector(".item-metadata .item-state-mark") === null)).toBe(true);
     expect(container.querySelector(".scheduled-item .item-metadata .item-state-text")).not.toBeNull();
-    expect(container.querySelector(".scheduled-item .item-metadata")?.textContent).toBe("TODO·#økonomi");
+    expect(container.querySelector(".scheduled-item .item-metadata")?.textContent).toBe("todo·#økonomi");
   });
 
   it("exposes list keys and row checkbox indexes so toggles can route source mutations", () => {
@@ -588,7 +588,7 @@ describe("renderAgenda", () => {
     expect(row).not.toBeNull();
     const state = row?.querySelector(".item-state") as HTMLElement | null;
     const title = row?.querySelector(".item-title") as HTMLElement | null;
-    expect(state?.textContent).toBe("TODO");
+    expect(state?.textContent).toBe("todo");
     expect(state?.getAttribute("data-action")).toBe("toggle-done");
     expect(state?.getAttribute("data-line")).toBe("42");
     expect(row?.querySelector(".item-kind")).toBeNull();
@@ -596,7 +596,7 @@ describe("renderAgenda", () => {
     expect(state?.closest(".item-metadata")).not.toBeNull();
     expect(state?.classList.contains("item-state-text")).toBe(true);
     expect(state?.querySelector(".item-state-mark")).toBeNull();
-    expect(row?.querySelector(".item-title-stack > .item-metadata")?.textContent).toBe("TODO·16:00");
+    expect(row?.querySelector(".item-title-stack > .item-metadata")?.textContent).toBe("todo·16:00");
   });
 
   it("renders todo badges as compact status marks with done items filled", () => {
@@ -652,12 +652,13 @@ describe("renderAgenda", () => {
     renderAgenda(container, week, deadlines, [], someday, new Date(2026, 3, 20, 8, 0));
 
     const states = Array.from(container.querySelectorAll<HTMLElement>(".item-state"));
-    expect(states.map(state => state.textContent)).toEqual(["TODO", "TODO", "DONE", "TODO", "TODO"]);
+    expect(states.map(state => state.textContent)).toEqual(["TODO", "todo", "done", "todo", "TODO"]);
     expect(states.map(state => state.dataset.state)).toEqual(["TODO", "TODO", "DONE", "TODO", "TODO"]);
     const metadataStates = states.filter(state => state.classList.contains("item-state-text"));
     const markStates = states.filter(state => !state.classList.contains("item-state-text"));
     expect(metadataStates.every(state => state.querySelector(".item-state-mark") === null)).toBe(true);
     expect(markStates.every(state => state.querySelector(".item-state-mark") !== null)).toBe(true);
+    expect(metadataStates.map(state => state.textContent)).toEqual(["todo", "done", "todo"]);
     expect(states[2]?.closest(".item-done")).not.toBeNull();
     expect(container.querySelector<HTMLElement>(".item-title-stack > .checkbox-list")).not.toBeNull();
   });
@@ -687,7 +688,7 @@ describe("renderAgenda", () => {
     const row = container.querySelector(".scheduled-item") as HTMLElement | null;
     expect(row).not.toBeNull();
     expect(row?.classList.contains("has-state")).toBe(true);
-    expect(row?.querySelector(".item-state")?.textContent).toBe("TODO");
+    expect(row?.querySelector(".item-state")?.textContent).toBe("todo");
     expect(row?.querySelector(".item-title .item-priority")?.textContent).toBe("!");
     expect(row?.querySelector(".item-title")?.textContent).toContain("Pay bills");
   });
