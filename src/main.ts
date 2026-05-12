@@ -106,6 +106,7 @@ interface AddPanelRefs {
   clearOverrideBtn: HTMLButtonElement;
   schedSummonRow: HTMLElement;
   deadSummonRow: HTMLElement;
+  prioritySummonRow: HTMLElement;
   repeatSummonRow: HTMLElement;
   schedRepeatSummonRow: HTMLElement;
   deadRepeatSummonRow: HTMLElement;
@@ -119,6 +120,7 @@ let addPanelRefs: AddPanelRefs | null = null;
 
 let revealedSched = false;
 let revealedDead = false;
+let revealedPriority = false;
 let revealedRepeat = false;
 let revealedSchedRepeat = false;
 let revealedDeadRepeat = false;
@@ -391,13 +393,26 @@ function buildAddPanel(): void {
   const deadRepeatSummonRow = makeRepeatSummonRow(t("summonDeadRepeat"), () => { revealedDeadRepeat = true; syncVisibility(); deadRepeatSelect.select.focus(); });
   datesSection.appendChild(deadRepeatSummonRow);
 
-  // Priority
-  const priorityGroup = makePriorityStepper();
-  metadataSection.appendChild(priorityGroup.container);
-
   // Tags
   const tagPicker = makeTagPicker(t("tags"), "add-tags");
   metadataSection.appendChild(tagPicker.container);
+
+  // Priority (summoned on demand)
+  const priorityGroup = makePriorityStepper();
+  metadataSection.appendChild(priorityGroup.container);
+
+  const prioritySummonRow = document.createElement("div");
+  prioritySummonRow.className = "field-summon-row";
+  const prioritySummonBtn = document.createElement("button");
+  prioritySummonBtn.type = "button";
+  prioritySummonBtn.className = "field-summon-btn";
+  prioritySummonBtn.textContent = t("summonPriority");
+  prioritySummonBtn.addEventListener("click", () => {
+    revealedPriority = true;
+    syncVisibility();
+  });
+  prioritySummonRow.appendChild(prioritySummonBtn);
+  metadataSection.appendChild(prioritySummonRow);
 
   // Show/hide fields based on type
   const typeRadios = typeGroup.container.querySelectorAll<HTMLInputElement>("input[name='add-type']");
@@ -425,6 +440,9 @@ function buildAddPanel(): void {
     deadSummonRow.style.display = isTodo && !showDead ? "" : "none";
     deadRepeatSelect.container.style.display = showDeadRepeat ? "" : "none";
     deadRepeatSummonRow.style.display = isTodo && hasDeadDate && !showDeadRepeat ? "" : "none";
+    const showPriority = editingPriority !== null || revealedPriority;
+    priorityGroup.container.style.display = showPriority ? "" : "none";
+    prioritySummonRow.style.display = showPriority ? "none" : "";
     checkboxSection.style.display = isTodo ? "" : "none";
     checklistSection.style.display = isTodo ? "" : "none";
     updateDateTimePreview(whenInput.input, whenInput.preview);
@@ -639,6 +657,7 @@ function buildAddPanel(): void {
     clearOverrideBtn,
     schedSummonRow,
     deadSummonRow,
+    prioritySummonRow,
     repeatSummonRow,
     schedRepeatSummonRow,
     deadRepeatSummonRow,
@@ -1525,6 +1544,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
 
   revealedSched = false;
   revealedDead = false;
+  revealedPriority = false;
   revealedRepeat = false;
   revealedSchedRepeat = false;
   revealedDeadRepeat = false;
@@ -1583,6 +1603,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
 
   revealedSched = false;
   revealedDead = false;
+  revealedPriority = false;
   revealedRepeat = false;
   revealedSchedRepeat = false;
   revealedDeadRepeat = false;
