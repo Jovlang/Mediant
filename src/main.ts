@@ -1525,23 +1525,7 @@ async function drainEditSourceSaves(): Promise<boolean> {
 }
 
 function scheduleEditAutosave(): void {
-  if (editingLine === null) {
-    // Add mode: create a draft entry on first save-worthy change
-    const orgText = buildPanelOrgText({ focusInvalid: false });
-    if (orgText === null) return;
-    const before = editSaveBaseSource();
-    const newSource = appendAgendaItemToSource(before, orgText);
-    if (newSource === before) return;
-    const oldLines = before.split("\n");
-    const newLines = newSource.split("\n");
-    for (let i = 0; i < newLines.length; i++) {
-      if (oldLines[i] !== newLines[i]) { editingLine = i + 1; break; }
-    }
-    if (editingLine === null) return;
-    addPanelEl?.classList.add("is-editing");
-    void queueEditSourceSave(newSource);
-    return;
-  }
+  if (editingLine === null) return;
   if (!addPanelEl?.classList.contains("is-editing")) return;
   const orgText = buildPanelOrgText({ focusInvalid: false });
   if (orgText === null) return;
@@ -1914,7 +1898,11 @@ function closeAddPanel(): void {
   if (!addPanelEl) return;
   if (editingLine === null) {
     const orgText = buildPanelOrgText({ focusInvalid: false });
-    if (orgText !== null) appendOrgText(orgText);
+    if (orgText !== null) {
+      const before = editSaveBaseSource();
+      const newSource = appendAgendaItemToSource(before, orgText);
+      if (newSource !== before) void queueEditSourceSave(newSource);
+    }
   }
   disarmDeleteBtn();
   addPanelEl.classList.remove("is-open");
