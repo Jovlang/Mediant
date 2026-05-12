@@ -442,8 +442,8 @@ function buildAddPanel(): void {
     const showSched = isTodo && (hasSchedDate || revealedSched);
     const showDead = isTodo && (hasDeadDate || revealedDead);
     const showRepeat = !isTodo && (hasRepeat || revealedRepeat);
-    const showSchedRepeat = isTodo && hasSchedDate && (hasSchedRepeat || revealedSchedRepeat);
-    const showDeadRepeat = isTodo && hasDeadDate && (hasDeadRepeat || revealedDeadRepeat);
+    const showSchedRepeat = isTodo && (hasSchedDate || revealedSched) && (hasSchedRepeat || revealedSchedRepeat);
+    const showDeadRepeat = isTodo && (hasDeadDate || revealedDead) && (hasDeadRepeat || revealedDeadRepeat);
     syncDetailsSection(detailsSection, isTodo);
     whenInput.container.style.display = isTodo ? "none" : "";
     repeatSelect.container.style.display = showRepeat ? "" : "none";
@@ -451,11 +451,11 @@ function buildAddPanel(): void {
     schedInput.container.style.display = showSched ? "" : "none";
     schedSummonBtn.style.display = isTodo && !showSched ? "" : "none";
     schedRepeatSelect.container.style.display = showSchedRepeat ? "" : "none";
-    schedRepeatSummonRow.style.display = isTodo && hasSchedDate && !showSchedRepeat ? "" : "none";
+    schedRepeatSummonRow.style.display = isTodo && (hasSchedDate || revealedSched) && !showSchedRepeat ? "" : "none";
     deadInput.container.style.display = showDead ? "" : "none";
     deadSummonBtn.style.display = isTodo && !showDead ? "" : "none";
     deadRepeatSelect.container.style.display = showDeadRepeat ? "" : "none";
-    deadRepeatSummonRow.style.display = isTodo && hasDeadDate && !showDeadRepeat ? "" : "none";
+    deadRepeatSummonRow.style.display = isTodo && (hasDeadDate || revealedDead) && !showDeadRepeat ? "" : "none";
     datesSummonRow.style.display = [schedSummonBtn, deadSummonBtn, schedRepeatSummonRow, deadRepeatSummonRow].some(b => b.style.display === "") ? "" : "none";
     const hasTags = tagPicker.getTags().length > 0;
     const showTags = hasTags || revealedTags;
@@ -1676,12 +1676,14 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
     const sched = entry.planning.find(p => p.kind === "scheduled");
     const deadline = entry.planning.find(p => p.kind === "deadline");
     if (sched) {
+      revealedSched = true;
       refs.sched.input.value = tsToDateTimeDisplay(sched.timestamp);
       refs.schedRepeatSelect.value = formatRepeaterValue(sched.timestamp.repeater);
       editingSchedRepeater = sched.timestamp.repeater
         ? formatRepeaterValue(sched.timestamp.repeater) : null;
     }
     if (deadline) {
+      revealedDead = true;
       refs.dead.input.value = tsToDateTimeDisplay(deadline.timestamp);
       refs.deadRepeatSelect.value = formatRepeaterValue(deadline.timestamp.repeater);
       editingDeadRepeater = deadline.timestamp.repeater
