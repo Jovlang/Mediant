@@ -1,37 +1,428 @@
 # Mediant
 
-A focused web agenda and editor for Org-mode files.
+A calm, focused web agenda for Org-mode files.
 
-Mediant parses a practical subset of Org syntax, renders a rolling agenda view, and can edit common agenda workflows without trying to become a full Org implementation. It runs in two modes:
+Mediant turns a plain `.org` file into a clean rolling agenda view: overdue tasks, upcoming deadlines, scheduled items, recurring events, quick capture, lightweight editing, tag filtering, and optional browser notifications.
 
-- **Static mode** — paste Org content into a textarea, everything stays in `localStorage`. Zero-install, works from any static host.
-- **Server mode** — `mediant <file.org>` starts a local Node server that reads and writes a real `.org` file. The UI hydrates from the file on load and picks up external edits (e.g. from Emacs) live via SSE.
+It is built around a simple idea:
 
-The server can run locally for near-instant sync with your editor, or on a VPS for mobile access (behind Tailscale, an SSH tunnel, or a reverse proxy — no built-in auth). Keep the `.org` file in sync between machines with Syncthing, Dropbox, git, or whatever you prefer.
+> Your tasks should stay as plain text files,
+> but the interface should still feel modern, fast, and pleasant to use.
+
+Mediant is not a full Org-mode implementation. It is not a project-management platform. It is not a cloud service. It is a small agenda UI for people who like plain files, but do not always want to live inside Emacs just to see what their week looks like.
+
+You keep the file. Mediant gives it a focused interface.
+
+---
+
+## Why Mediant exists
+
+Org-mode is powerful because it stores real information in ordinary text files. You can edit them anywhere, version them, sync them, grep them, and keep them for decades.
+
+But a plain text file is not always the best interface for answering simple daily questions:
+
+* What is happening today?
+* What is overdue?
+* What is coming up this week?
+* Which deadlines are getting close?
+* What did I schedule but forget?
+* What can I quickly capture without opening my whole system?
+
+Mediant exists for that layer.
+
+It keeps Org as the source of truth, then adds a focused browser interface for the agenda-shaped parts of the file.
+
+The goal is not to expose every possible Org feature. The goal is to make the common personal-agenda workflow feel clear, fast, and calm.
+
+---
+
+## What Mediant feels like
+
+Mediant is designed for fast visual scanning.
+
+It gives you:
+
+* a rolling agenda view
+* overdue items at the top
+* upcoming deadlines below that
+* day cards for the active range
+* scheduled tasks and timed events
+* subtle handling of DONE items
+* quick capture with a single key
+* lightweight add/edit panels
+* tag and priority filtering
+* recurring tasks with per-occurrence exceptions
+* optional browser notifications for timed events
+* English and Norwegian UI strings
+
+The interface tries to stay quiet. Features are available, but they should not make the default view feel like a dashboard, a team workspace, or a database admin panel.
+
+Mediant is for “my stuff”.
+
+---
+
+## The basic model
+
+Mediant has three layers:
+
+```text
+.org file → parser → agenda → UI
+```
+
+The `.org` file is the source of truth.
+
+The parser reads a practical subset of Org syntax into structured entries.
+
+The agenda generator decides what should appear today, tomorrow, next week, in overdue, in deadlines, or in someday.
+
+The UI renders that agenda and writes common edits back into the original Org source.
+
+This separation is important: parsing remains about Org syntax, while agenda classification remains about what the interface needs to show.
+
+---
+
+## Two ways to use it
+
+Mediant can run in two modes.
+
+### Static mode
+
+Paste Org content into the browser.
+
+Everything stays in `localStorage`.
+
+There is no server, no account, no database, and no install step beyond hosting the static files.
+
+This is useful for:
+
+* trying Mediant
+* temporary agendas
+* simple personal lists
+* static hosting
+* browser-only use
+
+### Server mode
+
+Run Mediant against a real Org file:
+
+```sh
+mediant ~/org/todo.org
+```
+
+Mediant starts a tiny Node server bound to `127.0.0.1`. The browser hydrates from the file, writes edits back to disk, and receives live updates when the file changes externally.
+
+That means you can edit the same file from Emacs and see the browser UI update automatically.
+
+This is useful for:
+
+* using Org as the real storage format
+* combining Emacs editing with a browser agenda
+* local desktop use
+* mobile access through Tailscale, SSH tunnels, or a reverse proxy
+* syncing the file with Dropbox, Syncthing, git, Nextcloud, or anything else
+
+Mediant does not include authentication. If you expose it beyond localhost, put it behind something you trust.
+
+---
+
+## What Mediant is not
+
+Mediant is deliberately not trying to become all of Org-mode in the browser.
+
+It does not aim to replace Emacs Org.
+
+It does not attempt to support every Org syntax feature.
+
+It does not provide collaboration, accounts, teams, ACLs, dashboards, or a database backend.
+
+It does not try to own your workflow.
+
+The intended shape is smaller:
+
+> One plain file.
+> One focused agenda.
+> Enough editing to support daily use.
+
+---
+
+## Getting started
+
+Install dependencies and start the development server:
+
+```sh
+npm install
+npx vite
+```
+
+The dev server runs at:
+
+```text
+http://localhost:5173
+```
+
+In this mode, Mediant uses the textarea/static workflow.
+
+Run tests:
+
+```sh
+npm test
+```
+
+Build the browser bundle:
+
+```sh
+npm run build
+```
+
+`npm install` only pulls development tooling:
+
+* TypeScript
+* Vite
+* Vitest
+* happy-dom
+
+The shipped runtime uses no npm packages. The browser bundle is static, and the optional server uses only Node built-ins.
+
+---
+
+## Server mode
+
+Build once:
+
+```sh
+npm run build
+```
+
+Run Mediant against an Org file:
+
+```sh
+node server/cli.mjs ~/org/todo.org
+```
+
+By default, the server listens on:
+
+```text
+http://localhost:4242
+```
+
+Use another port:
+
+```sh
+node server/cli.mjs ~/org/todo.org --port 7000
+```
+
+Run in the background:
+
+```sh
+node server/cli.mjs ~/org/todo.org --daemon
+```
+
+After installing globally or linking the package:
+
+```sh
+npm install -g .
+# or
+npm link
+```
+
+You can run:
+
+```sh
+mediant ~/org/todo.org
+mediant ~/org/todo.org --port 7000
+mediant ~/org/todo.org --daemon
+```
+
+A daemon prints its PID when it starts. Stop it with:
+
+```sh
+kill <pid>
+```
+
+### Server behavior
+
+In server mode:
+
+* the browser loads the Org source from disk
+* UI edits are written back to the file
+* external edits are detected automatically
+* updates are pushed to the browser with Server-Sent Events
+* the file on disk is the source of truth
+
+Conflict strategy: **disk wins**.
+
+If the file changes underneath the browser, the server rejects the stale write with `409`, and the UI reloads from disk.
+
+### Security
+
+The server binds to `127.0.0.1` and has no built-in authentication.
+
+For remote access, use something like:
+
+* Tailscale
+* an SSH tunnel
+* a trusted reverse proxy
+* another private network layer
+
+Do not expose the server directly to the public internet unless you have added your own protection in front of it.
+
+---
+
+## The agenda view
+
+Mediant renders a rolling agenda from your Org file.
+
+The main view includes:
+
+* **Overdue** — TODO items past their `SCHEDULED` or `DEADLINE` date
+* **Upcoming deadlines** — future deadlines sorted by due date
+* **Day cards** — scheduled tasks, timed events, all-day items, and recurring occurrences
+* **Someday** — undated TODO items with no timestamp, `SCHEDULED`, or `DEADLINE`
+
+The default range is 7 days. A month-ahead toggle expands the range to 30 days.
+
+You can navigate with buttons or keyboard shortcuts.
+
+---
+
+## Daily workflow
+
+Mediant is designed around a few common actions.
+
+### Capture something quickly
+
+Press `q` to open quick capture.
+
+Type a task, press `Enter`, and Mediant appends it as an undated `TODO` under `* Tasks`.
+
+The field stays focused so you can enter several tasks quickly.
+
+### Add a task or event
+
+Press `a` to open the add-item panel.
+
+New TODO tasks are appended under:
+
+```org
+* Tasks
+```
+
+New events are appended under:
+
+```org
+* Events
+```
+
+### Edit an existing item
+
+Click an item to open the edit panel.
+
+Edits autosave as fields change. There is no separate Save button.
+
+The editor preserves body text and updates the relevant part of the original Org source.
+
+### Work with tags
+
+Click a tag to filter the agenda.
+
+Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible.
+
+Active filters are shown in the header and can be cleared in one click.
+
+### Work with recurring items
+
+Repeating timestamps render as multiple agenda occurrences.
+
+When editing a recurring occurrence, Mediant can apply a one-off change to that occurrence without changing the whole series.
+
+Supported per-occurrence changes include:
+
+* skip this occurrence
+* shift this occurrence by minutes, hours, or days
+* reschedule this occurrence to another date or time
+* attach a one-off note
+* stop the series before a given base occurrence
+
+These changes are stored as ordinary Org properties, so the file remains valid Org.
+
+---
+
+## Keyboard shortcuts
+
+| Key | Action                            |
+| --- | --------------------------------- |
+| `n` | Next range                        |
+| `p` | Previous range                    |
+| `t` | Jump to today                     |
+| `a` | Open add-item panel               |
+| `q` | Open quick capture                |
+| `h` | Toggle hide empty days            |
+| `d` | Toggle hide completed and skipped |
+| `m` | Toggle month-ahead view           |
+| `x` | Clear active tag filters          |
+
+Shortcuts are disabled while typing in form fields.
+
+---
+
+## Date input shorthand
+
+Add and edit fields accept a few shorthand forms:
+
+| Input        | Meaning                         |
+| ------------ | ------------------------------- |
+| `DD`         | Day of current or next month    |
+| `DD/MM`      | Day and month                   |
+| `DD/MM/YY`   | Day, month, two-digit year      |
+| `DD/MM/YYYY` | Full date                       |
+| `+N`         | N days from today               |
+| `mon`..`sun` | Next matching weekday           |
+| `man`..`søn` | Next matching Norwegian weekday |
+
+Ambiguous numeric forms resolve to the next future occurrence. Two-digit years are interpreted in the current century.
+
+---
 
 ## Supported Org syntax
 
-See [ORG-SYNTAX.md](ORG-SYNTAX.md) for the full breakdown of supported, gracefully ignored, and unsupported syntax.
+Mediant supports a practical subset of Org syntax for agenda use.
 
-| Feature | Example |
-|---|---|
-| Headings | `* Top level` / `** Second level` |
-| TODO / DONE | `** TODO Some task` / `** DONE Finished` |
-| Priority cookies | `** TODO [#A] Urgent task` |
-| Tags | `** Heading :tag1:tag2:` |
-| Active timestamp | `<2026-04-07 ti. 15:15-16:00>` |
-| Repeater | `<2026-04-07 ti. 15:15-16:00 +1w>` |
-| SCHEDULED | `SCHEDULED: <2026-04-14 ti. 12:00>` |
-| DEADLINE | `DEADLINE: <2026-05-05 ti.>` |
-| Checkbox lists | `- [ ] Pending` / `- [X] Done` |
+For the full breakdown of supported, gracefully ignored, and unsupported syntax, see [`ORG-SYNTAX.md`](ORG-SYNTAX.md).
+
+| Feature          | Example                                     |
+| ---------------- | ------------------------------------------- |
+| Headings         | `* Top level` / `** Second level`           |
+| TODO / DONE      | `** TODO Some task` / `** DONE Finished`    |
+| Priority cookies | `** TODO [#A] Urgent task`                  |
+| Tags             | `** Heading :tag1:tag2:`                    |
+| Active timestamp | `<2026-04-07 ti. 15:15-16:00>`              |
+| Repeater         | `<2026-04-07 ti. 15:15-16:00 +1w>`          |
+| SCHEDULED        | `SCHEDULED: <2026-04-14 ti. 12:00>`         |
+| DEADLINE         | `DEADLINE: <2026-05-05 ti.>`                |
+| Checkbox lists   | `- [ ] Pending` / `- [X] Done`              |
 | Progress cookies | `** TODO Task [2/3]` / `** TODO Task [66%]` |
-| Body text | Free text lines under a heading |
+| Body text        | Free text lines under a heading             |
 
-Anything outside this subset is ignored gracefully — it will not cause errors.
+Anything outside this subset is ignored gracefully. Unsupported syntax should not cause parse errors.
 
-### Mediant-specific extensions
+---
 
-Mediant layers two small extensions on top of standard Org: **recurrence exceptions** and **series truncation**. Two property-drawer key families let a single occurrence of a repeating entry deviate from the base series (skip / shift / move / attach a note), keyed on the unshifted base date so they round-trip cleanly:
+## Mediant-specific Org extensions
+
+Mediant adds two small extensions on top of ordinary Org property drawers:
+
+* recurrence exceptions
+* series truncation
+
+These are used to represent per-occurrence changes to repeating entries.
+
+Because they are stored as normal property drawer keys, the file remains valid Org. Emacs can open and edit it without knowing anything about Mediant.
+
+### Recurrence exceptions
+
+A repeating Org entry may have one-off changes keyed by the unshifted base occurrence date.
+
+Example:
 
 ```org
 ** TODO Yoga :health:
@@ -45,24 +436,68 @@ SCHEDULED: <2026-04-27 ma. 17:00-18:00 +1w>
 :END:
 ```
 
-`SERIES-UNTIL` is an **exclusive** end date for the repeating series, evaluated against the repeater's unshifted base slots rather than the final rendered date after a move:
+Supported exception values:
 
-- A base occurrence dated exactly `2026-06-01` is excluded.
-- A reschedule keyed to `:EXCEPTION-2026-06-01:` or any later base slot is ignored, because that slot no longer exists in the series.
-- A reschedule keyed to an earlier valid slot may still land after `2026-06-01`, which is what makes split-series handoff work cleanly.
+| Value                               | Meaning                                             |
+| ----------------------------------- | --------------------------------------------------- |
+| `cancelled`                         | Hide or de-emphasize this occurrence                |
+| `shift +45m`                        | Move this occurrence by a relative offset           |
+| `shift -1h`                         | Move this occurrence earlier by one hour            |
+| `shift +1d`                         | Move this occurrence forward by one day             |
+| `reschedule YYYY-MM-DD`             | Move this occurrence to another date                |
+| `reschedule YYYY-MM-DD HH:MM`       | Move this occurrence to another date and time       |
+| `reschedule YYYY-MM-DD HH:MM-HH:MM` | Move this occurrence to another date and time range |
 
-Because these ride on ordinary property-drawer syntax, files stay valid Org. Emacs opens and edits them without complaint; load the optional `elisp/mediant-org-agenda.el` integration if you want Org agenda to hide cancelled occurrences, move shifted/rescheduled occurrences, show notes, and apply `SERIES-UNTIL`. See [ORG-SYNTAX.md](ORG-SYNTAX.md#mediant-specific-extensions) for the full grammar, edge cases, and interop notes.
+A note can be attached with:
 
-### Optional Org agenda integration
+```org
+:EXCEPTION-NOTE-YYYY-MM-DD: Note text
+```
 
-Out of the box, Emacs treats `:EXCEPTION-…:` and `:SERIES-UNTIL:` as ordinary properties, so they round-trip safely but Org agenda still shows every base occurrence. The bundled Elisp package teaches Org agenda to honor them on display:
+The date in the property key is always the original base date of the occurrence, not the final rendered date after a shift or reschedule.
 
-- cancelled occurrences are hidden
-- shifted and rescheduled occurrences move to their target day/time
-- `EXCEPTION-NOTE` text renders as a sub-line under the occurrence
-- `SERIES-UNTIL` cuts the series at its exclusive end date
+This keeps the exception stable even if the occurrence moves.
 
-To enable it, point Emacs at `elisp/` and turn on the global minor mode:
+### Series truncation
+
+A repeating series can be cut off with:
+
+```org
+:SERIES-UNTIL: YYYY-MM-DD
+```
+
+`SERIES-UNTIL` is an exclusive end date.
+
+It is evaluated against the repeater's unshifted base slots, not the final rendered dates after exception handling.
+
+That means:
+
+* a base occurrence dated exactly `2026-06-01` is excluded
+* an exception keyed to `2026-06-01` or later is ignored because that base slot no longer exists
+* an earlier valid base slot may still be rescheduled past `2026-06-01`
+
+This makes split-series handoff work cleanly: one heading can end on a base date while a successor heading starts on that same date without overlapping base occurrences.
+
+See [`ORG-SYNTAX.md`](ORG-SYNTAX.md#mediant-specific-extensions) for the full grammar, edge cases, and interop notes.
+
+---
+
+## Optional Emacs Org agenda integration
+
+Out of the box, Emacs treats Mediant's exception properties as ordinary properties.
+
+That is safe: they round-trip normally, but Org agenda will still show every base occurrence.
+
+The bundled Elisp integration teaches Org agenda to honor Mediant recurrence exceptions when displaying the agenda.
+
+It can:
+
+* hide cancelled occurrences
+* move shifted and rescheduled occurrences to their target day/time
+* show `EXCEPTION-NOTE` text as a sub-line under the occurrence
+* apply `SERIES-UNTIL` as an exclusive series cutoff
+
+Enable it with:
 
 ```elisp
 (add-to-list 'load-path "/path/to/Mediant/elisp")
@@ -70,161 +505,202 @@ To enable it, point Emacs at `elisp/` and turn on the global minor mode:
 (mediant-org-agenda-mode 1)
 ```
 
-The integration is display-only — there are no Emacs commands for creating or editing exception properties. To write them, use Mediant's edit panel or edit the property drawer by hand.
+The integration is display-only. It does not add Emacs commands for creating or editing exception properties.
 
-## Getting started
+To write those properties, use Mediant's edit panel or edit the property drawer by hand.
 
-```sh
-npm install
-npx vite         # dev server at http://localhost:5173 (textarea mode)
-npm test         # run all tests
-npm run build    # produce dist/
-```
+---
 
-`npm install` only pulls dev tooling: TypeScript, Vite (dev server + bundler), Vitest (test runner), and happy-dom (DOM for tests). The shipped runtime — the browser bundle and `server/cli.mjs` — uses no npm packages.
+## API
 
-### Server mode
+In server mode, Mediant exposes three endpoints on top of the static UI.
 
-To run against a real `.org` file:
+| Method | Path          | Purpose                                                                           |
+| ------ | ------------- | --------------------------------------------------------------------------------- |
+| `GET`  | `/api/source` | Returns the file contents. Response header: `X-Version: <mtimeMs>`.               |
+| `PUT`  | `/api/source` | Writes the file. Accepts `If-Match: <version>`. Version mismatch returns `409`.   |
+| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <version>` when the file changes on disk. |
 
-```sh
-npm run build                    # produce dist/ (required once)
-node server/cli.mjs ~/org/todo.org            # foreground, http://localhost:4242
-node server/cli.mjs ~/org/todo.org --port 7000
-node server/cli.mjs ~/org/todo.org --daemon   # fork to background, prints PID
-```
+The version is based on the file modification timestamp.
 
-Or, after `npm install -g .` (or `npm link`), just:
+Write conflicts are rejected. The UI then reloads from disk.
 
-```sh
-mediant ~/org/todo.org [--port N] [--daemon]
-```
-
-The browser UI hydrates directly from the file. Edits made in the UI are written back to disk, and external edits (from Emacs, Syncthing, etc.) are picked up automatically via SSE.
-
-**Security:** the server binds to `127.0.0.1` with no authentication. For remote access, use Tailscale, an SSH tunnel, or a reverse proxy.
-
-**Stopping a daemon:** `kill <pid>` (printed on `--daemon` start).
-
-### API
-
-The server exposes three endpoints on top of the static UI:
-
-| Method | Path | Purpose |
-|---|---|---|
-| `GET` | `/api/source` | Returns the file contents. Response header `X-Version: <mtimeMs>`. |
-| `PUT` | `/api/source` | Writes the file. Accepts `If-Match: <version>`; mismatch returns `409`. Response header `X-Version` is the new version. |
-| `GET` | `/api/events` | Server-Sent Events stream. Emits `data: <version>` whenever the file changes on disk. |
-
-Conflict strategy: **disk wins**. If the file changes underneath you, the server rejects the write (409) and the UI reloads from disk.
+---
 
 ## Architecture
 
-Three clearly separated stages:
+Mediant is split into three main stages:
 
-```
-  .org file → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
-              OrgEntry[]           AgendaDay[]            HTML/CSS
+```text
+.org file → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
+            OrgEntry[]          AgendaDay[]            HTML/CSS
 ```
 
-- **Parser types** reflect Org source faithfully (headings, timestamps, planning, tags, checkbox items, progress cookies, body)
-- **Agenda types** reflect UI needs (render categories, day grouping, deadline collection)
-- Classification into display categories happens at the agenda stage, never during parsing
+### Parser layer
+
+The parser reads Org source into structures that reflect the file:
+
+* headings
+* TODO state
+* priority cookies
+* tags
+* planning lines
+* timestamps
+* checkbox items
+* progress cookies
+* body text
+* selected property drawer values
+
+Parser types should describe Org source faithfully. They should not decide how an entry appears in the agenda.
+
+### Agenda layer
+
+The agenda generator turns parsed Org entries into display-oriented structures:
+
+* agenda days
+* timed items
+* all-day items
+* overdue items
+* deadline items
+* someday items
+* recurrence occurrences
+
+Classification happens here, not in the parser.
+
+### UI layer
+
+The UI renders the agenda and wires interaction:
+
+* day cards
+* filters
+* settings
+* quick capture
+* add/edit panels
+* notifications
+* source mutation helpers
+
+The UI writes back to the original Org source rather than maintaining a separate database.
+
+---
 
 ## Project structure
 
-```
+```text
 src/
   org/
-    model.ts           — Parser output types (OrgEntry, OrgPlanning, TodoState, Priority, CheckboxItem, RecurrenceOverride, RecurrenceException)
-    timestamp.ts       — Timestamp parsing, Date conversion, recurrence expansion, per-occurrence exception application
-    parser.ts          — Line-by-line Org file parser (including exception properties inside PROPERTIES drawers)
-    drawer.ts          — Property-drawer mutation helpers (upsertProperty / removeProperty)
+    model.ts           — Parser output types
+    timestamp.ts       — Timestamp parsing, Date conversion, recurrence expansion, exception handling
+    parser.ts          — Line-by-line Org parser
+    drawer.ts          — Property-drawer mutation helpers
     sourceEdit.ts      — Raw Org source mutation helpers for UI writes
     __tests__/         — Timestamp, parser, and drawer tests
+
   agenda/
-    model.ts           — Render types (AgendaItem, AgendaDay, AgendaWeek, DeadlineItem, OverdueItem, SomedayItem)
+    model.ts           — Render-oriented agenda types
     generate.ts        — Range generation, classification, sorting, deadline collection
     __tests__/         — Agenda generation tests
+
   ui/
-    render.ts          — DOM rendering from AgendaDay[] + DeadlineItem[] + OverdueItem[]
+    render.ts          — DOM rendering
     notifications.ts   — Browser notification preference and timer scheduling
-    style.css          — All styles (CSS grid layout)
+    style.css          — Styles
+
   i18n.ts              — English/Norwegian UI strings and locale persistence
-  main.ts              — Entry point: probes server, hydrates, wires parse → generate → render
+  main.ts              — Entry point: hydrate, parse, generate, render
+
 server/
-  cli.mjs              — Node CLI + HTTP server (no deps). Serves dist/ and exposes /api/source + /api/events.
-index.html             — Minimal shell with #agenda container
+  cli.mjs              — Node CLI and HTTP server using built-in modules only
+
+elisp/
+  mediant-org-agenda.el — Optional Org agenda display integration
+
+index.html             — Minimal browser shell
 ```
 
-## UI overview
+---
 
-- **Overdue section** at the top — TODO items past their DEADLINE or SCHEDULED date, sorted most overdue first, with a clickable TODO badge before each title
-- **Upcoming deadlines** section below overdue (global, sorted by due date), labeled as `Today` or compact day counts like `12d`, with urgency colors that progress from red to orange to yellow to a calmer tone as the due date gets farther away
-- **Day cards** (7 consecutive days by default, or 30 days with the month-ahead toggle) each containing:
-  - All-day events (holidays, birthdays) in a subtle grouped section
-  - Timed events with a monospace, content-width time column and plain `#tag` labels under the title
-  - Scheduled tasks inline (time → TODO/DONE badge → title)
-- **Tag filtering** — clicking a tag filters the agenda, overdue, deadlines, and someday sections. Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible. Active filters are shown in the header and can be cleared in one click.
-- **Tag picker keyboard support** — in the add/edit panel, `ArrowUp`/`ArrowDown` move through tag suggestions, `Enter` selects the highlighted suggestion, and `Backspace` on an empty tag field removes the last selected tag pill.
-- **Priority badges** — A/B/C priority cookies rendered as small colored badges (red/amber/blue) before the item title, including overdue and upcoming deadline rows
-- **Progress badges** — `[2/3]` shown as a small badge next to the title (green when complete, gray otherwise)
-- **Checkbox lists** — `- [ ]`/`- [X]` items rendered as a mini checklist under agenda items. Clicking a subtask toggles completion; text, add, and remove edits live in the edit-panel checklist editor for TODO tasks. Events never show or write checklist state. Lists are collapsed by default — a small `>`/`<` disclosure control next to the item title expands or collapses the list, with state preserved across rerenders and independent per duplicate rendering of the same entry.
-- **Recurrence exceptions** — per-occurrence deviations on a repeating entry (skip, shift by `±N(m|h|d)`, reschedule to another date/time, attach a one-off note). Shifted/rescheduled occurrences show a `← Moved` or `→ Moved` chip (arrow points to the direction of the move); skipped occurrences are de-emphasised — a small `•` prefixes the title, the row dims, and the title shifts to muted text. Notes render as an italic line under the item. Exceptions are stored in the entry's `:PROPERTIES:` drawer keyed by the unshifted base date (e.g. `:EXCEPTION-2026-05-04: shift +45m`), so they round-trip cleanly.
-- **Series truncation** — `:SERIES-UNTIL: YYYY-MM-DD` stops a repeating series at an exclusive end date, evaluated on the unshifted base slots. This lets one heading end on a handoff date while a successor heading starts on that same date without overlap, and still allows older valid slots to be moved past the cutoff.
-- **Someday section** at the bottom — undated TODO items (no timestamps, no SCHEDULED/DEADLINE), shown in source order so quick captures stay in capture order
-- **Quick capture** — press `q` to open a fixed one-line capture overlay. `Enter` appends the text as an undated `TODO` under `* Tasks`, clears the field, and keeps focus ready for the next task. `Escape` or clicking outside the field closes it.
-- **DONE items** rendered at reduced opacity in muted text
-- **Today** indicated by blue card border and small dot marker
-- **Hide tags** — the `Hide tags` toggle removes agenda tag labels while preserving active tag filters in the header. The preference is stored in `localStorage`.
-- **Hide empty days** — the `Hide empty days` toggle removes days with no visible agenda items from the active range. This is useful with tag filters; if every day is hidden, the day-card container is hidden too. The preference is stored in `localStorage`.
-- **Hide completed & skipped** — the `Hide completed & skipped` toggle drops DONE entries and skipped recurrence occurrences from the day cards and the someday section. Pairs naturally with `Hide empty days` to collapse the view down to outstanding work. The preference is stored in `localStorage`.
-- **TODO badges** — TODO/DONE badges render as compact status marks with the same click/keyboard toggle behavior and accessible labels.
-- **Month-ahead view** — a settings toggle expands the day cards from 7 days to 30 days. Prev/next navigation moves by the active range length, and the preference is stored in `localStorage`.
-- **Notifications** — a settings toggle requests browser notification permission and schedules reminders for timed events happening today, 1 hour before their start time. The preference is stored in `localStorage`.
-- **Language** — a settings toggle switches the UI between English and Norwegian, with the chosen locale stored in `localStorage`.
-- **Range navigation** with prev/next/today buttons
-- **Keyboard shortcuts** — `n` next range, `p` previous range, `t` jump to today, `a` open the add-item panel, `q` open quick capture, `h` toggle hide empty days, `d` toggle hide completed & skipped, `m` toggle month-ahead view, `x` clear active tag filters. Shortcuts are disabled while typing in form fields.
-- **Now line** on today's timed section
-- **Add-item panel** for creating TODO tasks and events from the UI. New TODOs are appended under `* Tasks`; new events are appended under `* Events`.
-- **Edit-item panel** for updating an existing entry in place (preserves body text). Edits autosave as fields change; there is no separate Save step. Clicking a recurring occurrence reveals a "This occurrence" section alongside the series fields, where skip/stop-repeat toggles, the move date/time field, the note field, and Clear override write exception properties keyed on the unshifted base date.
-- **Shorthand date input** — add/edit date fields accept `DD`, `DD/MM`, `DD/MM/YY`, `DD/MM/YYYY`, `+N`, and weekday names like `mon`..`sun` / `man`..`søn`. Ambiguous numeric forms resolve to the next future occurrence, and 2-digit years are interpreted in the current century.
 ## Tech stack
 
-- **TypeScript** — parser, data model, agenda generation, rendering
-- **Vite** — dev server and bundling
-- **Vitest** — 356 tests across parser, timestamp, source-edit, agenda, UI, notification, i18n, main, and server suites
-- **HTML/CSS** — agenda view with CSS grid
-- **Node** (built-ins only) — optional local server with no runtime npm dependencies
+* **TypeScript** — parser, data model, agenda generation, rendering
+* **HTML/CSS** — agenda UI
+* **Vite** — development server and bundling
+* **Vitest** — test runner
+* **happy-dom** — DOM environment for tests
+* **Node built-ins** — optional local server and CLI
 
-## Non-goals (v1)
+Mediant has no runtime npm dependencies in the shipped browser bundle or server.
 
-- Full Org-mode syntax
-- Heading hierarchy in the agenda
-- Arbitrary property drawers (only `:EXCEPTION-…:` / `:EXCEPTION-NOTE-…:` / `:SERIES-UNTIL:` are read; habits and clocking are ignored)
-- Timezone handling beyond local time
-- Advanced state workflows / custom TODO keywords
-- Multi-file agenda or export
-- Built-in authentication (use Tailscale / SSH tunnel / reverse proxy)
-- Collaborative editing (the file on disk is the single source of truth)
+---
+
+## Tests
+
+Run the full test suite:
+
+```sh
+npm test
+```
+
+The test suite covers parser behavior, timestamp handling, recurrence expansion, source editing, agenda generation, UI rendering, notifications, i18n, main entry behavior, and server behavior.
+
+---
 
 ## Local storage
 
-Mediant uses your browser's `localStorage` for the following:
+Mediant uses browser `localStorage` for UI preferences and, in static mode, the pasted Org source.
 
-| Key | Purpose |
-|---|---|
-| `mediant-org-source` | Pasted Org content (static mode only — ignored in server mode) |
-| `mediant-hide-tags` | Whether agenda tag labels are hidden |
-| `mediant-hide-empty-days` | Whether empty days are hidden in the agenda view |
-| `mediant-hide-completed` | Whether DONE entries and skipped occurrences are hidden in day cards and someday |
-| `mediant-month-ahead` | Whether the agenda shows 30 days instead of 7 |
-| `mediant-notifications` | Whether browser reminders are enabled |
-| `mediant-locale` | Selected UI locale (`en` or `no`) |
-| `theme` | Light/dark mode preference |
+| Key                       | Purpose                                                    |
+| ------------------------- | ---------------------------------------------------------- |
+| `mediant-org-source`      | Pasted Org content in static mode. Ignored in server mode. |
+| `mediant-hide-tags`       | Whether agenda tag labels are hidden.                      |
+| `mediant-hide-empty-days` | Whether empty days are hidden.                             |
+| `mediant-hide-completed`  | Whether DONE entries and skipped occurrences are hidden.   |
+| `mediant-month-ahead`     | Whether the agenda shows 30 days instead of 7.             |
+| `mediant-notifications`   | Whether browser reminders are enabled.                     |
+| `mediant-locale`          | Selected UI locale: `en` or `no`.                          |
+| `theme`                   | Light/dark mode preference.                                |
 
-In static mode all data stays in the browser. In server mode the Org source lives in the file you passed to the CLI; UI preferences are still browser-local.
+In static mode, the Org source lives in the browser.
+
+In server mode, the Org source lives in the file passed to the CLI. UI preferences are still browser-local.
+
+---
+
+## Non-goals
+
+Mediant intentionally does not support everything Org-mode can do.
+
+Current non-goals include:
+
+* full Org-mode syntax
+* heading hierarchy in the agenda view
+* arbitrary property drawer semantics
+* habits
+* clocking
+* timezone handling beyond local time
+* custom TODO keyword workflows
+* advanced state machines
+* multi-file agenda
+* export
+* collaborative editing
+* built-in authentication
+* a database backend
+* accounts or cloud sync
+
+For unsupported Org syntax, the preferred behavior is graceful ignoring rather than failure.
+
+---
+
+## Data ownership
+
+Mediant is designed so the important data remains outside Mediant.
+
+Your Org file can be edited with other tools, synced with whatever you prefer, backed up normally, and read without this project.
+
+Mediant should make the file nicer to use, not make the file depend on Mediant.
+
+---
 
 ## License
 
 [GPLv3](LICENSE)
+
