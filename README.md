@@ -659,6 +659,7 @@ Mediant uses browser `localStorage` for UI preferences and, in static mode, the 
 | `mediant-hide-tags`       | Whether agenda tag labels are hidden.                      |
 | `mediant-hide-empty-days` | Whether empty days are hidden.                             |
 | `mediant-hide-completed`  | Whether DONE entries and skipped occurrences are hidden.   |
+| `mediant-hide-deadlines`  | Whether the upcoming deadlines section is hidden.          |
 | `mediant-month-ahead`     | Whether the agenda shows 30 days instead of 7.             |
 | `mediant-notifications`   | Whether browser reminders are enabled.                     |
 | `mediant-locale`          | Selected UI locale: `en`, `nb`, `it`, or `de`.             |

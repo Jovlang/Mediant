@@ -103,21 +103,22 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 - **Overdue section** at the very top — TODO items past their DEADLINE or SCHEDULED date, sorted most overdue first. Shows days overdue + kind badge (DEADLINE/SCHEDULED) + clickable TODO badge before the title. Red-accented border and labels.
 - **Upcoming deadlines section** below overdue (global, not per-day). Due text is rendered as `Today` or compact day counts like `12d`, with urgency colors that progress from red to orange to yellow to a calmer tone as the due date gets farther away.
 - **Day cards** (7 consecutive days by default, or 30 days with the month-ahead toggle), each containing:
-  - All-day section (holidays, birthdays — no label, title flush left)
-  - Deadline items (DEADLINE badge + title, time shown if present)
-  - Timed events (time column + title + plain `#tag` labels under the title)
-  - Scheduled tasks inline with events (time → TODO badge → title)
+  - All-day section: title + metadata row showing `all day` · #tags
+  - Deadline items: title + metadata row showing `deadline` · time (if present) · #tags
+  - Timed events: title + metadata row showing time · #tags
+  - Scheduled tasks: title + metadata row showing state label (`scheduled` / `task` / `done`) · time (if present) · #tags
 - **DONE items** rendered at `opacity: 0.7` in muted text (`var(--text-done)`)
 - **Today** indicated by blue border + small blue dot (not a text badge)
 - **Day headings** are clickable/focusable controls. Activating a day heading opens the add-item panel in Event mode with that day prefilled in the When field.
 - **Hide empty days** — toolbar toggle removes day blocks with no visible agenda items. If no day blocks remain, the day-card container is not rendered. Preference persists in localStorage (`mediant-hide-empty-days`).
 - **Hide completed & skipped** — toolbar toggle filters out DONE entries and `skipped` (cancelled-occurrence) items from the day cards, and drops DONE entries from the someday section. Filtering happens in `renderAgendaBase` after tag filtering, so it composes with `Hide empty days` (filtered days that fall to zero items collapse). Overdue and upcoming-deadlines collectors already restrict to TODO/non-cancelled items, so they need no extra filter. Preference persists in localStorage (`mediant-hide-completed`).
+- **Hide upcoming deadlines** — settings toggle collapses the upcoming-deadlines section entirely. Preference persists in localStorage (`mediant-hide-deadlines`).
 - **Month-ahead view** — settings toggle expands the day-card range from 7 days to 30 days. Prev/next navigation moves by the active range length. Preference persists in localStorage (`mediant-month-ahead`).
 - **Tags** rendered as plain `#tag` text below the item title.
 - **Hide tags** — settings toggle hides agenda tag labels without clearing active tag filters. Active filters remain visible in the header so they can be removed. Preference persists in localStorage (`mediant-hide-tags`).
 - **Tag filtering** — clicking a tag toggles it in the active filter set. Filtering applies to the visible agenda range, overdue section, upcoming deadlines, and someday section. Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible.
 - **Tag picker keyboard support** — in the add/edit panel, `ArrowUp`/`ArrowDown` move through tag suggestions, `Enter` selects the highlighted suggestion, and `Backspace` on an empty tag field removes the last selected pill.
-- **TODO badges** — TODO/DONE badges render as compact status marks while keeping the same click/keyboard toggle behavior and accessible labels.
+- **TODO badges** — state badges display semantic text labels (`scheduled`, `task`, `done`, `deadline`) rather than the raw `TODO`/`DONE` keyword; `data-state` always holds the actual TODO/DONE value for CSS targeting and toggle behavior. Click/keyboard toggle and accessible labels are unchanged.
 - **Priority badges** — `[#A]`/`[#B]`/`[#C]` rendered as small colored badges (red/amber/blue) nested inside the item title so the row grid templates stay fixed. Do not duplicate priority in metadata rows; it should appear before the title everywhere.
 - **Progress badges** — `[2/3]` rendered as a small badge next to the title (green when complete, gray otherwise)
 - **Checkbox lists** — `- [ ]`/`- [X]` items rendered as a mini checklist under the agenda item; checked items dimmed. Clicking a checkbox row toggles completion. The edit-panel checklist editor is available for TODO tasks, including repeating tasks, and hidden for events. Events never write checklist state. Lists are collapsed by default; a small disclosure control inside the item title (`>` collapsed, `<` expanded) toggles visibility per list. Collapse state is keyed by a stable per-list identity so it survives full agenda rerenders, and duplicate renderings of the same entry (e.g. an upcoming-deadlines row and the matching day-card row) keep independent state.
