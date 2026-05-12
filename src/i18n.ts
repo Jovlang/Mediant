@@ -128,6 +128,7 @@ const messages = {
     summonRepeat: "+ Repeat",
     summonSchedRepeat: "+ Scheduled repeat",
     summonDeadRepeat: "+ Deadline repeat",
+    summonCancel: "+ Cancel",
     summonMove: "+ Move",
     summonNote: "+ Note",
 
@@ -258,6 +259,7 @@ const messages = {
     summonRepeat: "+ Gjenta",
     summonSchedRepeat: "+ Gjenta planlagt",
     summonDeadRepeat: "+ Gjenta frist",
+    summonCancel: "+ Avlys",
     summonMove: "+ Flytt",
     summonNote: "+ Notat",
 
@@ -385,6 +387,7 @@ const messages = {
     summonRepeat: "+ Ripeti",
     summonSchedRepeat: "+ Ripeti pianificato",
     summonDeadRepeat: "+ Ripeti scadenza",
+    summonCancel: "+ Annulla",
     summonMove: "+ Sposta",
     summonNote: "+ Nota",
 
@@ -512,6 +515,7 @@ const messages = {
     summonRepeat: "+ Wiederholen",
     summonSchedRepeat: "+ Geplant wiederholen",
     summonDeadRepeat: "+ Frist wiederholen",
+    summonCancel: "+ Absagen",
     summonMove: "+ Verschieben",
     summonNote: "+ Notiz",
 

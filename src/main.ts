@@ -110,6 +110,7 @@ interface AddPanelRefs {
   repeatSummonRow: HTMLElement;
   schedRepeatSummonRow: HTMLElement;
   deadRepeatSummonRow: HTMLElement;
+  occCancelSummonBtn: HTMLButtonElement;
   occMoveSummonBtn: HTMLButtonElement;
   occNoteSummonBtn: HTMLButtonElement;
   occMoveFieldsWrapper: HTMLElement;
@@ -124,6 +125,7 @@ let revealedPriority = false;
 let revealedRepeat = false;
 let revealedSchedRepeat = false;
 let revealedDeadRepeat = false;
+let revealedOccCancel = false;
 let revealedOccMove = false;
 let revealedOccNote = false;
 let queuedEditSource: string | null = null;
@@ -565,6 +567,15 @@ function buildAddPanel(): void {
   const occSummonRow = document.createElement("div");
   occSummonRow.className = "field-summon-row";
 
+  const occCancelSummonBtn = document.createElement("button");
+  occCancelSummonBtn.type = "button";
+  occCancelSummonBtn.className = "field-summon-btn";
+  occCancelSummonBtn.textContent = t("summonCancel");
+  occCancelSummonBtn.addEventListener("click", () => {
+    revealedOccCancel = true;
+    refreshOccurrenceSection();
+  });
+
   const occMoveSummonBtn = document.createElement("button");
   occMoveSummonBtn.type = "button";
   occMoveSummonBtn.className = "field-summon-btn";
@@ -585,7 +596,7 @@ function buildAddPanel(): void {
     noteTextarea.focus();
   });
 
-  occSummonRow.append(occMoveSummonBtn, occNoteSummonBtn);
+  occSummonRow.append(occCancelSummonBtn, occMoveSummonBtn, occNoteSummonBtn);
   occurrenceSection.appendChild(occSummonRow);
 
   // Save button
@@ -661,6 +672,7 @@ function buildAddPanel(): void {
     repeatSummonRow,
     schedRepeatSummonRow,
     deadRepeatSummonRow,
+    occCancelSummonBtn,
     occMoveSummonBtn,
     occNoteSummonBtn,
     occMoveFieldsWrapper,
@@ -1548,6 +1560,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   revealedRepeat = false;
   revealedSchedRepeat = false;
   revealedDeadRepeat = false;
+  revealedOccCancel = false;
   revealedOccMove = false;
   revealedOccNote = false;
   editingLine = null;
@@ -1607,6 +1620,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   revealedRepeat = false;
   revealedSchedRepeat = false;
   revealedDeadRepeat = false;
+  revealedOccCancel = false;
   revealedOccMove = false;
   revealedOccNote = false;
 
@@ -1784,22 +1798,24 @@ function refreshOccurrenceSection(opts: { resetOccurrenceInput?: boolean } = {})
     : t("onSchedule");
   refs.occurrenceState.classList.toggle("is-modified", override !== null);
 
-  refs.skipCheckboxRow.style.display = "";
   refs.skipCheckbox.checked = isSkipped;
   const nextBaseKey = nextOccurrenceBoundary(base, editingBaseDate);
   const isSeriesLast = nextBaseKey !== null && entry.seriesUntil === nextBaseKey;
-  refs.endSeriesCheckboxRow.style.display = nextBaseKey === null ? "none" : "";
   refs.endSeriesCheckbox.checked = isSeriesLast;
   refs.endSeriesCheckbox.disabled = nextBaseKey === null;
   refs.clearOverrideBtn.style.display = override ? "" : "none";
 
+  const showCancel = revealedOccCancel || isSkipped || isSeriesLast;
   const showMove = revealedOccMove || override !== null;
   const showNote = revealedOccNote || note !== null;
+  refs.skipCheckboxRow.style.display = showCancel ? "" : "none";
+  refs.endSeriesCheckboxRow.style.display = showCancel && nextBaseKey !== null ? "" : "none";
   refs.occMoveFieldsWrapper.style.display = showMove ? "" : "none";
   refs.occNoteFieldsWrapper.style.display = showNote ? "" : "none";
+  refs.occCancelSummonBtn.style.display = showCancel ? "none" : "";
   refs.occMoveSummonBtn.style.display = showMove ? "none" : "";
   refs.occNoteSummonBtn.style.display = showNote ? "none" : "";
-  refs.occSummonRow.style.display = showMove && showNote ? "none" : "";
+  refs.occSummonRow.style.display = showCancel && showMove && showNote ? "none" : "";
 
   // Autosave stores parsed notes trimmed, so avoid normalizing a focused
   // textarea while the user is typing a space before the next word.
