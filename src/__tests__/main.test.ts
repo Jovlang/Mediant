@@ -198,7 +198,7 @@ describe("main.ts integration", () => {
     const inboxTitle = Array.from(document.querySelectorAll<HTMLElement>(".item-title"))
       .find(el => el.textContent?.includes("Inbox"));
     const toggle = inboxTitle?.closest("div")?.querySelector<HTMLElement>(".item-state.is-toggleable");
-    expect(toggle?.textContent).toBe("todo");
+    expect(toggle?.textContent).toBe("scheduled");
     expect(toggle?.dataset.state).toBe("TODO");
     toggle!.click();
     await flush();

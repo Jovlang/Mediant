@@ -475,10 +475,20 @@ type MetadataPart = string | HTMLElement;
 
 function metadataForItem(item: AgendaItem, hasTime: boolean, stateBadge: HTMLElement | null): MetadataPart[] {
   const parts: MetadataPart[] = [];
-  if (stateBadge) parts.push(stateBadge);
+  if (stateBadge) {
+    stateBadge.textContent = taskStateMetadataLabel(item);
+    parts.push(stateBadge);
+  }
   if (hasTime) parts.push(formatTimeRange(item.startTime, item.endTime));
   if (item.category === "all-day") parts.push(t("allDay"));
   return parts;
+}
+
+function taskStateMetadataLabel(item: AgendaItem): string {
+  if (item.entry.todo === "DONE") return t("taskDoneMeta");
+  if (item.category === "deadline") return t("taskDeadlineMeta");
+  if (item.category === "scheduled") return t("taskScheduledMeta");
+  return t("taskOpenMeta");
 }
 
 function renderOverrideChip(
@@ -553,7 +563,6 @@ function renderStateTextBadge(
   state.classList.add("item-state-text");
   const mark = state.querySelector(".item-state-mark");
   mark?.remove();
-  state.textContent = state.dataset.state?.toLowerCase() ?? state.textContent.toLowerCase();
   return state;
 }
 
