@@ -9,6 +9,7 @@
 }
 
 :root {
+  color-scheme: light dark;
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "SF Mono", "Cascadia Code", "Fira Code", monospace;
 
