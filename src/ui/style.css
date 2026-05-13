@@ -669,10 +669,11 @@ body {
 .item-state.is-toggleable {
   cursor: pointer;
   user-select: none;
+  transition: text-shadow 120ms ease;
 }
 
 .item-state.is-toggleable:hover {
-  filter: brightness(1.15);
+  text-shadow: 0 0 8px color-mix(in srgb, currentColor 55%, transparent);
 }
 
 .item-state-mark {
