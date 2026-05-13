@@ -683,6 +683,11 @@ body {
   border-radius: 999px;
   background: transparent;
   box-sizing: border-box;
+  transition: box-shadow 120ms ease;
+}
+
+.item-state.is-toggleable:hover .item-state-mark {
+  box-shadow: 0 0 6px 1px color-mix(in srgb, var(--text-dim) 40%, transparent);
 }
 
 .item-done .item-state {
