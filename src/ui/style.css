@@ -573,6 +573,12 @@ body {
   min-width: 0;
   cursor: pointer;
   user-select: none;
+  border-radius: 0.25rem;
+  transition: text-shadow 120ms ease;
+}
+
+.deadline-item .item-time:hover {
+  text-shadow: 0 0 8px color-mix(in srgb, var(--deadline-urgency, var(--deadline-urgency-calm)) 55%, transparent);
 }
 
 .deadline-item > .item-title,
