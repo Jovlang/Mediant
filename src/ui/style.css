@@ -504,7 +504,7 @@ body {
 
 .overdue-item .item-time {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 650;
   color: var(--text-dim);
   cursor: pointer;
