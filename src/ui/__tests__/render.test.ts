@@ -628,14 +628,14 @@ describe("renderAgenda", () => {
     renderAgenda(container, week, deadlines, [], someday, new Date(2026, 3, 20, 8, 0));
 
     const states = Array.from(container.querySelectorAll<HTMLElement>(".item-state"));
-    expect(states.map(state => state.textContent)).toEqual(["TODO", "task", "done", "deadline", "TODO"]);
-    expect(states.map(state => state.dataset.state)).toEqual(["TODO", "TODO", "DONE", "TODO", "TODO"]);
+    expect(states.map(state => state.textContent)).toEqual(["task", "done", "deadline", "TODO"]);
+    expect(states.map(state => state.dataset.state)).toEqual(["TODO", "DONE", "TODO", "TODO"]);
     const metadataStates = states.filter(state => state.classList.contains("item-state-text"));
     const markStates = states.filter(state => !state.classList.contains("item-state-text"));
     expect(metadataStates.every(state => state.querySelector(".item-state-mark") === null)).toBe(true);
     expect(markStates.every(state => state.querySelector(".item-state-mark") !== null)).toBe(true);
     expect(metadataStates.map(state => state.textContent)).toEqual(["task", "done", "deadline"]);
-    expect(states[2]?.closest(".item-done")).not.toBeNull();
+    expect(states[1]?.closest(".item-done")).not.toBeNull();
     expect(container.querySelector<HTMLElement>(".item-title-stack > .checkbox-list")).not.toBeNull();
   });
 

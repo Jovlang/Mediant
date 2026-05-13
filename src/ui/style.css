@@ -555,7 +555,7 @@ body {
 /* ── Deadline items ───────────────────────────────────────────────── */
 
 .deadline-item {
-  grid-template-columns: 4.35ch auto 1fr;
+  grid-template-columns: 4.35ch 1fr;
   padding: 0.68rem var(--section-padding-x);
   padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
   gap: 0 var(--gap-badge);
@@ -571,6 +571,8 @@ body {
   font-weight: 650;
   color: var(--deadline-urgency, var(--deadline-urgency-calm));
   min-width: 0;
+  cursor: pointer;
+  user-select: none;
 }
 
 .deadline-item > .item-title,

@@ -283,6 +283,14 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
     if (dl.entry.todo === "DONE") row.classList.add("item-done");
     const time = el("span", "item-time");
     time.textContent = formatDeadlineDueText(dl.daysUntil);
+    if (dl.entry.todo) {
+      time.classList.add("is-toggleable");
+      time.dataset.action = "toggle-done";
+      time.dataset.line = String(dl.entry.sourceLineNumber);
+      time.setAttribute("role", "button");
+      time.setAttribute("tabindex", "0");
+      time.setAttribute("aria-label", dl.entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
+    }
 
     const title = renderTitle(dl.entry);
     if (dl.baseDate) title.dataset.baseDate = dl.baseDate;
@@ -290,7 +298,7 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
       ? renderCheckboxItems(dl.entry.checkboxItems, dl.entry.sourceLineNumber)
       : null;
 
-    row.append(time, renderStateBadge(dl.entry), renderTitleWithTags(title, dl.entry.tags, dl.instanceNote, checklist));
+    row.append(time, renderTitleWithTags(title, dl.entry.tags, dl.instanceNote, checklist));
     section.appendChild(row);
   }
 
