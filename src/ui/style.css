@@ -479,7 +479,7 @@ body {
   --global-row-fringe-color: transparent;
   grid-template-columns: 4.35ch 1fr;
   padding: 0.68rem var(--section-padding-x);
-  padding-left: 0.75rem;
+  padding-left: calc(0.75rem + var(--global-row-fringe-width));
   gap: 0 0.85rem;
 }
 
