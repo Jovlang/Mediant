@@ -342,6 +342,10 @@ body {
   border-top: 1px solid color-mix(in srgb, var(--border-light) 60%, transparent);
 }
 
+.day-block.is-today {
+  background: color-mix(in srgb, var(--border-today) 4%, var(--bg-card));
+}
+
 .day-block.is-today .date-label {
   color: var(--border-today);
 }
