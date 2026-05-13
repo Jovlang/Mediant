@@ -510,6 +510,7 @@ body {
   font-size: 0.84rem;
   font-weight: 650;
   color: var(--text-dim);
+  text-align: right;
   cursor: pointer;
   user-select: none;
   transition: text-shadow 120ms ease;
@@ -573,6 +574,7 @@ body {
   font-weight: 650;
   color: var(--deadline-urgency, var(--deadline-urgency-calm));
   min-width: 0;
+  text-align: right;
   cursor: pointer;
   user-select: none;
   border-radius: 0.25rem;
