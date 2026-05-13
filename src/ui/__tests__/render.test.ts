@@ -589,7 +589,7 @@ describe("renderAgenda", () => {
     expect(row).not.toBeNull();
     const state = row?.querySelector(".item-state") as HTMLElement | null;
     const title = row?.querySelector(".item-title") as HTMLElement | null;
-    expect(state?.textContent).toBe("deadline");
+    expect(state?.textContent).toBe("deadline 16:00");
     expect(state?.getAttribute("data-action")).toBe("toggle-done");
     expect(state?.getAttribute("data-line")).toBe("42");
     expect(row?.querySelector(".item-kind")).toBeNull();
@@ -597,7 +597,7 @@ describe("renderAgenda", () => {
     expect(state?.closest(".item-metadata")).not.toBeNull();
     expect(state?.classList.contains("item-state-text")).toBe(true);
     expect(state?.querySelector(".item-state-mark")).toBeNull();
-    expect(row?.querySelector(".item-title-stack > .item-metadata")?.textContent).toBe("deadline·16:00");
+    expect(row?.querySelector(".item-title-stack > .item-metadata")?.textContent).toBe("deadline 16:00");
   });
 
   it("renders todo badges as compact status marks with done items filled", () => {

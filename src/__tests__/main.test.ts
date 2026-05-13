@@ -265,7 +265,7 @@ describe("main.ts integration", () => {
     expect(document.querySelector<HTMLElement>(".priority-stepper-value")?.textContent).toBe("!!");
     expect((document.querySelector<HTMLInputElement>("input[name='add-type']")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
     expect((document.querySelector<HTMLInputElement>("#add-when")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
-    expect((document.querySelector<HTMLInputElement>("#add-sched")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
+    expect((document.querySelector<HTMLInputElement>("#add-sched")?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
     expect((document.querySelector<HTMLElement>(".edit-checkboxes") as HTMLElement | null)?.style.display).toBe("");
 
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
@@ -369,7 +369,7 @@ describe("main.ts integration", () => {
     expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
       .toBe("Tue 5 May 2026");
     expect(deadRepeatSelect?.closest(".add-field")).not.toBeNull();
-    expect((deadRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
+    expect((deadRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
 
     deadInput!.value = "5/3";
     deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
@@ -385,7 +385,7 @@ describe("main.ts integration", () => {
     schedInput!.dispatchEvent(new Event("input", { bubbles: true }));
     expect(schedPreview?.textContent).toBe("");
     expect(schedPreview?.classList.contains("is-visible")).toBe(false);
-    expect((schedRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
+    expect((schedRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
 
     schedInput!.value = "+341374344";
     schedInput!.dispatchEvent(new Event("input", { bubbles: true }));
@@ -412,7 +412,7 @@ describe("main.ts integration", () => {
     schedRepeatSelect!.dispatchEvent(new Event("change", { bubbles: true }));
     deadInput!.value = "23/04/2026 08:00";
     deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
-    expect((deadRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("");
+    expect((deadRepeatSelect?.closest(".add-field") as HTMLElement | null)?.style.display).toBe("none");
     deadRepeatSelect!.value = ".+1m";
     deadRepeatSelect!.dispatchEvent(new Event("change", { bubbles: true }));
     deadInput!.value = "";

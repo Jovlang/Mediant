@@ -477,9 +477,13 @@ function metadataForItem(item: AgendaItem, hasTime: boolean, stateBadge: HTMLEle
   const parts: MetadataPart[] = [];
   if (stateBadge) {
     stateBadge.textContent = taskStateMetadataLabel(item);
+    if (hasTime) {
+      const timeStr = formatTimeRange(item.startTime, item.endTime);
+      if (timeStr) stateBadge.appendChild(document.createTextNode(" " + timeStr));
+    }
     parts.push(stateBadge);
   }
-  if (hasTime) parts.push(formatTimeRange(item.startTime, item.endTime));
+  if (hasTime && !stateBadge) parts.push(formatTimeRange(item.startTime, item.endTime));
   if (item.category === "all-day") parts.push(t("allDay"));
   return parts;
 }
