@@ -474,9 +474,9 @@ body {
 
 .overdue-item {
   --global-row-fringe-color: transparent;
-  grid-template-columns: 4.1ch 1fr;
-  padding: 0.78rem var(--section-padding-x);
-  gap: 0 0.5rem;
+  grid-template-columns: 4.35ch 1fr;
+  padding: 0.68rem var(--section-padding-x);
+  gap: 0 var(--gap-badge);
 }
 
 .overdue-item,
