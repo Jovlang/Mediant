@@ -479,7 +479,7 @@ body {
   --global-row-fringe-color: transparent;
   grid-template-columns: 4.35ch 1fr;
   padding: 0.68rem var(--section-padding-x);
-  gap: 0 0.5rem;
+  gap: 0 0.85rem;
 }
 
 .overdue-item,
@@ -561,7 +561,7 @@ body {
   grid-template-columns: 4.35ch 1fr;
   padding: 0.68rem var(--section-padding-x);
   padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
-  gap: 0 0.5rem;
+  gap: 0 0.85rem;
 }
 
 .deadline-item + .deadline-item {
