@@ -393,6 +393,10 @@ body {
   padding: 0;
 }
 
+.allday-section + .timed-section {
+  margin-top: var(--item-gap-y);
+}
+
 .allday-item {
   display: block;
   padding: 0.18rem var(--section-padding-x);
