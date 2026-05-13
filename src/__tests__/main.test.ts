@@ -109,7 +109,7 @@ describe("main.ts integration", () => {
     expect(document.querySelector(".hide-empty-days-toggle")?.classList.contains("is-on")).toBe(false);
     expect(document.querySelectorAll(".day-block")).toHaveLength(7);
 
-    expect(document.querySelector(".overdue-section .item-time[data-action='toggle-done']")).not.toBeNull();
+    expect(document.querySelector(".temporal-gravity-section .item-time[data-action='toggle-done']")).not.toBeNull();
 
     keydownHandler!(makeKeydownEvent("q", document.body));
     await waitFor(() => document.querySelector(".quick-capture-overlay.is-open") !== null);
@@ -298,7 +298,7 @@ describe("main.ts integration", () => {
     await flush();
     expect(document.querySelector<HTMLElement>(".nav-week-date")?.textContent).toBe("20–26 Apr");
 
-    const deadlineTitle = document.querySelector<HTMLElement>(".deadlines-section .item-title[data-base-date='2026-04-22']");
+    const deadlineTitle = document.querySelector<HTMLElement>(".temporal-gravity-section .item-title[data-base-date='2026-04-22']");
     expect(deadlineTitle).not.toBeNull();
     deadlineTitle!.click();
     await waitFor(() => document.querySelector(".add-panel.is-open") !== null);

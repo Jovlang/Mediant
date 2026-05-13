@@ -308,8 +308,7 @@ body {
 /* ── Day Card ─────────────────────────────────────────────────────── */
 
 .days-card,
-.overdue-section,
-.deadlines-section,
+.temporal-gravity-section,
 .someday-section {
   background: var(--bg-card);
   border-radius: 1rem;
@@ -526,8 +525,12 @@ body {
   font-weight: 500;
 }
 
-.deadlines-section {
+.temporal-gravity-section {
   padding-top: 0.22rem;
+}
+
+.overdue-item + .deadline-item {
+  margin-top: 0.6rem;
 }
 
 .deadline-urgency-critical {

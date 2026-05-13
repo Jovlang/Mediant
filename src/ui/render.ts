@@ -79,14 +79,10 @@ function renderAgendaBase(
 
   const hideCompleted = options.hideCompletedAndSkipped ?? false;
 
-  // Overdue section (before deadlines — most urgent)
-  if (overdue.length > 0) {
-    container.appendChild(renderOverdue(overdue));
-  }
-
-  // Deadlines section
-  if (deadlines.length > 0 && !options.hideDeadlines) {
-    container.appendChild(renderDeadlines(deadlines));
+  // Unified temporal gravity card (overdue past + upcoming deadlines)
+  const hasDeadlines = deadlines.length > 0 && !options.hideDeadlines;
+  if (overdue.length > 0 || hasDeadlines) {
+    container.appendChild(renderTemporalGravity(overdue, hasDeadlines ? deadlines : []));
   }
 
   // Days card (the visible date range in one container, divided by thin rules)
@@ -274,8 +270,29 @@ function renderSettingsMenu(options: RenderAgendaOptions): HTMLElement {
 
 // ── Deadlines ────────────────────────────────────────────────────────
 
-function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
-  const section = el("section", "deadlines-section");
+// ── Temporal gravity (overdue past + upcoming deadlines) ─────────────
+
+function renderTemporalGravity(overdue: OverdueItem[], deadlines: DeadlineItem[]): HTMLElement {
+  const section = el("section", "temporal-gravity-section");
+
+  for (const item of overdue) {
+    const row = el("div", "overdue-item");
+    if (item.kind === "deadline") row.classList.add("is-deadline");
+    const time = el("span", "item-time");
+    time.textContent = `-${item.daysOverdue}d`;
+    if (item.entry.todo) {
+      time.classList.add("is-toggleable");
+      time.dataset.action = "toggle-done";
+      time.dataset.line = String(item.entry.sourceLineNumber);
+      time.setAttribute("role", "button");
+      time.setAttribute("tabindex", "0");
+      time.setAttribute("aria-label", item.entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
+    }
+    const title = renderTitle(item.entry);
+    if (item.baseDate) title.dataset.baseDate = item.baseDate;
+    row.append(time, renderTitleWithTags(title, item.entry.tags, item.instanceNote));
+    section.appendChild(row);
+  }
 
   for (const dl of deadlines) {
     const row = el("div", "deadline-item");
@@ -291,43 +308,12 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
       time.setAttribute("tabindex", "0");
       time.setAttribute("aria-label", dl.entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
     }
-
     const title = renderTitle(dl.entry);
     if (dl.baseDate) title.dataset.baseDate = dl.baseDate;
     const checklist = dl.entry.checkboxItems.length > 0
       ? renderCheckboxItems(dl.entry.checkboxItems, dl.entry.sourceLineNumber)
       : null;
-
     row.append(time, renderTitleWithTags(title, dl.entry.tags, dl.instanceNote, checklist));
-    section.appendChild(row);
-  }
-
-  return section;
-}
-
-// ── Overdue ─────────────────────────────────────────────────────────
-
-function renderOverdue(items: OverdueItem[]): HTMLElement {
-  const section = el("section", "overdue-section");
-
-  for (const item of items) {
-    const row = el("div", "overdue-item");
-    if (item.kind === "deadline") row.classList.add("is-deadline");
-    const time = el("span", "item-time");
-    time.textContent = `-${item.daysOverdue}d`;
-    if (item.entry.todo) {
-      time.classList.add("is-toggleable");
-      time.dataset.action = "toggle-done";
-      time.dataset.line = String(item.entry.sourceLineNumber);
-      time.setAttribute("role", "button");
-      time.setAttribute("tabindex", "0");
-      time.setAttribute("aria-label", item.entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
-    }
-
-    const title = renderTitle(item.entry);
-    if (item.baseDate) title.dataset.baseDate = item.baseDate;
-
-    row.append(time, renderTitleWithTags(title, item.entry.tags, item.instanceNote));
     section.appendChild(row);
   }
 
