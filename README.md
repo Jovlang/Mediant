@@ -274,8 +274,7 @@ Mediant renders a rolling agenda from your Org file.
 
 The main view includes:
 
-* **Overdue** — TODO items past their `SCHEDULED` or `DEADLINE` date
-* **Upcoming deadlines** — future deadlines sorted by due date
+* **Overdue and upcoming deadlines** — overdue items and approaching deadlines, shown together sorted by temporal distance
 * **Day cards** — scheduled tasks, timed events, all-day items, and recurring occurrences
 * **Someday** — undated TODO items with no timestamp, `SCHEDULED`, or `DEADLINE`
 
