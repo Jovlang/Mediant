@@ -479,7 +479,6 @@ body {
   --global-row-fringe-color: transparent;
   grid-template-columns: 4.35ch 1fr;
   padding: 0.68rem var(--section-padding-x);
-  padding-left: calc(0.75rem + var(--global-row-fringe-width));
   gap: 0 0.85rem;
 }
 
@@ -492,6 +491,10 @@ body {
   align-items: baseline;
   padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
   font-size: 0.875rem;
+}
+
+.overdue-item {
+  padding-left: calc(0.75rem + var(--global-row-fringe-width));
 }
 
 .overdue-item::before,
