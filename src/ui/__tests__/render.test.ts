@@ -126,7 +126,7 @@ describe("renderAgenda", () => {
     expect(allDayRow?.querySelector(".item-all-day-marker")).toBeNull();
     expect(allDayRow?.querySelector(".item-metadata")?.textContent).toBe("all day");
 
-    expect(container.querySelector(".overdue-header")?.textContent).toBe("Overdue");
+    expect(container.querySelector(".overdue-header")).toBeNull();
     expect(container.querySelector(".someday-header")).toBeNull();
     expect(container.querySelector(".overdue-section .item-time")?.textContent).toBe("-2d");
     expect(container.querySelector(".overdue-section .item-title")?.getAttribute("data-base-date")).toBe("2026-04-18");

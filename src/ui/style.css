@@ -472,16 +472,9 @@ body {
 
 /* ── Overdue section (top of agenda) ─────────────────────────────── */
 
-.overdue-header {
-  padding: 0.95rem var(--section-padding-x) 0.4rem;
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: var(--text-dim);
-}
-
 .overdue-item {
   --global-row-fringe-color: transparent;
-  grid-template-columns: 4.1ch auto 1fr;
+  grid-template-columns: 4.1ch 1fr;
   padding: 0.78rem var(--section-padding-x);
   gap: 0 0.5rem;
 }
@@ -513,21 +506,18 @@ body {
   font-family: var(--font-mono);
   font-size: 0.82rem;
   font-weight: 650;
-  color: color-mix(in srgb, var(--accent-deadline) 45%, var(--text-dim));
+  color: var(--text-dim);
   cursor: pointer;
   user-select: none;
   transition: text-shadow 120ms ease;
 }
 
-.overdue-item .item-time:hover {
-  text-shadow: 0 0 8px color-mix(in srgb, var(--accent-deadline) 30%, transparent);
+.overdue-item.is-deadline .item-time {
+  color: color-mix(in srgb, var(--accent-deadline) 45%, var(--text-dim));
 }
 
-.overdue-item .item-kind {
-  font-size: 0.6625rem;
-  font-weight: 500;
-  color: var(--text-dim);
-  opacity: 0.7;
+.overdue-item .item-time:hover {
+  text-shadow: 0 0 8px color-mix(in srgb, currentColor 40%, transparent);
 }
 
 .overdue-item > .item-title,

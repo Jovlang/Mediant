@@ -310,12 +310,9 @@ function renderDeadlines(deadlines: DeadlineItem[]): HTMLElement {
 function renderOverdue(items: OverdueItem[]): HTMLElement {
   const section = el("section", "overdue-section");
 
-  const header = el("header", "overdue-header");
-  header.textContent = t("overdue");
-  section.appendChild(header);
-
   for (const item of items) {
     const row = el("div", "overdue-item");
+    if (item.kind === "deadline") row.classList.add("is-deadline");
     const time = el("span", "item-time");
     time.textContent = `-${item.daysOverdue}d`;
     if (item.entry.todo) {
@@ -326,13 +323,11 @@ function renderOverdue(items: OverdueItem[]): HTMLElement {
       time.setAttribute("tabindex", "0");
       time.setAttribute("aria-label", item.entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
     }
-    const kind = el("span", "item-kind");
-    kind.textContent = item.kind === "deadline" ? t("deadline") : t("overdueScheduled");
 
     const title = renderTitle(item.entry);
     if (item.baseDate) title.dataset.baseDate = item.baseDate;
 
-    row.append(time, kind, renderTitleWithTags(title, item.entry.tags, item.instanceNote));
+    row.append(time, renderTitleWithTags(title, item.entry.tags, item.instanceNote));
     section.appendChild(row);
   }
 
