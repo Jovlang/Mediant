@@ -475,7 +475,7 @@ body {
   --global-row-fringe-color: transparent;
   grid-template-columns: 4.35ch 1fr;
   padding: 0.68rem var(--section-padding-x);
-  gap: 0 var(--gap-badge);
+  gap: 0 0.5rem;
 }
 
 .overdue-item,
@@ -512,7 +512,7 @@ body {
 }
 
 .overdue-item.is-deadline .item-time {
-  color: color-mix(in srgb, var(--accent-deadline) 45%, var(--text-dim));
+  color: color-mix(in srgb, var(--accent-deadline) 28%, var(--text-dim));
 }
 
 .overdue-item .item-time:hover {
@@ -559,7 +559,7 @@ body {
   grid-template-columns: 4.35ch 1fr;
   padding: 0.68rem var(--section-padding-x);
   padding-left: calc(var(--section-padding-x) + var(--global-row-fringe-width));
-  gap: 0 var(--gap-badge);
+  gap: 0 0.5rem;
 }
 
 .deadline-item + .deadline-item {
