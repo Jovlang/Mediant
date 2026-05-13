@@ -533,9 +533,6 @@ body {
   padding-top: 0.22rem;
 }
 
-.overdue-item + .deadline-item {
-  margin-top: 0.6rem;
-}
 
 .deadline-urgency-critical {
   --deadline-urgency: var(--deadline-urgency-critical);
