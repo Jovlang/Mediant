@@ -109,7 +109,7 @@ describe("main.ts integration", () => {
     expect(document.querySelector(".hide-empty-days-toggle")?.classList.contains("is-on")).toBe(false);
     expect(document.querySelectorAll(".day-block")).toHaveLength(7);
 
-    expect(document.querySelector(".item-state .item-state-mark")).not.toBeNull();
+    expect(document.querySelector(".overdue-section .item-time[data-action='toggle-done']")).not.toBeNull();
 
     keydownHandler!(makeKeydownEvent("q", document.body));
     await waitFor(() => document.querySelector(".quick-capture-overlay.is-open") !== null);

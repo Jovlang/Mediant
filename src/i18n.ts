@@ -53,8 +53,8 @@ const messages = {
     // Day rows
     addEventOn: "Add event on {date}",
     overdue: "Overdue",
-    deadline: "DEADLINE",
-    overdueScheduled: "SCHEDULED",
+    deadline: "deadline",
+    overdueScheduled: "scheduled",
     taskDeadlineMeta: "deadline",
     taskScheduledMeta: "scheduled",
     taskOpenMeta: "task",
@@ -193,8 +193,8 @@ const messages = {
 
     addEventOn: "Legg til hendelse {date}",
     overdue: "Forfalt",
-    deadline: "FRIST",
-    overdueScheduled: "PLANLAGT",
+    deadline: "frist",
+    overdueScheduled: "planlagt",
     taskDeadlineMeta: "frist",
     taskScheduledMeta: "planlagt",
     taskOpenMeta: "oppgave",
@@ -325,8 +325,8 @@ const messages = {
 
     addEventOn: "Aggiungi evento il {date}",
     overdue: "Scaduto",
-    deadline: "SCADENZA",
-    overdueScheduled: "PIANIFICATO",
+    deadline: "scadenza",
+    overdueScheduled: "pianificato",
     taskDeadlineMeta: "scadenza",
     taskScheduledMeta: "pianificata",
     taskOpenMeta: "attività",
@@ -457,8 +457,8 @@ const messages = {
 
     addEventOn: "Ereignis hinzufügen am {date}",
     overdue: "Überfällig",
-    deadline: "FRIST",
-    overdueScheduled: "GEPLANT",
+    deadline: "frist",
+    overdueScheduled: "geplant",
     taskDeadlineMeta: "frist",
     taskScheduledMeta: "geplant",
     taskOpenMeta: "aufgabe",

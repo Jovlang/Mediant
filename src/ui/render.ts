@@ -318,14 +318,21 @@ function renderOverdue(items: OverdueItem[]): HTMLElement {
     const row = el("div", "overdue-item");
     const time = el("span", "item-time");
     time.textContent = `-${item.daysOverdue}d`;
+    if (item.entry.todo) {
+      time.classList.add("is-toggleable");
+      time.dataset.action = "toggle-done";
+      time.dataset.line = String(item.entry.sourceLineNumber);
+      time.setAttribute("role", "button");
+      time.setAttribute("tabindex", "0");
+      time.setAttribute("aria-label", item.entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
+    }
     const kind = el("span", "item-kind");
     kind.textContent = item.kind === "deadline" ? t("deadline") : t("overdueScheduled");
-    const state = renderStateBadge(item.entry);
 
     const title = renderTitle(item.entry);
     if (item.baseDate) title.dataset.baseDate = item.baseDate;
 
-    row.append(time, kind, state, renderTitleWithTags(title, item.entry.tags, item.instanceNote));
+    row.append(time, kind, renderTitleWithTags(title, item.entry.tags, item.instanceNote));
     section.appendChild(row);
   }
 

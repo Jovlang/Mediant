@@ -161,10 +161,9 @@ describe("renderAgenda", () => {
     expect(somedayCheckboxes.map((item) => item.textContent)).toEqual(["Draft outline"]);
     expect(somedayCheckboxes[0]?.getAttribute("data-line")).toBe("11");
     expect(container.querySelector(".someday-section .checkbox-list")).not.toBeNull();
-    const overdueState = container.querySelector(".overdue-section .item-state");
-    expect(overdueState?.textContent).toBe("TODO");
-    expect(overdueState?.getAttribute("data-action")).toBe("toggle-done");
-    expect(overdueState?.getAttribute("data-line")).toBe("7");
+    const overdueTime = container.querySelector(".overdue-section .item-time");
+    expect(overdueTime?.getAttribute("data-action")).toBe("toggle-done");
+    expect(overdueTime?.getAttribute("data-line")).toBe("7");
   });
 
   it("uses title-first in-day rows with time and tags in secondary metadata", () => {
