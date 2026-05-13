@@ -33,8 +33,7 @@
   /* Category accents */
   --accent-deadline: #d85a55;
   --accent-scheduled: #6b7280;
-  --now-line: #e67a2e;
-  --deadline-urgency-critical: #c94f48;
+--deadline-urgency-critical: #c94f48;
   --deadline-urgency-warning: #bd6a2f;
   --deadline-urgency-caution: #aa8238;
   --deadline-urgency-calm: #647b92;
@@ -889,37 +888,6 @@ body {
 
 
 /* ── Now line ─────────────────────────────────────────────────────── */
-
-.now-line {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  align-items: center;
-  padding: 0.25rem var(--section-padding-x) 0.15rem;
-  pointer-events: none;
-  color: var(--now-line);
-  gap: 0 0.45rem;
-}
-
-.now-time {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.now-label {
-  margin-left: 0.55rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0.88;
-}
-
-.now-rule {
-  height: 1px;
-  background: color-mix(in srgb, var(--now-line) 86%, transparent);
-  border-radius: 999px;
-}
 
 /* ── Progress badge ──────────────────────────────────────────────── */
 

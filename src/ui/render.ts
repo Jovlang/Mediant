@@ -390,21 +390,7 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
   if (rest.length > 0) {
     const section = el("div", "timed-section");
 
-    const nowMinutes = isToday
-      ? today.getHours() * 60 + today.getMinutes()
-      : -1;
-    let nowLineInserted = !isToday;
-
     for (const item of rest) {
-      // Insert now line before the first item that starts at or after current time
-      if (!nowLineInserted) {
-        const itemMinutes = item.startTime ? timeToMinutes(item.startTime) : -1;
-        if (itemMinutes >= nowMinutes) {
-          section.appendChild(renderNowLine(today));
-          nowLineInserted = true;
-        }
-      }
-
       const itemRow = renderItemForCategory(item);
       section.appendChild(itemRow);
 
@@ -414,12 +400,6 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
         body.textContent = item.entry.body;
         section.appendChild(body);
       }
-
-    }
-
-    // If all items are before now, append the line at the end
-    if (!nowLineInserted) {
-      section.appendChild(renderNowLine(today));
     }
 
     card.appendChild(section);
@@ -571,23 +551,6 @@ function renderStateTextBadge(
 }
 
 // ── Now line ─────────────────────────────────────────────────────────
-
-function renderNowLine(today: Date): HTMLElement {
-  const row = el("div", "now-line");
-
-  const time = el("span", "now-time");
-  const hh = String(today.getHours()).padStart(2, "0");
-  const mm = String(today.getMinutes()).padStart(2, "0");
-  time.textContent = hh + ":" + mm;
-
-  const label = el("span", "now-label");
-  label.textContent = t("nowMarker");
-
-  const rule = el("span", "now-rule");
-
-  row.append(time, label, rule);
-  return row;
-}
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -787,11 +750,6 @@ function getDeadlineUrgencyClass(daysUntil: number): string {
   if (daysUntil <= 7) return "deadline-urgency-warning";
   if (daysUntil <= 14) return "deadline-urgency-caution";
   return "deadline-urgency-calm";
-}
-
-function timeToMinutes(time: string): number {
-  const [h, m] = time.split(":").map(Number);
-  return h * 60 + m;
 }
 
 function isSameDate(a: Date, b: Date): boolean {

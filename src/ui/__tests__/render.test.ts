@@ -409,31 +409,6 @@ describe("renderAgenda", () => {
     expect(container.querySelector(".day-block")).toBeNull();
   });
 
-  it("inserts the now line before the first item that starts after the current time", () => {
-    const container = document.createElement("div");
-    const today = new Date(2026, 3, 20, 12, 30);
-    const week = makeWeek([
-      [
-        makeItem({ title: "Morning", date: new Date(2026, 3, 20, 10, 0), startTime: "10:00" }),
-        makeItem({ title: "Afternoon", date: new Date(2026, 3, 20, 15, 0), startTime: "15:00" }),
-      ],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ]);
-
-    renderAgenda(container, week, [], [], [], today);
-
-    const timedSection = container.querySelector(".day-block.is-today .timed-section");
-    expect(timedSection).not.toBeNull();
-    const children = Array.from(timedSection!.children).map((el) => (el as HTMLElement).classList[0]);
-    expect(children).toEqual(["timed-item", "now-line", "timed-item"]);
-    expect(timedSection!.querySelector(".now-time")?.textContent).toBe("12:30");
-  });
-
   it("renders override chips, notes, checkboxes, and edit metadata", () => {
     const container = document.createElement("div");
     const week = makeWeek([
