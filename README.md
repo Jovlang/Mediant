@@ -2,16 +2,24 @@
 
 A calm, focused web agenda for Org-mode files.
 
-Mediant turns a plain `.org` file into a clean rolling agenda view: overdue tasks, upcoming deadlines, scheduled items, recurring events, quick capture, lightweight editing, tag filtering, and optional browser notifications.
+Mediant gives a plain `.org` file a focused, readable interface.
 
-It is built around a simple idea:
+It is built around two simple ideas:
 
 > Your tasks should stay as plain text files,
 > but the interface should still feel modern, fast, and pleasant to use.
 
-Mediant is not a full Org-mode implementation. It is not a project-management platform. It is not a cloud service. It is a small agenda UI for people who like plain files, but do not always want to live inside Emacs just to see what their week looks like.
+And:
 
-You keep the file. Mediant gives it a focused interface.
+> Not every future thing is the same kind of thing.
+
+Mediant treats the agenda as three distinct spaces:
+
+* **Deadlines** — things that exert pressure
+* **Calendar** — things that have a place in time
+* **Someday** — possible futures that should remain visible without demanding attention
+
+It is a small agenda UI for people who like plain files, but do not always want to live inside Emacs just to see what their week looks like.
 
 ---
 
@@ -21,11 +29,13 @@ Org-mode is powerful because it stores real information in ordinary text files. 
 
 But a plain text file is not always the best interface for answering simple daily questions:
 
+* What is urgent?
 * What is happening today?
 * What is overdue?
 * What is coming up this week?
 * Which deadlines are getting close?
 * What did I schedule but forget?
+* What could become relevant later?
 * What can I quickly capture without opening my whole system?
 
 Mediant exists for that layer.
@@ -36,22 +46,101 @@ The goal is not to expose every possible Org feature. The goal is to make the co
 
 ---
 
+## The shape of the agenda
+
+Mediant does not treat every future item as one giant chronological stream.
+
+That flattening is often where agenda tools become noisy. Deadlines get buried between meetings. Undated ideas compete with real commitments. A task that is overdue appears beside a thought that merely might matter someday. The interface becomes a database dump instead of a usable daily surface.
+
+Mediant separates these things because they answer different questions.
+
+### Deadlines
+
+Deadlines are things that exert pressure.
+
+Overdue items and approaching deadlines appear together and are sorted by temporal distance.
+
+This section answers questions like:
+
+* What is becoming urgent?
+* What am I at risk of forgetting?
+* What is pulling on my attention?
+* What needs action even if it is not scheduled for a specific day?
+
+Deadlines have gravity.
+
+They are not simply calendar events. They are obligations moving toward you.
+
+### Calendar
+
+The calendar shows things that already have a place in time.
+
+Scheduled tasks, timed events, all-day items, and recurring occurrences appear inside the active date range.
+
+This section answers questions like:
+
+* What does today look like?
+* What happens tomorrow?
+* When do I actually need to be somewhere?
+* What have I placed on the calendar-shaped part of my system?
+
+The calendar is about commitment and structure.
+
+They show the shape of time, not every possible thing you could be doing.
+
+### Someday
+
+Someday is for things that matter, but not yet.
+
+Undated TODO items without a timestamp, `SCHEDULED`, or `DEADLINE` appear here.
+
+This section answers questions like:
+
+* What ideas exist?
+* What could become important later?
+* What should stay visible without demanding attention?
+* What have I captured, but not placed in time?
+
+Someday is not treated as a failed agenda item.
+
+It is a place for possible futures.
+
+### Three spaces, three logics
+
+These sections intentionally follow different rules because they serve different purposes.
+
+Mediant tries to preserve that distinction rather than flattening everything into one list.
+
+The result is still one agenda, but not one undifferentiated stream.
+
+It is closer to a quiet daily surface:
+
+* pressure at the top
+* commitments in the middle
+* possibilities below
+
+---
+
 ## What Mediant feels like
 
 Mediant is designed for fast visual scanning.
 
 It gives you:
 
-* a rolling agenda view
+* three agenda spaces with different semantics:
+
+  * deadlines for pressure
+  * calendar for commitments
+  * someday for possibilities
 * overdue items at the top
-* upcoming deadlines below that
-* day cards for the active range
-* scheduled tasks and timed events
-* subtle handling of DONE items
+* upcoming deadlines grouped by temporal urgency
+* scheduled tasks and timed events in the calendar
+* recurring tasks and events with per-occurrence exceptions
 * quick capture with a single key
-* lightweight add/edit panels
+* lightweight add and edit panels
+* autosaving field edits
 * tag and priority filtering
-* recurring tasks with per-occurrence exceptions
+* subtle handling of completed and skipped items
 * optional browser notifications for timed events
 * English, Norwegian, Italian, and German UI strings
 
@@ -73,7 +162,7 @@ The `.org` file is the source of truth.
 
 The parser reads a practical subset of Org syntax into structured entries.
 
-The agenda generator decides what should appear today, tomorrow, next week, in overdue, in deadlines, or in someday.
+The agenda generator decides what should appear as a deadline, in the calendar, in someday, or not at all for the current view.
 
 The UI renders that agenda and writes common edits back into the original Org source.
 
@@ -141,7 +230,7 @@ The intended shape is smaller:
 
 > One plain file.
 > One focused agenda.
-> Enough editing to support daily use.
+> Different kinds of future separated into different spaces.
 
 ---
 
@@ -268,22 +357,6 @@ Do not expose the server directly to the public internet unless you have added y
 
 ---
 
-## The agenda view
-
-Mediant renders a rolling agenda from your Org file.
-
-The main view includes:
-
-* **Overdue and upcoming deadlines** — overdue items and approaching deadlines, shown together sorted by temporal distance
-* **Day cards** — scheduled tasks, timed events, all-day items, and recurring occurrences
-* **Someday** — undated TODO items with no timestamp, `SCHEDULED`, or `DEADLINE`
-
-The default range is 7 days. A month-ahead toggle expands the range to 30 days.
-
-You can navigate with buttons or keyboard shortcuts.
-
----
-
 ## Daily workflow
 
 Mediant is designed around a few common actions.
@@ -330,6 +403,24 @@ Multiple selected tags use AND semantics: an item must contain every selected ta
 
 Active filters are shown in the header and can be cleared in one click.
 
+### Work with priorities
+
+Mediant understands Org priority cookies such as:
+
+```org
+** TODO [#A] Pay invoice
+```
+
+Priority can be added through quick capture with leading exclamation marks:
+
+| Input prefix | Org priority |
+| ------------ | ------------ |
+| `!`          | `[#C]`       |
+| `!!`         | `[#B]`       |
+| `!!!`        | `[#A]`       |
+
+Priorities can also be used as filters in the interface.
+
 ### Work with recurring items
 
 Repeating timestamps render as multiple agenda occurrences.
@@ -371,17 +462,17 @@ Shortcuts are disabled while typing in form fields.
 
 Add and edit fields accept a few shorthand forms:
 
-| Input        | Meaning                         |
-| ------------ | ------------------------------- |
-| `DD`         | Day of current or next month    |
-| `DD/MM`      | Day and month                   |
-| `DD/MM/YY`   | Day, month, two-digit year      |
-| `DD/MM/YYYY` | Full date                       |
-| `+N`         | N days from today               |
-| `mon`..`sun` | Next matching weekday (English)  |
-| `man`..`søn` | Next matching weekday (Norwegian) |
-| `lun`..`dom` | Next matching weekday (Italian)  |
-| `mo`..`so`   | Next matching weekday (German)   |
+| Input        | Meaning                          |
+| ------------ | -------------------------------- |
+| `DD`         | Day of current or next month     |
+| `DD/MM`      | Day and month                    |
+| `DD/MM/YY`   | Day, month, two-digit year       |
+| `DD/MM/YYYY` | Full date                        |
+| `+N`         | N days from today                |
+| `mon`..`sun` | Next matching weekday, English   |
+| `man`..`søn` | Next matching weekday, Norwegian |
+| `lun`..`dom` | Next matching weekday, Italian   |
+| `mo`..`so`   | Next matching weekday, German    |
 
 Ambiguous numeric forms resolve to the next future occurrence. Two-digit years are interpreted in the current century.
 
@@ -537,7 +628,7 @@ Mediant is split into three main stages:
 
 ```text
 .org file → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
-            OrgEntry[]          AgendaDay[]            HTML/CSS
+            OrgEntry[]          Agenda model          HTML/CSS
 ```
 
 ### Parser layer
@@ -561,21 +652,24 @@ Parser types should describe Org source faithfully. They should not decide how a
 
 The agenda generator turns parsed Org entries into display-oriented structures:
 
+* deadline items
 * agenda days
 * timed items
 * all-day items
-* overdue items
-* deadline items
 * someday items
-* recurrence occurrences
+* recurring occurrences
 
 Classification happens here, not in the parser.
+
+This is where Mediant's three-space model is created: deadlines, calendar, and someday are not just visual sections. They are distinct agenda classifications with different sorting and display logic.
 
 ### UI layer
 
 The UI renders the agenda and wires interaction:
 
-* day cards
+* deadline overview
+* calendar
+* someday list
 * filters
 * settings
 * quick capture
@@ -592,33 +686,33 @@ The UI writes back to the original Org source rather than maintaining a separate
 ```text
 src/
   org/
-    model.ts           — Parser output types
-    timestamp.ts       — Timestamp parsing, Date conversion, recurrence expansion, exception handling
-    parser.ts          — Line-by-line Org parser
-    drawer.ts          — Property-drawer mutation helpers
-    sourceEdit.ts      — Raw Org source mutation helpers for UI writes
-    __tests__/         — Timestamp, parser, and drawer tests
+    model.ts            — Parser output types
+    timestamp.ts        — Timestamp parsing, Date conversion, recurrence expansion, exception handling
+    parser.ts           — Line-by-line Org parser
+    drawer.ts           — Property-drawer mutation helpers
+    sourceEdit.ts       — Raw Org source mutation helpers for UI writes
+    __tests__/          — Timestamp, parser, and drawer tests
 
   agenda/
-    model.ts           — Render-oriented agenda types
-    generate.ts        — Range generation, classification, sorting, deadline collection
-    __tests__/         — Agenda generation tests
+    model.ts            — Render-oriented agenda types
+    generate.ts         — Range generation, classification, sorting, deadline collection
+    __tests__/          — Agenda generation tests
 
   ui/
-    render.ts          — DOM rendering
-    notifications.ts   — Browser notification preference and timer scheduling
-    style.css          — Styles
+    render.ts           — DOM rendering
+    notifications.ts    — Browser notification preference and timer scheduling
+    style.css           — Styles
 
-  i18n.ts              — English/Norwegian/Italian/German UI strings and locale persistence
-  main.ts              — Entry point: hydrate, parse, generate, render
+  i18n.ts               — English/Norwegian/Italian/German UI strings and locale persistence
+  main.ts               — Entry point: hydrate, parse, generate, render
 
 server/
-  cli.mjs              — Node CLI and HTTP server using built-in modules only
+  cli.mjs               — Node CLI and HTTP server using built-in modules only
 
 elisp/
   mediant-org-agenda.el — Optional Org agenda display integration
 
-index.html             — Minimal browser shell
+index.html              — Minimal browser shell
 ```
 
 ---
