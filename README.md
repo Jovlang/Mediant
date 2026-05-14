@@ -25,7 +25,7 @@ It is a web agenda UI for people who like plain text but want to check their wee
 
 ## Why Mediant exists
 
-Org-mode is powerful because it stores real information in ordinary text files. You can edit them anywhere, version them, sync them, grep them, and keep them for decades.
+Org-mode is powerful because it stores a rich variety of information in ordinary text files. You can edit them anywhere, version them, sync them, grep them, and keep them for decades.
 
 But a plain text file is not always the best interface for answering simple daily questions:
 
