@@ -2,7 +2,7 @@
 
 A calm, focused web agenda for Org-mode files.
 
-Mediant gives a plain `.org` file a focused, readable interface.
+Mediant gives a plain `.org` file a clean, readable interface.
 
 It is built around two simple ideas:
 
@@ -19,7 +19,7 @@ Mediant treats the agenda as three distinct spaces:
 * **Calendar** — things that have a place in time
 * **Someday** — possible futures that should remain visible without demanding attention
 
-It is a small agenda UI for people who like plain files, but do not always want to live inside Emacs just to see what their week looks like.
+It is a web agenda UI for people who like plain text but want to check their week from any device, not just from inside Emacs.
 
 ---
 
@@ -40,9 +40,9 @@ But a plain text file is not always the best interface for answering simple dail
 
 Mediant exists for that layer.
 
-It keeps Org as the source of truth, then adds a focused browser interface for the agenda-shaped parts of the file.
+It keeps Org as the source of truth, then surfaces the agenda through a browser UI.
 
-The goal is not to expose every possible Org feature. The goal is to make the common personal-agenda workflow feel clear, fast, and calm.
+The goal is not to expose every possible Org feature, but to make the common personal-agenda workflow feel clear, fast, and calm.
 
 ---
 
@@ -82,11 +82,11 @@ This section answers questions like:
 * What does today look like?
 * What happens tomorrow?
 * When do I actually need to be somewhere?
-* What have I placed on the calendar-shaped part of my system?
+* What have I committed to on specific days?
 
 The calendar is about commitment and structure.
 
-They show the shape of time, not every possible thing you could be doing.
+It shows the shape of time, not every possible thing you could be doing.
 
 ### Someday
 
