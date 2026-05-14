@@ -36,7 +36,7 @@ But a plain text file is not always the best interface for answering simple dail
 * Which deadlines are getting close?
 * What did I schedule but forget?
 * What could become relevant later?
-* What can I quickly capture without opening my whole system?
+* What can I quickly capture on my phone?
 
 Mediant exists for that layer.
 
@@ -75,7 +75,7 @@ They are not simply calendar events. They are obligations moving toward you.
 
 The calendar shows things that already have a place in time.
 
-Scheduled tasks, timed events, all-day items, and recurring occurrences appear inside the active date range.
+Scheduled tasks, timed events, all-day events, and recurring occurrences appear inside the active date range.
 
 This section answers questions like:
 
@@ -116,7 +116,7 @@ The result is still one agenda, but not one undifferentiated stream.
 It is closer to a quiet daily surface:
 
 * pressure at the top
-* commitments in the middle
+* plans in the middle
 * possibilities below
 
 ---
@@ -128,7 +128,6 @@ Mediant is designed for fast visual scanning.
 It gives you:
 
 * three agenda spaces with different semantics:
-
   * deadlines for pressure
   * calendar for commitments
   * someday for possibilities
