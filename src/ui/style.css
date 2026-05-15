@@ -2069,6 +2069,8 @@ body:has(.add-panel[open]) {
 .field-summon-btn:hover {
   opacity: 1;
   color: var(--text);
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--border) 80%, var(--border-today) 20%);
 }
 
 .occ-optional-fields {
