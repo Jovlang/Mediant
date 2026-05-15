@@ -432,6 +432,14 @@ describe("body text", () => {
     expect(entries[0].body).toBe("#+begin_src python");
   });
 
+  it("indented #+end_src inside block is comma-escaped and round-trips correctly", () => {
+    // formatDescriptionLine writes "  ,  #+end_src" for "  #+end_src"
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\n  ,  #+end_src\n#+end_src\n",
+    );
+    expect(entries[0].body).toBe("  #+end_src");
+  });
+
   it("double-comma escaped leading comma round-trips correctly", () => {
     // formatDescriptionLine writes "  ,,text" for ",text"
     const entries = parseOrg(

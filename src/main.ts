@@ -9,6 +9,7 @@ import {
   toggleCheckboxInSource,
   toggleDoneInSource,
 } from "./org/sourceEdit.ts";
+import { formatDescriptionLine } from "./org/description.ts";
 import { stepDate } from "./org/timestamp.ts";
 import { generateAgenda, collectDeadlines, collectOverdueItems, collectSomedayItems } from "./agenda/generate.ts";
 import { renderAgenda } from "./ui/render.ts";
@@ -1383,16 +1384,6 @@ interface BuildOrgOpts {
   deadRepeater?: string | null;
   checkboxItems?: { text: string; checked: boolean }[];
   body?: string;
-}
-
-// Indent description lines by 2 spaces. Escape lines containing #+end_src
-// (recognized as block close by Emacs even when indented) and leading commas
-// (to preserve them through the round-trip) with a "," prefix.
-function formatDescriptionLine(line: string): string {
-  const escaped = (line.startsWith(",") || /^#\+(?:begin|end)_src\b/i.test(line))
-    ? "," + line
-    : line;
-  return "  " + escaped;
 }
 
 function buildOrgText(opts: BuildOrgOpts): string {
