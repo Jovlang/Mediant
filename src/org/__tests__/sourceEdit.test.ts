@@ -161,6 +161,47 @@ describe("replaceOrgBlockInSource", () => {
       "** Event\n#+begin_src description\n  * not a heading\n#+end_src\n** Next\n",
     );
   });
+
+  it("preserves PROPERTIES drawer when the description block is replaced", () => {
+    const source =
+      "** Yoga\n" +
+      "#+begin_src description\n" +
+      "  Old body.\n" +
+      "#+end_src\n" +
+      ":PROPERTIES:\n" +
+      ":EXCEPTION-2026-04-27: cancelled\n" +
+      ":END:\n";
+    const out = replaceOrgBlockInSource(
+      source,
+      1,
+      "** Yoga\n#+begin_src description\n  New body.\n#+end_src",
+    );
+    expect(out).toContain(":EXCEPTION-2026-04-27: cancelled");
+    expect(out).toContain("New body.");
+    expect(out).not.toContain("Old body.");
+  });
+
+  it("replaces entry that has description block + PROPERTIES and another entry follows", () => {
+    const source =
+      "** Yoga\n" +
+      "#+begin_src description\n" +
+      "  Notes.\n" +
+      "#+end_src\n" +
+      ":PROPERTIES:\n" +
+      ":EXCEPTION-2026-04-27: cancelled\n" +
+      ":END:\n" +
+      "** Run\n";
+    const out = replaceOrgBlockInSource(
+      source,
+      1,
+      "** Yoga :health:\n#+begin_src description\n  Updated.\n#+end_src",
+    );
+    // Following entry is intact
+    expect(out).toContain("** Run\n");
+    // Exception property is preserved
+    expect(out).toContain(":EXCEPTION-2026-04-27: cancelled");
+    expect(out).toContain("Updated.");
+  });
 });
 
 describe("toggleDoneInSource", () => {
@@ -246,6 +287,34 @@ describe("toggleDoneInSource", () => {
   it("does nothing for headings without TODO/DONE", () => {
     const source = "** Plain heading\n";
     expect(toggleDoneInSource(source, 1)).toBe(source);
+  });
+
+  it("does not confuse description block content as an entry boundary when toggling", () => {
+    const source =
+      "** TODO Task\n" +
+      "#+begin_src description\n" +
+      "  * not a heading\n" +
+      "  ** also not a heading\n" +
+      "#+end_src\n";
+    expect(toggleDoneInSource(source, 1)).toBe(
+      "** DONE Task\n" +
+      "#+begin_src description\n" +
+      "  * not a heading\n" +
+      "  ** also not a heading\n" +
+      "#+end_src\n",
+    );
+  });
+
+  it("advances repeater correctly when entry has a description block", () => {
+    const source =
+      "** TODO Yoga\n" +
+      "SCHEDULED: <2026-04-22 Wed +1w>\n" +
+      "#+begin_src description\n" +
+      "  Bring mat.\n" +
+      "#+end_src\n";
+    const out = toggleDoneInSource(source, 1);
+    expect(out).toContain("SCHEDULED: <2026-04-29 Wed +1w>");
+    expect(out).toContain("#+begin_src description\n  Bring mat.\n#+end_src");
   });
 });
 
@@ -353,6 +422,32 @@ describe("deleteOrgBlockInSource", () => {
       "** One\n" +
       "Body1.",
     );
+  });
+
+  it("removes entry with a description block cleanly, leaving next entry intact", () => {
+    const source =
+      "** One\n" +
+      "#+begin_src description\n" +
+      "  * heading-like content\n" +
+      "#+end_src\n" +
+      "** Two\n";
+
+    expect(deleteOrgBlockInSource(source, 1)).toBe("** Two\n");
+  });
+
+  it("removes entry with description block and PROPERTIES without leaving orphan lines", () => {
+    const source =
+      "** Yoga\n" +
+      "#+begin_src description\n" +
+      "  Notes.\n" +
+      "#+end_src\n" +
+      ":PROPERTIES:\n" +
+      ":EXCEPTION-2026-04-27: cancelled\n" +
+      ":END:\n" +
+      "** Run\n";
+
+    const out = deleteOrgBlockInSource(source, 1);
+    expect(out).toBe("** Run\n");
   });
 });
 

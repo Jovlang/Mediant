@@ -339,6 +339,112 @@ describe("body text", () => {
     expect(entries[0].checkboxItems).toHaveLength(0);
   });
 
+  it("empty description block yields empty body string", () => {
+    const entries = parseOrg("** Event\n#+begin_src description\n#+end_src\n");
+    expect(entries[0].body).toBe("");
+  });
+
+  it("blank lines inside block are preserved", () => {
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\n  First.\n\n  Second.\n#+end_src\n",
+    );
+    expect(entries[0].body).toBe("First.\n\nSecond.");
+  });
+
+  it(":END: inside block is not treated as a drawer close", () => {
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\n  :END:\n  After.\n#+end_src\n",
+    );
+    expect(entries[0].body).toBe(":END:\nAfter.");
+    // The entry is still just one entry (no phantom drawer boundary)
+    expect(entries).toHaveLength(1);
+  });
+
+  it("DEADLINE: inside block is not parsed as a planning line", () => {
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\n  DEADLINE: <2026-04-07 ti.>\n#+end_src\n",
+    );
+    expect(entries[0].planning).toHaveLength(0);
+    expect(entries[0].body).toBe("DEADLINE: <2026-04-07 ti.>");
+  });
+
+  it("unclosed block absorbs content to EOF without creating extra entries", () => {
+    // The trailing \n in the source produces a final empty string after split,
+    // which gets appended as an empty line in the body.
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\n  Line one.\n  Line two.\n",
+    );
+    expect(entries).toHaveLength(1);
+    expect(entries[0].body).toContain("Line one.");
+    expect(entries[0].body).toContain("Line two.");
+  });
+
+  it("unclosed block absorbs subsequent heading-like lines as body content", () => {
+    // Once inside a desc block, only #+end_src can close it.
+    // Heading-like lines are treated as body, not as new entries.
+    const entries = parseOrg(
+      "** First\n#+begin_src description\n  Body of first.\n** Second\n",
+    );
+    expect(entries).toHaveLength(1);
+    expect(entries[0].body).toContain("Body of first.");
+    expect(entries[0].body).toContain("** Second");
+  });
+
+  it("description block and PROPERTIES drawer coexist in the same entry", () => {
+    const entries = parseOrg(
+      "** Yoga\n" +
+        "#+begin_src description\n  Notes.\n#+end_src\n" +
+        ":PROPERTIES:\n:EXCEPTION-2026-04-27: cancelled\n:END:\n",
+    );
+    expect(entries[0].body).toBe("Notes.");
+    expect(entries[0].exceptions.get("2026-04-27")?.override?.kind).toBe("cancelled");
+  });
+
+  it("#+begin_src python is NOT treated as a description block", () => {
+    const entries = parseOrg(
+      "** Code\n#+begin_src python\n  print('hello')\n#+end_src\n",
+    );
+    expect(entries[0].body).toBe("");
+  });
+
+  it("line with only 1-space prefix has the space kept (2-space stripping is exact)", () => {
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\n one-space\n#+end_src\n",
+    );
+    expect(entries[0].body).toBe(" one-space");
+  });
+
+  it("line with no indent prefix is kept as-is", () => {
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\nno-indent\n#+end_src\n",
+    );
+    expect(entries[0].body).toBe("no-indent");
+  });
+
+  it("#+begin_src inside block is comma-escaped and round-trips correctly", () => {
+    // formatDescriptionLine writes "  ,#+begin_src python" for "#+begin_src python"
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\n  ,#+begin_src python\n#+end_src\n",
+    );
+    expect(entries[0].body).toBe("#+begin_src python");
+  });
+
+  it("double-comma escaped leading comma round-trips correctly", () => {
+    // formatDescriptionLine writes "  ,,text" for ",text"
+    const entries = parseOrg(
+      "** Event\n#+begin_src description\n  ,,starts with comma\n#+end_src\n",
+    );
+    expect(entries[0].body).toBe(",starts with comma");
+  });
+
+  it("block is scoped to its own entry; next entry body is unaffected", () => {
+    const entries = parseOrg(
+      "** First\n#+begin_src description\n  Body of first.\n#+end_src\n** Second\n",
+    );
+    expect(entries[0].body).toBe("Body of first.");
+    expect(entries[1].body).toBe("");
+  });
+
 });
 
 // ── Drawers ──────────────────────────────────────────────────────────
@@ -364,6 +470,31 @@ describe("drawers", () => {
       "** Entry\n#+begin_src description\n  ,#+end_src\n  ,,starts with comma\n  normal\n#+end_src\n",
     );
     expect(entries[0].body).toBe("#+end_src\n,starts with comma\nnormal");
+  });
+
+  it("drawer after description block is still parsed correctly", () => {
+    // PROPERTIES following the description block must be scanned, not swallowed
+    const entries = parseOrg(
+      "** Entry\n" +
+        "#+begin_src description\n  Notes.\n#+end_src\n" +
+        ":PROPERTIES:\n:SERIES-UNTIL: 2026-06-01\n:END:\n",
+    );
+    expect(entries[0].body).toBe("Notes.");
+    expect(entries[0].seriesUntil).toBe("2026-06-01");
+  });
+
+  it(":PROPERTIES: inside a description block is not parsed as a drawer", () => {
+    const entries = parseOrg(
+      "** Entry\n" +
+        "#+begin_src description\n" +
+        "  :PROPERTIES:\n" +
+        "  :CATEGORY: health\n" +
+        "  :END:\n" +
+        "#+end_src\n",
+    );
+    // The drawer-like text is just body content
+    expect(entries[0].body).toBe(":PROPERTIES:\n:CATEGORY: health\n:END:");
+    expect(entries[0].exceptions.size).toBe(0);
   });
 });
 

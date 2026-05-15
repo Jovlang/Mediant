@@ -103,6 +103,27 @@ describe("upsertProperty", () => {
     );
   });
 
+  it("inserts into existing PROPERTIES when entry also has a description block", () => {
+    const { source, entry } = withEntry(
+      "** Yoga\n" +
+        "#+begin_src description\n  Notes.\n#+end_src\n" +
+        ":PROPERTIES:\n:EXCEPTION-2026-04-27: cancelled\n:END:\n",
+    );
+    const out = upsertProperty(source, entry, "EXCEPTION-2026-05-04", "shift +45m");
+    expect(out).toContain(":EXCEPTION-2026-04-27: cancelled\n:EXCEPTION-2026-05-04: shift +45m\n:END:");
+    expect(out).toContain("#+begin_src description\n  Notes.\n#+end_src");
+  });
+
+  it("does not treat heading-like content inside description block as an entry boundary when inserting", () => {
+    const { source, entry } = withEntry(
+      "** Event\n#+begin_src description\n  * not a heading\n#+end_src\n",
+    );
+    const out = upsertProperty(source, entry, "SERIES-UNTIL", "2026-06-01");
+    expect(out).toBe(
+      "** Event\n#+begin_src description\n  * not a heading\n#+end_src\n:PROPERTIES:\n:SERIES-UNTIL: 2026-06-01\n:END:\n",
+    );
+  });
+
   it("written source round-trips through the parser", () => {
     const { source, entry } = withEntry(
       "** Yoga\n<2026-04-27 ma. 17:00 +1w>\nBody.\n",
