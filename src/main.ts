@@ -1389,7 +1389,7 @@ interface BuildOrgOpts {
 // (recognized as block close by Emacs even when indented) and leading commas
 // (to preserve them through the round-trip) with a "," prefix.
 function formatDescriptionLine(line: string): string {
-  const escaped = (line.startsWith(",") || /^#\+end_src\s*$/i.test(line))
+  const escaped = (line.startsWith(",") || /^#\+(?:begin|end)_src\b/i.test(line))
     ? "," + line
     : line;
   return "  " + escaped;
