@@ -311,28 +311,28 @@ describe("body text", () => {
 
   it("reads body from #+begin_src description block", () => {
     const entries = parseOrg(
-      "** Event\n#+begin_src description\nMeet at the main entrance.\n#+end_src\n",
+      "** Event\n#+begin_src description\n  Meet at the main entrance.\n#+end_src\n",
     );
     expect(entries[0].body).toBe("Meet at the main entrance.");
   });
 
   it("#+begin_src description multiline body", () => {
     const entries = parseOrg(
-      "** Event\n#+begin_src description\nFirst line.\nSecond line.\n#+end_src\n",
+      "** Event\n#+begin_src description\n  First line.\n  Second line.\n#+end_src\n",
     );
     expect(entries[0].body).toBe("First line.\nSecond line.");
   });
 
   it("block is case-insensitive for open/close markers", () => {
     const entries = parseOrg(
-      "** Event\n#+BEGIN_SRC description\nContent.\n#+END_SRC\n",
+      "** Event\n#+BEGIN_SRC description\n  Content.\n#+END_SRC\n",
     );
     expect(entries[0].body).toBe("Content.");
   });
 
-  it("Org syntax inside the block is not parsed", () => {
+  it("Org syntax inside the block is safe when indented", () => {
     const entries = parseOrg(
-      "** Event\n#+begin_src description\n* heading\nSCHEDULED: <2026-04-07 ti.>\n- [ ] checkbox\n#+end_src\n",
+      "** Event\n#+begin_src description\n  * heading\n  SCHEDULED: <2026-04-07 ti.>\n  - [ ] checkbox\n#+end_src\n",
     );
     expect(entries[0].body).toBe("* heading\nSCHEDULED: <2026-04-07 ti.>\n- [ ] checkbox");
     expect(entries[0].planning).toHaveLength(0);
@@ -358,12 +358,12 @@ describe("drawers", () => {
     expect(entries[0].body).toBe("");
   });
 
-  it("unescapes comma-prefixed #+end_src lines written by escapeDescriptionLine", () => {
-    // File as written by buildOrgText: only #+end_src is comma-prefixed
+  it("strips indentation and unescapes #+end_src and leading commas", () => {
+    // As written by formatDescriptionLine: indented + comma-escaped dangerous lines
     const entries = parseOrg(
-      "** Entry\n#+begin_src description\n,#+end_src\n,,starts with comma\n#+end_src\n",
+      "** Entry\n#+begin_src description\n  ,#+end_src\n  ,,starts with comma\n  normal\n#+end_src\n",
     );
-    expect(entries[0].body).toBe("#+end_src\n,starts with comma");
+    expect(entries[0].body).toBe("#+end_src\n,starts with comma\nnormal");
   });
 });
 
@@ -701,7 +701,7 @@ describe("checkbox items", () => {
 
   it("checkboxes alongside a #+begin_src description block", () => {
     const entries = parseOrg(
-      "** TODO Task\n#+begin_src description\nSome notes.\n#+end_src\n- [ ] Step one\n- [X] Step two\n",
+      "** TODO Task\n#+begin_src description\n  Some notes.\n#+end_src\n- [ ] Step one\n- [X] Step two\n",
     );
     expect(entries[0].body).toBe("Some notes.");
     expect(entries[0].checkboxItems).toHaveLength(2);
@@ -770,7 +770,7 @@ SCHEDULED: <2026-04-14 ti. 12:00>
 ** Outdoor activity :outdoors:
 <2026-04-12 Sun 14:00>
 #+begin_src description
-Meet at the main entrance.
+  Meet at the main entrance.
 #+end_src
 `;
 

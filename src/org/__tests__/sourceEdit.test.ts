@@ -149,16 +149,16 @@ describe("replaceOrgBlockInSource", () => {
     const source =
       "** Event\n" +
       "#+begin_src description\n" +
-      "* not a heading\n" +
+      "  * not a heading\n" +
       "#+end_src\n" +
       "** Next\n";
     const out = replaceOrgBlockInSource(
       source,
       1,
-      "** Event\n#+begin_src description\n* not a heading\n#+end_src",
+      "** Event\n#+begin_src description\n  * not a heading\n#+end_src",
     );
     expect(out).toBe(
-      "** Event\n#+begin_src description\n* not a heading\n#+end_src\n** Next\n",
+      "** Event\n#+begin_src description\n  * not a heading\n#+end_src\n** Next\n",
     );
   });
 });

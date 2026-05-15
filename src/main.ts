@@ -1385,11 +1385,14 @@ interface BuildOrgOpts {
   body?: string;
 }
 
-// Org src-block escaping: only #+end_src can close the block prematurely.
-function escapeDescriptionLine(line: string): string {
-  if (line.startsWith(",")) return "," + line;                   // double-escape leading comma
-  if (/^#\+end_src\s*$/i.test(line)) return "," + line;
-  return line;
+// Indent description lines by 2 spaces. Escape lines containing #+end_src
+// (recognized as block close by Emacs even when indented) and leading commas
+// (to preserve them through the round-trip) with a "," prefix.
+function formatDescriptionLine(line: string): string {
+  const escaped = (line.startsWith(",") || /^#\+end_src\s*$/i.test(line))
+    ? "," + line
+    : line;
+  return "  " + escaped;
 }
 
 function buildOrgText(opts: BuildOrgOpts): string {
@@ -1417,7 +1420,7 @@ function buildOrgText(opts: BuildOrgOpts): string {
   );
 
   const bodyLines = opts.body
-    ? ["#+begin_src description", ...opts.body.split("\n").map(escapeDescriptionLine), "#+end_src"]
+    ? ["#+begin_src description", ...opts.body.split("\n").map(formatDescriptionLine), "#+end_src"]
     : [];
 
   if (opts.type === "event") {

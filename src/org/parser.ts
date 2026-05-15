@@ -141,7 +141,8 @@ export function parseOrg(source: string): OrgEntry[] {
       if (DESC_BLOCK_CLOSE_RE.test(line)) {
         inDescBlock = false;
       } else if (current) {
-        const unescaped = line.startsWith(",") ? line.slice(1) : line;
+        const dented = line.startsWith("  ") ? line.slice(2) : line;
+        const unescaped = dented.startsWith(",") ? dented.slice(1) : dented;
         if (current.body.length > 0) current.body += "\n";
         current.body += unescaped;
       }

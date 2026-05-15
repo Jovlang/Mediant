@@ -95,11 +95,11 @@ describe("upsertProperty", () => {
 
   it("inserts after #+begin_src description block so description precedes properties", () => {
     const { source, entry } = withEntry(
-      "** TODO Yoga\nSCHEDULED: <2026-04-27 ma. 17:00 +1w>\n#+begin_src description\nNotes.\n#+end_src\n",
+      "** TODO Yoga\nSCHEDULED: <2026-04-27 ma. 17:00 +1w>\n#+begin_src description\n  Notes.\n#+end_src\n",
     );
     const out = upsertProperty(source, entry, "EXCEPTION-2026-04-27", "cancelled");
     expect(out).toBe(
-      "** TODO Yoga\nSCHEDULED: <2026-04-27 ma. 17:00 +1w>\n#+begin_src description\nNotes.\n#+end_src\n:PROPERTIES:\n:EXCEPTION-2026-04-27: cancelled\n:END:\n",
+      "** TODO Yoga\nSCHEDULED: <2026-04-27 ma. 17:00 +1w>\n#+begin_src description\n  Notes.\n#+end_src\n:PROPERTIES:\n:EXCEPTION-2026-04-27: cancelled\n:END:\n",
     );
   });
 

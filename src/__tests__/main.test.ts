@@ -59,7 +59,7 @@ describe("main.ts integration", () => {
         "** TODO Yoga :work:health:",
         "SCHEDULED: <2026-04-21 Tue 17:00 .+1w>",
         "#+begin_src description",
-        "Body line.",
+        "  Body line.",
         "#+end_src",
         "- [X] Mat",
         "- [ ] Water",
