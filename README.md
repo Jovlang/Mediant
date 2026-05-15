@@ -400,7 +400,7 @@ Click a tag to filter the agenda.
 
 Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible.
 
-Active filters are shown in the header and can be cleared in one click.
+Active filters can be cleared by clicking a selected tag again.
 
 ### Work with priorities
 
@@ -494,7 +494,7 @@ For the full breakdown of supported, gracefully ignored, and unsupported syntax,
 | SCHEDULED        | `SCHEDULED: <2026-04-14 ti. 12:00>`         |
 | DEADLINE         | `DEADLINE: <2026-05-05 ti.>`                |
 | Checkbox lists   | `- [ ] Pending` / `- [X] Done`              |
-| Progress cookies | `** TODO Task [2/3]` / `** TODO Task [66%]` |
+| Progress cookies | `** TODO Task [2/3]` / `** TODO Task [66%]` (treated as text) |
 | Body text        | Free text lines under a heading             |
 
 Anything outside this subset is ignored gracefully. Unsupported syntax should not cause parse errors.
@@ -641,7 +641,7 @@ The parser reads Org source into structures that reflect the file:
 * planning lines
 * timestamps
 * checkbox items
-* progress cookies
+* progress cookies (treated as text)
 * body text
 * selected property drawer values
 

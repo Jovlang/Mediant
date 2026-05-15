@@ -2035,6 +2035,27 @@ body:has(.add-panel[open]) {
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 
+.description-textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--border) 66%, transparent);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background: color-mix(in srgb, var(--bg-card) 82%, var(--bg-panel));
+  color: var(--text);
+  font-family: inherit;
+  box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.035), 0 1px 0 rgba(255, 255, 255, 0.28);
+  resize: vertical;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.description-textarea:focus {
+  outline: none;
+  border-color: var(--border-today);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--border-today) 16%, transparent);
+}
+
 .occurrence-note-row {
   justify-content: flex-end;
 }
@@ -2099,7 +2120,8 @@ body:has(.add-panel[open]) {
   .tag-picker-input,
   .occurrence-input,
   .datetime-text-input,
-  .edit-checkbox-text {
+  .edit-checkbox-text,
+  .description-textarea {
     font-size: 1rem;
   }
 }

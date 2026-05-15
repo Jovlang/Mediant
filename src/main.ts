@@ -103,6 +103,7 @@ interface AddPanelRefs {
   occurrenceInput: HTMLInputElement;
   occurrencePreview: HTMLElement;
   noteTextarea: HTMLInputElement;
+  bodyTextarea: HTMLTextAreaElement;
   clearOverrideBtn: HTMLButtonElement;
   datesSummonRow: HTMLElement;
   metadataSummonRow: HTMLElement;
@@ -128,6 +129,7 @@ let revealedDeadRepeat = false;
 let revealedOccCancel = false;
 let revealedOccMove = false;
 let revealedOccNote = false;
+let revealedDescription = false;
 let queuedEditSource: string | null = null;
 let queuedEditEpoch: number | null = null;
 let inFlightEditSource: string | null = null;
@@ -406,6 +408,26 @@ function buildAddPanel(): void {
   const priorityGroup = makePriorityStepper();
   metadataSection.appendChild(priorityGroup.container);
 
+  // Description (body text)
+  const descriptionWrapper = document.createElement("div");
+  descriptionWrapper.className = "add-field";
+  const bodyTextarea = document.createElement("textarea");
+  bodyTextarea.className = "description-textarea";
+  bodyTextarea.rows = 3;
+  bodyTextarea.addEventListener("input", scheduleEditAutosave);
+  descriptionWrapper.appendChild(bodyTextarea);
+  metadataSection.appendChild(descriptionWrapper);
+
+  const descriptionSummonBtn = document.createElement("button");
+  descriptionSummonBtn.type = "button";
+  descriptionSummonBtn.className = "field-summon-btn";
+  descriptionSummonBtn.textContent = t("summonDescription");
+  descriptionSummonBtn.addEventListener("click", () => {
+    revealedDescription = true;
+    syncVisibility();
+    bodyTextarea.focus();
+  });
+
   const etiketterSummonBtn = document.createElement("button");
   etiketterSummonBtn.type = "button";
   etiketterSummonBtn.className = "field-summon-btn";
@@ -427,7 +449,7 @@ function buildAddPanel(): void {
 
   const metadataSummonRow = document.createElement("div");
   metadataSummonRow.className = "field-summon-row";
-  metadataSummonRow.append(etiketterSummonBtn, prioritySummonBtn);
+  metadataSummonRow.append(descriptionSummonBtn, etiketterSummonBtn, prioritySummonBtn);
   metadataSection.appendChild(metadataSummonRow);
 
   // Show/hide fields based on type
@@ -460,11 +482,14 @@ function buildAddPanel(): void {
     const hasTags = tagPicker.getTags().length > 0;
     const showTags = hasTags || revealedTags;
     const showPriority = editingPriority !== null || revealedPriority;
+    const showDescription = bodyTextarea.value.length > 0 || revealedDescription;
     tagPicker.container.style.display = showTags ? "" : "none";
     priorityGroup.container.style.display = showPriority ? "" : "none";
+    descriptionWrapper.style.display = showDescription ? "" : "none";
+    descriptionSummonBtn.style.display = showDescription ? "none" : "";
     etiketterSummonBtn.style.display = showTags ? "none" : "";
     prioritySummonBtn.style.display = showPriority ? "none" : "";
-    metadataSummonRow.style.display = showTags && showPriority ? "none" : "";
+    metadataSummonRow.style.display = showDescription && showTags && showPriority ? "none" : "";
     checkboxSection.style.display = isTodo ? "" : "none";
     checklistSection.style.display = isTodo ? "" : "none";
     updateDateTimePreview(whenInput.input, whenInput.preview);
@@ -669,6 +694,7 @@ function buildAddPanel(): void {
     occurrenceInput,
     occurrencePreview,
     noteTextarea,
+    bodyTextarea,
     clearOverrideBtn,
     datesSummonRow,
     metadataSummonRow,
@@ -1354,6 +1380,7 @@ interface BuildOrgOpts {
   deadTime?: string;
   deadRepeater?: string | null;
   checkboxItems?: { text: string; checked: boolean }[];
+  body?: string;
 }
 
 function buildOrgText(opts: BuildOrgOpts): string {
@@ -1380,9 +1407,11 @@ function buildOrgText(opts: BuildOrgOpts): string {
     ci => `- [${ci.checked ? "X" : " "}] ${ci.text}`
   );
 
+  const bodyLines = opts.body ? ["", opts.body] : [];
+
   if (opts.type === "event") {
-    if (!opts.date) return [headingLine, ...cbLines].join("\n");
-    return [headingLine, makeTs(opts.date, opts.time, opts.repeater), ...cbLines].join("\n");
+    if (!opts.date) return [headingLine, ...cbLines, ...bodyLines].join("\n");
+    return [headingLine, makeTs(opts.date, opts.time, opts.repeater), ...cbLines, ...bodyLines].join("\n");
   }
 
   // TODO: up to one SCHEDULED and one DEADLINE, emitted together on a single
@@ -1392,7 +1421,7 @@ function buildOrgText(opts: BuildOrgOpts): string {
   if (opts.deadDate) planningParts.push(`DEADLINE: ${makeTs(opts.deadDate, opts.deadTime, opts.deadRepeater)}`);
   if (opts.schedDate) planningParts.push(`SCHEDULED: ${makeTs(opts.schedDate, opts.schedTime, opts.schedRepeater)}`);
   if (planningParts.length > 0) lines.push(planningParts.join(" "));
-  lines.push(...cbLines);
+  lines.push(...cbLines, ...bodyLines);
   return lines.join("\n");
 }
 
@@ -1406,6 +1435,7 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
     return null;
   }
   const tagsVal = refs.tagPicker.getTags().join(", ");
+  const body = refs.bodyTextarea.value.trim() || undefined;
 
   const readDateTime = (input: HTMLInputElement): { date: string; time: string } | null => {
     const raw = input.value.trim();
@@ -1434,6 +1464,7 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
       date: dt.date,
       time: dt.time,
       repeater: refs.repeatSelect.value || null,
+      body,
     });
   }
 
@@ -1457,6 +1488,7 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
     deadTime: deadline.time,
     deadRepeater: deadline.date ? (refs.deadRepeatSelect.value || null) : null,
     checkboxItems,
+    body,
   });
 }
 
@@ -1573,6 +1605,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   revealedOccCancel = false;
   revealedOccMove = false;
   revealedOccNote = false;
+  revealedDescription = false;
   editingLine = null;
   editingBaseDate = null;
   editingLevel = 1;
@@ -1586,6 +1619,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
 
   const refs = addPanelRefs;
   refs.titleInput.value = prefillTitle ?? "";
+  refs.bodyTextarea.value = "";
   refs.when.input.value = isoToDisplayDate(prefillDate ?? "");
   refs.sched.input.value = "";
   refs.dead.input.value = "";
@@ -1633,6 +1667,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   revealedOccCancel = false;
   revealedOccMove = false;
   revealedOccNote = false;
+  revealedDescription = false;
 
   const entry = entries.find(e => e.sourceLineNumber === sourceLine);
   if (!entry) return;
@@ -1698,6 +1733,10 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   // Populate checkbox items
   editingCheckboxItems = entry.checkboxItems.map(ci => ({ text: ci.text, checked: ci.checked }));
   rebuildCheckboxUI(refs.checkboxSection);
+
+  // Populate description (body text)
+  refs.bodyTextarea.value = entry.body;
+  revealedDescription = entry.body.length > 0;
 
   refs.syncVisibility();
 

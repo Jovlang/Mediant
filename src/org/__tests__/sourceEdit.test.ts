@@ -17,7 +17,7 @@ beforeEach(() => {
 });
 
 describe("replaceOrgBlockInSource", () => {
-  it("replaces planning fields while preserving body text", () => {
+  it("replaces planning fields; body must be included in newText", () => {
     const source =
       "** TODO Task\n" +
       "SCHEDULED: <2026-04-07 ti.>\n" +
@@ -26,35 +26,35 @@ describe("replaceOrgBlockInSource", () => {
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** TODO Task renamed\nDEADLINE: <2026-04-09 to.>\n",
+      "** TODO Task renamed\nDEADLINE: <2026-04-09 to.>\n\nBody line.",
     );
 
     expect(updated).toBe(
       "** TODO Task renamed\n" +
       "DEADLINE: <2026-04-09 to.>\n" +
       "\n" +
-      "Body line.\n",
+      "Body line.",
     );
   });
 
-  it("drops old checkbox lines because the editor re-emits the full checklist", () => {
+  it("drops old body and checkbox lines because newText re-emits them", () => {
     const source =
       "** TODO Task\n" +
       "- [ ] First\n" +
       "- [X] Second\n" +
-      "Notes stay.\n";
+      "Notes.\n";
 
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** TODO Task\n- [X] Replacement\n",
+      "** TODO Task\n- [X] Replacement\n\nNotes.",
     );
 
     expect(updated).toBe(
       "** TODO Task\n" +
       "- [X] Replacement\n" +
       "\n" +
-      "Notes stay.\n",
+      "Notes.",
     );
   });
 
@@ -68,15 +68,15 @@ describe("replaceOrgBlockInSource", () => {
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** Event updated\n<2026-04-07 ti. 12:00>\n",
+      "** Event updated\n<2026-04-07 ti. 12:00>\n\nBody.",
     );
 
     expect(updated).toBe(
       "** Event updated\n" +
       "<2026-04-07 ti. 12:00>\n" +
       "\n" +
-      "<2026-04-08 on. 11:00>\n" +
-      "Body.\n",
+      "Body.\n" +
+      "<2026-04-08 on. 11:00>",
     );
   });
 
@@ -90,14 +90,14 @@ describe("replaceOrgBlockInSource", () => {
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** TODO Task\nSCHEDULED: <2026-04-11 lø.>\n",
+      "** TODO Task\nSCHEDULED: <2026-04-11 lø.>\n\nBody.",
     );
 
     expect(updated).toBe(
       "** TODO Task\n" +
       "SCHEDULED: <2026-04-11 lø.>\n" +
       "\n" +
-      "Body.\n",
+      "Body.",
     );
   });
 
@@ -110,13 +110,13 @@ describe("replaceOrgBlockInSource", () => {
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** TODO Event\n",
+      "** TODO Event\n\nBody.",
     );
 
     expect(updated).toBe(
       "** TODO Event\n" +
       "\n" +
-      "Body.\n",
+      "Body.",
     );
   });
 
@@ -129,14 +129,14 @@ describe("replaceOrgBlockInSource", () => {
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** Task\n<2026-04-08 on. 11:00>\n",
+      "** Task\n<2026-04-08 on. 11:00>\n\nBody.",
     );
 
     expect(updated).toBe(
       "** Task\n" +
       "<2026-04-08 on. 11:00>\n" +
       "\n" +
-      "Body.\n",
+      "Body.",
     );
   });
 

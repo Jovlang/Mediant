@@ -135,10 +135,7 @@ DEADLINE: <2026-05-05 ti.>
 ```
 
 - `[N/M]` (fractional) or `[N%]` (percentage) after the priority cookie (or heading start).
-- Parsed into `progress` on the entry (`{ done, total }` or `null`). For percentage form, stored as `{ done: N, total: 100 }`.
-- Stripped from the title.
-- Rendered as a small badge next to the title (green when complete, gray otherwise).
-- Toggling, editing, adding, or removing a checkbox recalculates the progress cookie in the source immediately.
+- Not parsed — treated as plain text and included in the title as-is.
 
 ### Body text
 

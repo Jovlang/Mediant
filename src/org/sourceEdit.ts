@@ -14,10 +14,11 @@ const EN_DAY_ABBREVS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as cons
 const NO_DAY_ABBREVS = ["sø.", "ma.", "ti.", "on.", "to.", "fr.", "lø."] as const;
 
 /**
- * Replace the block for an entry at `sourceLine` with `newText`, preserving
- * any body text (non-planning, non-bare-timestamp lines) that followed the
- * original heading. The block extends from the heading line up to (but not
- * including) the next heading or EOF.
+ * Replace the block for an entry at `sourceLine` with `newText`. The new
+ * block text must include all content (heading, planning, checkboxes, body).
+ * Extra bare timestamps beyond the one in newText are preserved from the
+ * original. The block extends from the heading line up to (but not including)
+ * the next heading or EOF.
  */
 export function replaceOrgBlockInSource(source: string, sourceLine: number, newText: string): string {
   const lines = source.split("\n");
@@ -50,9 +51,11 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
         dropReplacementBare = false;
         continue;
       }
+      preserved.push(line);
+      continue;
     }
     if (checkboxRe.test(line)) continue;
-    preserved.push(line);
+    // body text and blank lines are now owned by newText — drop them
   }
 
   return [
