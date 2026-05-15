@@ -127,6 +127,18 @@ DEADLINE: <2026-05-05 ti.>
 - In agenda rows, clicking a checkbox row toggles completion and updates the Org source immediately. Text, add, and remove edits are handled by the edit-panel checklist editor for TODO tasks.
 - In the edit panel, checkboxes are interactive toggles with editable labels and add/remove controls that update the Org source immediately.
 
+### Description drawer
+
+```org
+** TODO Task
+:DESCRIPTION:
+Free-form description text here.
+:END:
+```
+
+- Content of a `:DESCRIPTION:` drawer is read as the entry's body text.
+- Written by the edit panel when an item has a description. This keeps arbitrary user text safe from being misinterpreted as Org syntax (headings, planning keywords, timestamps, checkboxes).
+
 ### Progress cookies
 
 ```org

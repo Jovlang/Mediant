@@ -1407,7 +1407,7 @@ function buildOrgText(opts: BuildOrgOpts): string {
     ci => `- [${ci.checked ? "X" : " "}] ${ci.text}`
   );
 
-  const bodyLines = opts.body ? ["", opts.body] : [];
+  const bodyLines = opts.body ? ["", ":DESCRIPTION:", opts.body, ":END:"] : [];
 
   if (opts.type === "event") {
     if (!opts.date) return [headingLine, ...cbLines, ...bodyLines].join("\n");

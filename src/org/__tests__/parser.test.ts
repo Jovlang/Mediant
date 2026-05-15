@@ -184,13 +184,11 @@ describe("planning", () => {
     expect(entries[0].planning[1].timestamp.date).toBe("2026-04-18");
   });
 
-  it("planning not accepted after body text starts", () => {
+  it("planning not accepted after a non-planning line", () => {
     const entries = parseOrg(
-      "** Heading\nSome body text\nSCHEDULED: <2026-04-14 ti.>\n",
+      "** Heading\nSome unrecognized line\nSCHEDULED: <2026-04-14 ti.>\n",
     );
     expect(entries[0].planning).toHaveLength(0);
-    // The SCHEDULED line becomes body text
-    expect(entries[0].body).toContain("SCHEDULED:");
   });
 });
 
@@ -256,12 +254,12 @@ describe("active timestamps", () => {
     expect(entries[0].planning).toHaveLength(1);
   });
 
-  it("mixed prose + timestamp line is treated as body text, not captured", () => {
+  it("mixed prose + timestamp line is ignored (not a timestamp-only line)", () => {
     const entries = parseOrg(
       "** Event\nMeet at <2026-04-07 ti. 15:00> sharp.\n",
     );
     expect(entries[0].timestamps).toHaveLength(0);
-    expect(entries[0].body).toBe("Meet at <2026-04-07 ti. 15:00> sharp.");
+    expect(entries[0].body).toBe("");
   });
 });
 
@@ -270,12 +268,12 @@ describe("active timestamps", () => {
 describe("skipped constructs", () => {
   it("ignores #+ keyword lines inside an entry", () => {
     const entries = parseOrg("** Entry\n#+begin_src python\ncode\n#+end_src\n");
-    expect(entries[0].body).toBe("code");
+    expect(entries[0].body).toBe("");
   });
 
   it("ignores comment lines inside an entry", () => {
-    const entries = parseOrg("** Entry\n# This is a comment\nReal body.\n");
-    expect(entries[0].body).toBe("Real body.");
+    const entries = parseOrg("** Entry\n# This is a comment\nOther line.\n");
+    expect(entries[0].body).toBe("");
   });
 
   it("planning line only uses first timestamp", () => {
@@ -290,39 +288,39 @@ describe("skipped constructs", () => {
 // ── Body text ────────────────────────────────────────────────────────
 
 describe("body text", () => {
-  it("preserves body text as notes", () => {
-    const entries = parseOrg(
-      "** Outdoor activity :outdoors:\n<2026-04-12 Sun 14:00>\nMeet at the main entrance.\n",
-    );
-    expect(entries[0].body).toBe("Meet at the main entrance.");
-  });
-
-  it("multiline body text preserves newlines", () => {
-    const entries = parseOrg(
-      "** Event\nFirst line.\nSecond line.\n",
-    );
-    expect(entries[0].body).toBe("First line.\nSecond line.");
-  });
-
-  it("empty body is empty string", () => {
+  it("empty body when no DESCRIPTION drawer", () => {
     const entries = parseOrg("** Just a heading\n");
     expect(entries[0].body).toBe("");
   });
 
-  it("body does not include planning lines", () => {
+  it("raw lines outside a drawer are ignored", () => {
     const entries = parseOrg(
-      "** TODO Task\nDEADLINE: <2026-05-05 ti.>\nSome note.\n",
+      "** Event\nFirst line.\nSecond line.\n",
     );
-    expect(entries[0].body).toBe("Some note.");
-    expect(entries[0].planning).toHaveLength(1);
+    expect(entries[0].body).toBe("");
   });
 
-  it("body does not include standalone timestamp lines", () => {
+  it("planning lines and timestamps are not affected by unrecognized lines", () => {
     const entries = parseOrg(
-      "** Event\n<2026-04-07 ti. 15:15>\nDetails here.\n",
+      "** TODO Task\nDEADLINE: <2026-05-05 ti.>\n<2026-04-07 ti. 15:15>\n",
     );
-    expect(entries[0].body).toBe("Details here.");
+    expect(entries[0].body).toBe("");
+    expect(entries[0].planning).toHaveLength(1);
     expect(entries[0].timestamps).toHaveLength(1);
+  });
+
+  it("reads body from DESCRIPTION drawer", () => {
+    const entries = parseOrg(
+      "** Event\n:DESCRIPTION:\nMeet at the main entrance.\n:END:\n",
+    );
+    expect(entries[0].body).toBe("Meet at the main entrance.");
+  });
+
+  it("DESCRIPTION drawer multiline body", () => {
+    const entries = parseOrg(
+      "** Event\n:DESCRIPTION:\nFirst line.\nSecond line.\n:END:\n",
+    );
+    expect(entries[0].body).toBe("First line.\nSecond line.");
   });
 });
 
@@ -331,16 +329,39 @@ describe("body text", () => {
 describe("drawers", () => {
   it("skips property drawers", () => {
     const entries = parseOrg(
-      "** Entry\n:PROPERTIES:\n:CATEGORY: work\n:END:\nBody text.\n",
+      "** Entry\n:PROPERTIES:\n:CATEGORY: work\n:END:\n",
     );
-    expect(entries[0].body).toBe("Body text.");
+    expect(entries[0].body).toBe("");
   });
 
   it("skips logbook drawers", () => {
     const entries = parseOrg(
-      "** Entry\n:LOGBOOK:\nCLOCK: [2026-04-07 ti.]\n:END:\nBody.\n",
+      "** Entry\n:LOGBOOK:\nCLOCK: [2026-04-07 ti.]\n:END:\n",
     );
-    expect(entries[0].body).toBe("Body.");
+    expect(entries[0].body).toBe("");
+  });
+
+  it("reads DESCRIPTION drawer content as body text", () => {
+    const entries = parseOrg(
+      "** TODO Task\n:DESCRIPTION:\nSome description.\n:END:\n",
+    );
+    expect(entries[0].body).toBe("Some description.");
+  });
+
+  it("DESCRIPTION drawer body is safe from Org syntax interpretation", () => {
+    const entries = parseOrg(
+      "** TODO Task\n:DESCRIPTION:\n** Not a heading\nSCHEDULED: <2026-04-07 ti.>\n- [ ] Not a checkbox\n:END:\n",
+    );
+    expect(entries[0].body).toBe("** Not a heading\nSCHEDULED: <2026-04-07 ti.>\n- [ ] Not a checkbox");
+    expect(entries[0].planning).toHaveLength(0);
+    expect(entries[0].checkboxItems).toHaveLength(0);
+  });
+
+  it("DESCRIPTION drawer multiline body preserves newlines", () => {
+    const entries = parseOrg(
+      "** Entry\n:DESCRIPTION:\nFirst line.\nSecond line.\n:END:\n",
+    );
+    expect(entries[0].body).toBe("First line.\nSecond line.");
   });
 });
 
@@ -676,17 +697,18 @@ describe("checkbox items", () => {
     expect(entries[0].checkboxItems).toEqual([]);
   });
 
-  it("mixes body text and checkboxes (body first)", () => {
-    const entries = parseOrg("** TODO Task\nSome notes.\n- [ ] Step one\n- [X] Step two\n");
+  it("checkboxes alongside a DESCRIPTION drawer", () => {
+    const entries = parseOrg(
+      "** TODO Task\n:DESCRIPTION:\nSome notes.\n:END:\n- [ ] Step one\n- [X] Step two\n",
+    );
     expect(entries[0].body).toBe("Some notes.");
     expect(entries[0].checkboxItems).toHaveLength(2);
   });
 
-  it("does not parse nested list items as checkboxes", () => {
-    // Plain list items without checkbox syntax are body text
+  it("does not parse plain list items as checkboxes", () => {
     const entries = parseOrg("** Notes\n- Plain item\n- Another item\n");
     expect(entries[0].checkboxItems).toEqual([]);
-    expect(entries[0].body).toContain("Plain item");
+    expect(entries[0].body).toBe("");
   });
 
   it("handles indented checkbox items", () => {
@@ -745,7 +767,9 @@ SCHEDULED: <2026-04-14 ti. 12:00>
 <2026-04-11 Sat 12:00>
 ** Outdoor activity :outdoors:
 <2026-04-12 Sun 14:00>
+:DESCRIPTION:
 Meet at the main entrance.
+:END:
 `;
 
   it("parses correct number of entries", () => {

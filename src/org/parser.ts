@@ -130,8 +130,7 @@ export function parseOrg(source: string): OrgEntry[] {
     const line = lines[i];
     const lineNumber = i + 1; // 1-based
 
-    // Inside a drawer: either close it, or (for PROPERTIES) pluck exception keys.
-    // All other drawer contents are skipped as today.
+    // Inside a drawer: close on :END:, accumulate DESCRIPTION as body, pluck PROPERTIES keys.
     if (drawerKind !== null) {
       if (DRAWER_CLOSE_RE.test(line)) {
         drawerKind = null;
@@ -139,6 +138,9 @@ export function parseOrg(source: string): OrgEntry[] {
       }
       if (drawerKind === "PROPERTIES" && current) {
         absorbPropertyLine(line, current);
+      } else if (drawerKind === "DESCRIPTION" && current) {
+        if (current.body.length > 0) current.body += "\n";
+        current.body += line;
       }
       continue;
     }
@@ -192,7 +194,7 @@ export function parseOrg(source: string): OrgEntry[] {
       continue;
     }
 
-    // Blank line — terminates body accumulation
+    // Blank lines and unrecognized lines are ignored
     if (line.trim() === "") {
       continue;
     }
@@ -215,12 +217,6 @@ export function parseOrg(source: string): OrgEntry[] {
       }
       continue;
     }
-
-    // Body text — any remaining non-blank line
-    if (current.body.length > 0) {
-      current.body += "\n";
-    }
-    current.body += line.trimStart();
   }
 
   // Finalize last entry
