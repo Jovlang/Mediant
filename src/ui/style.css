@@ -1496,9 +1496,9 @@ body:has(.add-panel[open]) {
   padding: 0.12rem 0.14rem 0.12rem 0.34rem;
   border-radius: 999px;
   font-weight: 500;
-  color: #d7e6f3;
-  background: #263d53;
-  border: 1px solid color-mix(in srgb, #7aa2c8 48%, #263d53);
+  color: #536d86;
+  background: #edf3f8;
+  border: 1px solid #d7e2ec;
   white-space: nowrap;
 }
 
@@ -1568,6 +1568,8 @@ body:has(.add-panel[open]) {
 @media (prefers-color-scheme: dark) {
   .tag-picker-pill {
     color: color-mix(in srgb, #7aa2c8 60%, var(--text) 40%);
+    background: color-mix(in srgb, #2d4f6e 28%, var(--bg-card) 72%);
+    border-color: color-mix(in srgb, #7aa2c8 44%, var(--border) 56%);
   }
 
   .tag-picker-pill-x {
