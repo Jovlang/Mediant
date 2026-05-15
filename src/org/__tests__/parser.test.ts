@@ -363,6 +363,14 @@ describe("drawers", () => {
     );
     expect(entries[0].body).toBe("First line.\nSecond line.");
   });
+
+  it("unescapes comma-prefixed heading and :END: lines written by escapeDescriptionLine", () => {
+    // File as written by buildOrgText: dangerous lines are comma-prefixed
+    const entries = parseOrg(
+      "** Entry\n:DESCRIPTION:\n,* not a heading\n,:END:\n,,starts with comma\n:END:\n",
+    );
+    expect(entries[0].body).toBe("* not a heading\n:END:\n,starts with comma");
+  });
 });
 
 // ── Exception properties ────────────────────────────────────────────

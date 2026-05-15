@@ -139,8 +139,11 @@ export function parseOrg(source: string): OrgEntry[] {
       if (drawerKind === "PROPERTIES" && current) {
         absorbPropertyLine(line, current);
       } else if (drawerKind === "DESCRIPTION" && current) {
+        // Strip the leading "," added by escapeDescriptionLine for lines
+        // that would otherwise be misread as headings or :END: markers.
+        const unescaped = line.startsWith(",") ? line.slice(1) : line;
         if (current.body.length > 0) current.body += "\n";
-        current.body += line;
+        current.body += unescaped;
       }
       continue;
     }

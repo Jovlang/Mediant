@@ -1385,6 +1385,14 @@ interface BuildOrgOpts {
   body?: string;
 }
 
+// Org src-block escaping convention: prefix dangerous lines with ","
+// so they survive inside a :DESCRIPTION: drawer intact.
+function escapeDescriptionLine(line: string): string {
+  if (line.startsWith(",")) return "," + line;                   // double-escape leading comma
+  if (/^\*+\s/.test(line) || /^\s*:END:\s*$/.test(line)) return "," + line;
+  return line;
+}
+
 function buildOrgText(opts: BuildOrgOpts): string {
   let tagStr = "";
   if (opts.tags) {
@@ -1409,7 +1417,9 @@ function buildOrgText(opts: BuildOrgOpts): string {
     ci => `- [${ci.checked ? "X" : " "}] ${ci.text}`
   );
 
-  const bodyLines = opts.body ? [":DESCRIPTION:", opts.body, ":END:"] : [];
+  const bodyLines = opts.body
+    ? [":DESCRIPTION:", ...opts.body.split("\n").map(escapeDescriptionLine), ":END:"]
+    : [];
 
   if (opts.type === "event") {
     if (!opts.date) return [headingLine, ...bodyLines, ...cbLines].join("\n");
