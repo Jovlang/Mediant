@@ -412,11 +412,16 @@ function buildAddPanel(): void {
   // Description (body text)
   const descriptionWrapper = document.createElement("div");
   descriptionWrapper.className = "add-field";
+  const descriptionLabel = document.createElement("label");
+  descriptionLabel.className = "add-label";
+  descriptionLabel.htmlFor = "add-description";
+  descriptionLabel.textContent = t("description");
   const bodyTextarea = document.createElement("textarea");
+  bodyTextarea.id = "add-description";
   bodyTextarea.className = "description-textarea";
   bodyTextarea.rows = 2;
   bodyTextarea.addEventListener("input", scheduleEditAutosave);
-  descriptionWrapper.appendChild(bodyTextarea);
+  descriptionWrapper.append(descriptionLabel, bodyTextarea);
   metadataSection.appendChild(descriptionWrapper);
 
   const descriptionSummonBtn = document.createElement("button");

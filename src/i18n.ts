@@ -96,6 +96,7 @@ const messages = {
     scheduledRepeat: "Scheduled repeat",
     deadlineRepeat: "Deadline repeat",
     tags: "Tags",
+    description: "Description",
     checklist: "Checklist",
     addSubtask: "+ Add subtask",
 
@@ -235,6 +236,7 @@ const messages = {
     scheduledRepeat: "Gjenta planlagt",
     deadlineRepeat: "Gjenta frist",
     tags: "Etiketter",
+    description: "Beskrivelse",
     checklist: "Sjekkliste",
     addSubtask: "+ Legg til deloppgave",
 
@@ -368,6 +370,7 @@ const messages = {
     scheduledRepeat: "Ripeti pianificato",
     deadlineRepeat: "Ripeti scadenza",
     tags: "Etichette",
+    description: "Descrizione",
     checklist: "Lista di controllo",
     addSubtask: "+ Aggiungi sottoattività",
 
@@ -501,6 +504,7 @@ const messages = {
     scheduledRepeat: "Geplante Wiederholung",
     deadlineRepeat: "Frist-Wiederholung",
     tags: "Tags",
+    description: "Beschreibung",
     checklist: "Checkliste",
     addSubtask: "+ Unteraufgabe hinzufügen",
 
