@@ -1726,8 +1726,8 @@ body:has(.add-panel[open]) {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  min-height: 1.35rem;
-  font-size: 0.8125rem;
+  min-height: 1.1rem;
+  font-size: 0.75rem;
 }
 
 .occurrence-toggle-checkbox {
