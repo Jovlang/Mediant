@@ -15,8 +15,8 @@ const NO_DAY_ABBREVS = ["sø.", "ma.", "ti.", "on.", "to.", "fr.", "lø."] as co
 
 const DRAWER_OPEN_RE = /^\s*:([A-Z_]+):\s*$/;
 const DRAWER_CLOSE_RE = /^\s*:END:\s*$/;
-const DESC_BLOCK_OPEN_RE = /^#\+begin_description\s*$/i;
-const DESC_BLOCK_CLOSE_RE = /^#\+end_description\s*$/i;
+const DESC_BLOCK_OPEN_RE = /^#\+begin_src\s+description\s*$/i;
+const DESC_BLOCK_CLOSE_RE = /^#\+end_src\s*$/i;
 
 /**
  * Return the index of the first line that starts the NEXT entry after

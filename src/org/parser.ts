@@ -98,9 +98,9 @@ const OVERRIDE_SHIFT_RE = /^shift\s+([+-]\d+)([mhd])$/;
 const OVERRIDE_RESCHEDULE_RE =
   /^reschedule\s+(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2})(?:-(\d{2}:\d{2}))?)?$/;
 
-/** #+begin_description / #+end_description block markers */
-const DESC_BLOCK_OPEN_RE = /^#\+begin_description\s*$/i;
-const DESC_BLOCK_CLOSE_RE = /^#\+end_description\s*$/i;
+/** #+begin_src description / #+end_src block markers for description content */
+const DESC_BLOCK_OPEN_RE = /^#\+begin_src\s+description\s*$/i;
+const DESC_BLOCK_CLOSE_RE = /^#\+end_src\s*$/i;
 
 /** File-level keyword lines (#+title:, #+startup:, etc.) */
 const KEYWORD_RE = /^\s*#\+/;

@@ -145,20 +145,20 @@ describe("replaceOrgBlockInSource", () => {
     expect(replaceOrgBlockInSource(source, 5, "** TODO Other\n")).toBe(source);
   });
 
-  it("does not treat heading-like text inside a #+begin_description block as an entry boundary", () => {
+  it("does not treat heading-like text inside a #+begin_src description block as an entry boundary", () => {
     const source =
       "** Event\n" +
-      "#+begin_description\n" +
+      "#+begin_src description\n" +
       "* not a heading\n" +
-      "#+end_description\n" +
+      "#+end_src\n" +
       "** Next\n";
     const out = replaceOrgBlockInSource(
       source,
       1,
-      "** Event\n#+begin_description\n* not a heading\n#+end_description",
+      "** Event\n#+begin_src description\n* not a heading\n#+end_src",
     );
     expect(out).toBe(
-      "** Event\n#+begin_description\n* not a heading\n#+end_description\n** Next\n",
+      "** Event\n#+begin_src description\n* not a heading\n#+end_src\n** Next\n",
     );
   });
 });

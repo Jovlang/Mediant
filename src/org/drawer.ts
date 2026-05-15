@@ -20,8 +20,8 @@ const HEADING_RE = /^\*+\s+/;
 const DRAWER_OPEN_RE = /^\s*:([A-Z_]+):\s*$/;
 const DRAWER_CLOSE_RE = /^\s*:END:\s*$/;
 const PLANNING_LINE_RE = /^\s*(?:SCHEDULED|DEADLINE|CLOSED):/;
-const DESC_BLOCK_OPEN_RE = /^#\+begin_description\s*$/i;
-const DESC_BLOCK_CLOSE_RE = /^#\+end_description\s*$/i;
+const DESC_BLOCK_OPEN_RE = /^#\+begin_src\s+description\s*$/i;
+const DESC_BLOCK_CLOSE_RE = /^#\+end_src\s*$/i;
 
 /**
  * Insert or update a `:key: value` line in the entry's PROPERTIES
