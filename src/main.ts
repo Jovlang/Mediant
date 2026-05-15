@@ -1386,10 +1386,10 @@ interface BuildOrgOpts {
 }
 
 // Org src-block escaping convention: prefix dangerous lines with ","
-// so they survive inside a :DESCRIPTION: drawer intact.
+// so they survive inside a #+begin_description block intact.
 function escapeDescriptionLine(line: string): string {
   if (line.startsWith(",")) return "," + line;                   // double-escape leading comma
-  if (/^\*+\s/.test(line) || /^\s*:END:\s*$/.test(line)) return "," + line;
+  if (/^#\+end_description\s*$/i.test(line)) return "," + line;
   return line;
 }
 
@@ -1418,7 +1418,7 @@ function buildOrgText(opts: BuildOrgOpts): string {
   );
 
   const bodyLines = opts.body
-    ? [":DESCRIPTION:", ...opts.body.split("\n").map(escapeDescriptionLine), ":END:"]
+    ? ["#+begin_description", ...opts.body.split("\n").map(escapeDescriptionLine), "#+end_description"]
     : [];
 
   if (opts.type === "event") {

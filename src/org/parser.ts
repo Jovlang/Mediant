@@ -98,6 +98,10 @@ const OVERRIDE_SHIFT_RE = /^shift\s+([+-]\d+)([mhd])$/;
 const OVERRIDE_RESCHEDULE_RE =
   /^reschedule\s+(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2})(?:-(\d{2}:\d{2}))?)?$/;
 
+/** #+begin_description / #+end_description block markers */
+const DESC_BLOCK_OPEN_RE = /^#\+begin_description\s*$/i;
+const DESC_BLOCK_CLOSE_RE = /^#\+end_description\s*$/i;
+
 /** File-level keyword lines (#+title:, #+startup:, etc.) */
 const KEYWORD_RE = /^\s*#\+/;
 
@@ -125,12 +129,26 @@ export function parseOrg(source: string): OrgEntry[] {
   let acceptPlanning = false;
   // null = not in a drawer; otherwise the drawer's uppercase name (e.g. "PROPERTIES", "LOGBOOK").
   let drawerKind: string | null = null;
+  // true while inside a #+begin_description ... #+end_description block.
+  let inDescBlock = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const lineNumber = i + 1; // 1-based
 
-    // Inside a drawer: close on :END:, accumulate DESCRIPTION as body, pluck PROPERTIES keys.
+    // Inside a #+begin_description block — accumulate as body, nothing is parsed.
+    if (inDescBlock) {
+      if (DESC_BLOCK_CLOSE_RE.test(line)) {
+        inDescBlock = false;
+      } else if (current) {
+        const unescaped = line.startsWith(",") ? line.slice(1) : line;
+        if (current.body.length > 0) current.body += "\n";
+        current.body += unescaped;
+      }
+      continue;
+    }
+
+    // Inside a drawer: close on :END:, pluck PROPERTIES keys.
     if (drawerKind !== null) {
       if (DRAWER_CLOSE_RE.test(line)) {
         drawerKind = null;
@@ -138,12 +156,6 @@ export function parseOrg(source: string): OrgEntry[] {
       }
       if (drawerKind === "PROPERTIES" && current) {
         absorbPropertyLine(line, current);
-      } else if (drawerKind === "DESCRIPTION" && current) {
-        // Strip the leading "," added by escapeDescriptionLine for lines
-        // that would otherwise be misread as headings or :END: markers.
-        const unescaped = line.startsWith(",") ? line.slice(1) : line;
-        if (current.body.length > 0) current.body += "\n";
-        current.body += unescaped;
       }
       continue;
     }
@@ -158,12 +170,20 @@ export function parseOrg(source: string): OrgEntry[] {
       }
     }
 
+    // #+begin_description block open (only within an entry)
+    if (current && DESC_BLOCK_OPEN_RE.test(line)) {
+      inDescBlock = true;
+      acceptPlanning = false;
+      continue;
+    }
+
     // Heading line — starts a new entry
     const headingMatch = line.match(HEADING_RE);
     if (headingMatch) {
       if (current) {
         entries.push(finalizeEntry(current));
       }
+      inDescBlock = false; // reset in case of unclosed block
       current = parseHeading(headingMatch, lineNumber);
       acceptPlanning = true;
       continue;

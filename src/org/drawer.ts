@@ -20,6 +20,8 @@ const HEADING_RE = /^\*+\s+/;
 const DRAWER_OPEN_RE = /^\s*:([A-Z_]+):\s*$/;
 const DRAWER_CLOSE_RE = /^\s*:END:\s*$/;
 const PLANNING_LINE_RE = /^\s*(?:SCHEDULED|DEADLINE|CLOSED):/;
+const DESC_BLOCK_OPEN_RE = /^#\+begin_description\s*$/i;
+const DESC_BLOCK_CLOSE_RE = /^#\+end_description\s*$/i;
 
 /**
  * Insert or update a `:key: value` line in the entry's PROPERTIES
@@ -97,12 +99,18 @@ function entryLineRange(lines: string[], entry: OrgEntry): [number, number] {
   const start = entry.sourceLineNumber - 1;
   let end = lines.length;
   let inDrawer = false;
+  let inDescBlock = false;
   for (let i = start + 1; i < lines.length; i++) {
     const line = lines[i];
+    if (inDescBlock) {
+      if (DESC_BLOCK_CLOSE_RE.test(line)) inDescBlock = false;
+      continue;
+    }
     if (inDrawer) {
       if (DRAWER_CLOSE_RE.test(line)) inDrawer = false;
       continue;
     }
+    if (DESC_BLOCK_OPEN_RE.test(line)) { inDescBlock = true; continue; }
     const m = line.match(DRAWER_OPEN_RE);
     if (m) {
       if (m[1] !== "END") inDrawer = true;
@@ -149,10 +157,9 @@ function drawerInsertionPoint(lines: string[], start: number, end: number): numb
       idx++;
       continue;
     }
-    const drawerOpen = line.match(DRAWER_OPEN_RE);
-    if (drawerOpen && drawerOpen[1] === "DESCRIPTION") {
+    if (DESC_BLOCK_OPEN_RE.test(line)) {
       idx++;
-      while (idx < end && !DRAWER_CLOSE_RE.test(lines[idx])) idx++;
+      while (idx < end && !DESC_BLOCK_CLOSE_RE.test(lines[idx])) idx++;
       if (idx < end) idx++;
       continue;
     }

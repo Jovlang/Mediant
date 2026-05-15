@@ -15,20 +15,28 @@ const NO_DAY_ABBREVS = ["sø.", "ma.", "ti.", "on.", "to.", "fr.", "lø."] as co
 
 const DRAWER_OPEN_RE = /^\s*:([A-Z_]+):\s*$/;
 const DRAWER_CLOSE_RE = /^\s*:END:\s*$/;
+const DESC_BLOCK_OPEN_RE = /^#\+begin_description\s*$/i;
+const DESC_BLOCK_CLOSE_RE = /^#\+end_description\s*$/i;
 
 /**
  * Return the index of the first line that starts the NEXT entry after
- * `startIdx`, skipping drawer contents so that heading-like text inside
- * a :DESCRIPTION: or :PROPERTIES: block is not mistaken for a heading.
+ * `startIdx`, skipping drawer and #+begin_*...#+end_* block contents so
+ * that heading-like text inside them is not mistaken for a heading.
  */
 function findEntryEnd(lines: string[], startIdx: number): number {
   let inDrawer = false;
+  let inBlock = false;
   for (let i = startIdx + 1; i < lines.length; i++) {
     const line = lines[i];
+    if (inBlock) {
+      if (/^#\+end_\S/i.test(line)) inBlock = false;
+      continue;
+    }
     if (inDrawer) {
       if (DRAWER_CLOSE_RE.test(line)) inDrawer = false;
       continue;
     }
+    if (/^#\+begin_\S/i.test(line)) { inBlock = true; continue; }
     const m = line.match(DRAWER_OPEN_RE);
     if (m) {
       if (m[1] !== "END") inDrawer = true;
@@ -66,15 +74,21 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
 
   let insideDrawer = false;
   let currentDrawer = "";
+  let insideDescBlock = false; // #+begin_description ... #+end_description owned by newText
 
   for (let i = startIdx + 1; i < endIdx; i++) {
     const line = lines[i];
 
+    if (insideDescBlock) {
+      if (DESC_BLOCK_CLOSE_RE.test(line)) insideDescBlock = false;
+      continue; // description block is owned by newText — drop
+    }
+
     if (insideDrawer) {
       if (drawerCloseRe.test(line)) {
-        if (currentDrawer !== "DESCRIPTION") preserved.push(line);
+        preserved.push(line);
         insideDrawer = false;
-      } else if (currentDrawer !== "DESCRIPTION") {
+      } else {
         preserved.push(line);
       }
       continue;
@@ -92,15 +106,17 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
     }
     if (checkboxRe.test(line)) continue;
 
+    if (DESC_BLOCK_OPEN_RE.test(line)) { insideDescBlock = true; continue; }
+
     const drawerMatch = line.match(drawerOpenRe);
     if (drawerMatch) {
       currentDrawer = drawerMatch[1];
       insideDrawer = true;
-      if (currentDrawer !== "DESCRIPTION") preserved.push(line);
+      preserved.push(line);
       continue;
     }
 
-    // raw body text lines and blank lines: drop (body is owned by :DESCRIPTION: in newText)
+    // raw body text lines and blank lines: drop (body is owned by #+begin_description in newText)
   }
 
   return [

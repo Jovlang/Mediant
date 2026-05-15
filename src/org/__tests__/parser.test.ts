@@ -288,12 +288,12 @@ describe("skipped constructs", () => {
 // ── Body text ────────────────────────────────────────────────────────
 
 describe("body text", () => {
-  it("empty body when no DESCRIPTION drawer", () => {
+  it("empty body when no description block", () => {
     const entries = parseOrg("** Just a heading\n");
     expect(entries[0].body).toBe("");
   });
 
-  it("raw lines outside a drawer are ignored", () => {
+  it("raw lines outside a block are ignored", () => {
     const entries = parseOrg(
       "** Event\nFirst line.\nSecond line.\n",
     );
@@ -309,19 +309,36 @@ describe("body text", () => {
     expect(entries[0].timestamps).toHaveLength(1);
   });
 
-  it("reads body from DESCRIPTION drawer", () => {
+  it("reads body from #+begin_description block", () => {
     const entries = parseOrg(
-      "** Event\n:DESCRIPTION:\nMeet at the main entrance.\n:END:\n",
+      "** Event\n#+begin_description\nMeet at the main entrance.\n#+end_description\n",
     );
     expect(entries[0].body).toBe("Meet at the main entrance.");
   });
 
-  it("DESCRIPTION drawer multiline body", () => {
+  it("#+begin_description multiline body", () => {
     const entries = parseOrg(
-      "** Event\n:DESCRIPTION:\nFirst line.\nSecond line.\n:END:\n",
+      "** Event\n#+begin_description\nFirst line.\nSecond line.\n#+end_description\n",
     );
     expect(entries[0].body).toBe("First line.\nSecond line.");
   });
+
+  it("block is case-insensitive for open/close markers", () => {
+    const entries = parseOrg(
+      "** Event\n#+BEGIN_DESCRIPTION\nContent.\n#+END_DESCRIPTION\n",
+    );
+    expect(entries[0].body).toBe("Content.");
+  });
+
+  it("Org syntax inside the block is not parsed", () => {
+    const entries = parseOrg(
+      "** Event\n#+begin_description\n* heading\nSCHEDULED: <2026-04-07 ti.>\n- [ ] checkbox\n#+end_description\n",
+    );
+    expect(entries[0].body).toBe("* heading\nSCHEDULED: <2026-04-07 ti.>\n- [ ] checkbox");
+    expect(entries[0].planning).toHaveLength(0);
+    expect(entries[0].checkboxItems).toHaveLength(0);
+  });
+
 });
 
 // ── Drawers ──────────────────────────────────────────────────────────
@@ -341,35 +358,12 @@ describe("drawers", () => {
     expect(entries[0].body).toBe("");
   });
 
-  it("reads DESCRIPTION drawer content as body text", () => {
+  it("unescapes comma-prefixed #+end_description lines written by escapeDescriptionLine", () => {
+    // File as written by buildOrgText: only #+end_description is comma-prefixed
     const entries = parseOrg(
-      "** TODO Task\n:DESCRIPTION:\nSome description.\n:END:\n",
+      "** Entry\n#+begin_description\n,#+end_description\n,,starts with comma\n#+end_description\n",
     );
-    expect(entries[0].body).toBe("Some description.");
-  });
-
-  it("DESCRIPTION drawer body is safe from Org syntax interpretation", () => {
-    const entries = parseOrg(
-      "** TODO Task\n:DESCRIPTION:\n** Not a heading\nSCHEDULED: <2026-04-07 ti.>\n- [ ] Not a checkbox\n:END:\n",
-    );
-    expect(entries[0].body).toBe("** Not a heading\nSCHEDULED: <2026-04-07 ti.>\n- [ ] Not a checkbox");
-    expect(entries[0].planning).toHaveLength(0);
-    expect(entries[0].checkboxItems).toHaveLength(0);
-  });
-
-  it("DESCRIPTION drawer multiline body preserves newlines", () => {
-    const entries = parseOrg(
-      "** Entry\n:DESCRIPTION:\nFirst line.\nSecond line.\n:END:\n",
-    );
-    expect(entries[0].body).toBe("First line.\nSecond line.");
-  });
-
-  it("unescapes comma-prefixed heading and :END: lines written by escapeDescriptionLine", () => {
-    // File as written by buildOrgText: dangerous lines are comma-prefixed
-    const entries = parseOrg(
-      "** Entry\n:DESCRIPTION:\n,* not a heading\n,:END:\n,,starts with comma\n:END:\n",
-    );
-    expect(entries[0].body).toBe("* not a heading\n:END:\n,starts with comma");
+    expect(entries[0].body).toBe("#+end_description\n,starts with comma");
   });
 });
 
@@ -705,9 +699,9 @@ describe("checkbox items", () => {
     expect(entries[0].checkboxItems).toEqual([]);
   });
 
-  it("checkboxes alongside a DESCRIPTION drawer", () => {
+  it("checkboxes alongside a #+begin_description block", () => {
     const entries = parseOrg(
-      "** TODO Task\n:DESCRIPTION:\nSome notes.\n:END:\n- [ ] Step one\n- [X] Step two\n",
+      "** TODO Task\n#+begin_description\nSome notes.\n#+end_description\n- [ ] Step one\n- [X] Step two\n",
     );
     expect(entries[0].body).toBe("Some notes.");
     expect(entries[0].checkboxItems).toHaveLength(2);
@@ -775,9 +769,9 @@ SCHEDULED: <2026-04-14 ti. 12:00>
 <2026-04-11 Sat 12:00>
 ** Outdoor activity :outdoors:
 <2026-04-12 Sun 14:00>
-:DESCRIPTION:
+#+begin_description
 Meet at the main entrance.
-:END:
+#+end_description
 `;
 
   it("parses correct number of entries", () => {
