@@ -71,7 +71,7 @@ Detailed account of how Mediant handles Org-mode syntax. Four categories:
 - Day name after date (any language, with or without trailing dot) — **consumed but ignored**. The date string is authoritative.
 - Optional start time in `HH:MM` format.
 - Optional end time as `-HH:MM` (time range on the same day).
-- Must appear as a **standalone line** (the only content on the line). A timestamp embedded in prose (`Meet at <2026-05-18 Mon> sharp.`) is **not** recognized — the line is silently ignored. Use a `#+begin_src description` block for notes that contain dates as text.
+- Must appear as a **standalone line** (the only content on the line). A timestamp embedded in prose (`Meet at <2026-05-18 Mon> sharp.`) is **not** recognized — the line is silently ignored. Use a `#+begin_src description` block to store description text that contains dates.
 
 ### Repeaters
 
@@ -165,9 +165,9 @@ DEADLINE: <2026-05-05 ti.>
 #+end_src
 ```
 
-- Free-form notes attached to an entry must be placed in a `#+begin_src description` block (see *Description block* above). The parser reads the block content as the entry's `body` string.
+- An entry's description must be placed in a `#+begin_src description` block (see *Description block* above). The parser reads the block content as the entry's `body` string.
 - Raw prose lines outside a description block (e.g. `Meet at the main entrance.` with no block wrapper) are **silently ignored** — they do not appear in body text.
-- In particular, a line like `Meet at <2026-05-18 Mon> sharp.` is not parsed as a timestamp (the timestamp is embedded in prose, not standalone) and the entire line is discarded. Place such notes inside a `#+begin_src description` block instead.
+- In particular, a line like `Meet at <2026-05-18 Mon> sharp.` is not parsed as a timestamp (the timestamp is embedded in prose, not standalone) and the entire line is discarded. Place such text inside a `#+begin_src description` block instead.
 
 ---
 
@@ -388,7 +388,7 @@ Meet at <2026-05-18 Mon 14:00> sharp.
 
 - A timestamp embedded in a prose line is **not** recognized as an active timestamp and does not generate an agenda item. The entire line is silently discarded.
 - Only lines whose sole content is a timestamp (optionally surrounded by whitespace) are parsed.
-- To attach a note that contains a date as text, use a `#+begin_src description` block.
+- To include description text that contains a date, use a `#+begin_src description` block.
 
 ### Diary sexp timestamps
 
