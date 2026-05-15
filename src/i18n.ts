@@ -169,7 +169,7 @@ const messages = {
     showEmptyDays: "Vis tomme dager",
     hideTags: "Skjul etiketter",
     showTags: "Vis etiketter",
-    hideCompletedAndSkipped: "Skjul fullførte og hoppet over",
+    hideCompletedAndSkipped: "Skjul fullførte og avlyste",
     showCompletedAndSkipped: "Vis fullførte og avlyste",
     hideDeadlines: "Skjul kommende frister",
     showDeadlines: "Vis kommende frister",
