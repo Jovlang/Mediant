@@ -463,19 +463,19 @@ Add and edit fields accept a few shorthand forms:
 
 | Input        | Meaning                          |
 | ------------ | -------------------------------- |
-| `DD`         | Day of current or next month     |
-| `DD/MM`      | Day and month                    |
-| `DD/MM/YY`   | Day, month, two-digit year       |
-| `DD/MM/YYYY` | Full date                        |
-| `DD mon`     | Day and month name, e.g. `8 jun` |
-| `DD mon YY`  | Day, month name, two-digit year  |
+| `D` / `DD`   | Day of current or next month     |
+| `D/M`        | Day and month                    |
+| `D/M/YY`     | Day, month, two-digit year       |
+| `D/M/YYYY`   | Full date                        |
+| `D mon`      | Day and month name, e.g. `8 jun` |
+| `D mon YY`   | Day, month name, two-digit year  |
 | `+N`         | N days from today                |
 | `mon`..`sun` | Next matching weekday, English   |
 | `man`..`søn` | Next matching weekday, Norwegian |
 | `lun`..`dom` | Next matching weekday, Italian   |
 | `mo`..`so`   | Next matching weekday, German    |
 
-Ambiguous date forms without a year resolve to the next future occurrence. Two-digit years are interpreted in the current century.
+Days and numeric months may be one or two digits. Ambiguous date forms without a year resolve to the next future occurrence. Two-digit years are interpreted in the current century.
 
 ---
 
