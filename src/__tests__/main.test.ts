@@ -383,6 +383,16 @@ describe("main.ts integration", () => {
     expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
       .toBe("Sun 5 Mar 2028");
 
+    deadInput!.value = "8 jun";
+    deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
+      .toBe("Mon 8 Jun 2026");
+
+    deadInput!.value = "8 jun 27";
+    deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
+      .toBe("Tue 8 Jun 2027");
+
     schedInput!.value = "21/";
     schedInput!.dispatchEvent(new Event("input", { bubbles: true }));
     expect(schedPreview?.textContent).toBe("");
@@ -518,6 +528,17 @@ describe("main.ts integration", () => {
 
     sourceWithMove = localStorage.getItem("mediant-org-source") ?? "";
     expect(sourceWithMove).not.toContain(":EXCEPTION-2026-04-22: reschedule 2026-04-29 18:00");
+
+    occurrenceInput!.value = "8 jun 18:00";
+    occurrenceInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(occurrencePreview?.textContent).toBe("Mon 8 Jun 2026, 18:00");
+    await flush();
+
+    sourceWithMove = localStorage.getItem("mediant-org-source") ?? "";
+    expect(sourceWithMove).toContain(":EXCEPTION-2026-04-22: reschedule 2026-06-08 18:00");
+
+    clearOverrideButton!.click();
+    await flush();
 
     occurrenceInput!.value = "18:30-21:15";
     occurrenceInput!.dispatchEvent(new Event("input", { bubbles: true }));

@@ -467,13 +467,15 @@ Add and edit fields accept a few shorthand forms:
 | `DD/MM`      | Day and month                    |
 | `DD/MM/YY`   | Day, month, two-digit year       |
 | `DD/MM/YYYY` | Full date                        |
+| `DD mon`     | Day and month name, e.g. `8 jun` |
+| `DD mon YY`  | Day, month name, two-digit year  |
 | `+N`         | N days from today                |
 | `mon`..`sun` | Next matching weekday, English   |
 | `man`..`søn` | Next matching weekday, Norwegian |
 | `lun`..`dom` | Next matching weekday, Italian   |
 | `mo`..`so`   | Next matching weekday, German    |
 
-Ambiguous numeric forms resolve to the next future occurrence. Two-digit years are interpreted in the current century.
+Ambiguous date forms without a year resolve to the next future occurrence. Two-digit years are interpreted in the current century.
 
 ---
 
@@ -800,4 +802,3 @@ Mediant should make the file nicer to use, not make the file depend on Mediant.
 ## License
 
 [GPLv3](LICENSE)
-

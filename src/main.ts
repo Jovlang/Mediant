@@ -1179,6 +1179,7 @@ function makeTextInput(label: string, id: string): { container: HTMLElement; inp
 /**
  * Expand shorthand date input to YYYY-MM-DD. Accepts:
  *   DD, DD/MM, DD/MM/YYYY — numeric forms (month/year default to today's)
+ *   DD mon, DD mon YYYY    — month-name forms (year defaults to today's)
  *   +N                    — N days from today (N >= 0)
  *   mon..sun, man..søn    — next occurrence of that weekday, strictly forward
  */
@@ -1213,6 +1214,44 @@ function expandDate(raw: string): string {
   if (dm) {
     const day = Number(dm[1]);
     const month = Number(dm[2]);
+    const thisYear = validateDateParts(now.getFullYear(), month, day);
+    if (thisYear) {
+      const [year, candidateMonth, date] = thisYear.split("-").map(Number);
+      const candidate = new Date(year, candidateMonth - 1, date);
+      if (candidate >= today) return thisYear;
+    }
+    return validateDateParts(now.getFullYear() + 1, month, day);
+  }
+  const namedMonth = raw.match(/^(\d{1,2})\s+([\p{L}.]+)(?:\s+(\d{2}|\d{4}))?$/u);
+  if (namedMonth) {
+    const normalizeMonthToken = (token: string): string =>
+      token
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{M}/gu, "")
+        .replace(/\.$/, "");
+    const monthIndexes: Readonly<Record<string, number>> = {
+      jan: 1,
+      feb: 2,
+      mar: 3, mars: 3,
+      apr: 4,
+      may: 5, mai: 5, mag: 5,
+      jun: 6, juni: 6, giu: 6,
+      jul: 7, juli: 7, lug: 7,
+      aug: 8, ago: 8,
+      sep: 9, set: 9,
+      oct: 10, okt: 10, ott: 10,
+      nov: 11,
+      dec: 12, des: 12, dez: 12, dic: 12,
+    };
+    const day = Number(namedMonth[1]);
+    const month = monthIndexes[normalizeMonthToken(namedMonth[2])] ?? 0;
+    if (!month) return "";
+    if (namedMonth[3]) {
+      const yearRaw = Number(namedMonth[3]);
+      const year = namedMonth[3].length === 2 ? 2000 + yearRaw : yearRaw;
+      return validateDateParts(year, month, day);
+    }
     const thisYear = validateDateParts(now.getFullYear(), month, day);
     if (thisYear) {
       const [year, candidateMonth, date] = thisYear.split("-").map(Number);
@@ -1296,7 +1335,7 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d(-([01]\d|2[0-3]):[0-5]\d)?$/;
 
 /**
  * Parse a combined date/time field. Accepts "<date>" or "<date> <time>".
- * Date forms: DD, DD/MM, DD/MM/YYYY. Time forms: HH:MM or HH:MM-HH:MM.
+ * Date forms: DD, DD/MM, DD/MM/YYYY, DD mon. Time forms: HH:MM or HH:MM-HH:MM.
  * Returns null on invalid input.
  */
 function parseDateTime(raw: string, fallbackDate?: string): { date: string; time: string } | null {
