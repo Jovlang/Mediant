@@ -36,14 +36,30 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
   const planningRe = /^\s*(?:SCHEDULED|DEADLINE):\s*</;
   const bareRe = /^\s*<\d{4}-\d{2}-\d{2}/;
   const checkboxRe = /^\s*-\s+\[[ X]\]\s+/;
+  const drawerOpenRe = /^\s*:([A-Z_]+):\s*$/;
+  const drawerCloseRe = /^\s*:END:\s*$/;
   const newBlockLines = newText.split("\n");
   const newHasBareTimestamp = newBlockLines.some((line) => bareRe.test(line));
   const shouldDropAllBare = !newHasBareTimestamp;
   let dropReplacementBare = newHasBareTimestamp;
   const preserved: string[] = [];
 
+  let insideDrawer = false;
+  let currentDrawer = "";
+
   for (let i = startIdx + 1; i < endIdx; i++) {
     const line = lines[i];
+
+    if (insideDrawer) {
+      if (drawerCloseRe.test(line)) {
+        if (currentDrawer !== "DESCRIPTION") preserved.push(line);
+        insideDrawer = false;
+      } else if (currentDrawer !== "DESCRIPTION") {
+        preserved.push(line);
+      }
+      continue;
+    }
+
     if (planningRe.test(line)) continue;
     if (bareRe.test(line)) {
       if (shouldDropAllBare) continue;
@@ -55,7 +71,16 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
       continue;
     }
     if (checkboxRe.test(line)) continue;
-    // body text and blank lines are now owned by newText — drop them
+
+    const drawerMatch = line.match(drawerOpenRe);
+    if (drawerMatch) {
+      currentDrawer = drawerMatch[1];
+      insideDrawer = true;
+      if (currentDrawer !== "DESCRIPTION") preserved.push(line);
+      continue;
+    }
+
+    // raw body text lines and blank lines: drop (body is owned by :DESCRIPTION: in newText)
   }
 
   return [

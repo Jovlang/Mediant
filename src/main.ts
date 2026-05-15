@@ -1407,11 +1407,11 @@ function buildOrgText(opts: BuildOrgOpts): string {
     ci => `- [${ci.checked ? "X" : " "}] ${ci.text}`
   );
 
-  const bodyLines = opts.body ? ["", ":DESCRIPTION:", opts.body, ":END:"] : [];
+  const bodyLines = opts.body ? [":DESCRIPTION:", opts.body, ":END:"] : [];
 
   if (opts.type === "event") {
-    if (!opts.date) return [headingLine, ...cbLines, ...bodyLines].join("\n");
-    return [headingLine, makeTs(opts.date, opts.time, opts.repeater), ...cbLines, ...bodyLines].join("\n");
+    if (!opts.date) return [headingLine, ...bodyLines, ...cbLines].join("\n");
+    return [headingLine, makeTs(opts.date, opts.time, opts.repeater), ...bodyLines, ...cbLines].join("\n");
   }
 
   // TODO: up to one SCHEDULED and one DEADLINE, emitted together on a single
@@ -1421,7 +1421,7 @@ function buildOrgText(opts: BuildOrgOpts): string {
   if (opts.deadDate) planningParts.push(`DEADLINE: ${makeTs(opts.deadDate, opts.deadTime, opts.deadRepeater)}`);
   if (opts.schedDate) planningParts.push(`SCHEDULED: ${makeTs(opts.schedDate, opts.schedTime, opts.schedRepeater)}`);
   if (planningParts.length > 0) lines.push(planningParts.join(" "));
-  lines.push(...cbLines, ...bodyLines);
+  lines.push(...bodyLines, ...cbLines);
   return lines.join("\n");
 }
 

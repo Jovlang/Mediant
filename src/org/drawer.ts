@@ -138,6 +138,13 @@ function drawerInsertionPoint(lines: string[], start: number, end: number): numb
       idx++;
       continue;
     }
+    const drawerOpen = line.match(DRAWER_OPEN_RE);
+    if (drawerOpen && drawerOpen[1] === "DESCRIPTION") {
+      idx++;
+      while (idx < end && !DRAWER_CLOSE_RE.test(lines[idx])) idx++;
+      if (idx < end) idx++;
+      continue;
+    }
     break;
   }
   return idx;

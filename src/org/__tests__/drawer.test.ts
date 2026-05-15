@@ -93,6 +93,16 @@ describe("upsertProperty", () => {
     );
   });
 
+  it("inserts after DESCRIPTION drawer so description precedes properties", () => {
+    const { source, entry } = withEntry(
+      "** TODO Yoga\nSCHEDULED: <2026-04-27 ma. 17:00 +1w>\n:DESCRIPTION:\nNotes.\n:END:\n",
+    );
+    const out = upsertProperty(source, entry, "EXCEPTION-2026-04-27", "cancelled");
+    expect(out).toBe(
+      "** TODO Yoga\nSCHEDULED: <2026-04-27 ma. 17:00 +1w>\n:DESCRIPTION:\nNotes.\n:END:\n:PROPERTIES:\n:EXCEPTION-2026-04-27: cancelled\n:END:\n",
+    );
+  });
+
   it("written source round-trips through the parser", () => {
     const { source, entry } = withEntry(
       "** Yoga\n<2026-04-27 ma. 17:00 +1w>\nBody.\n",
