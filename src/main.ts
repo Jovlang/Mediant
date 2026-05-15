@@ -727,13 +727,17 @@ function rebuildCheckboxUI(container: HTMLElement): void {
     const item = editingCheckboxItems[ci];
     const row = document.createElement("div");
     row.className = "edit-checkbox-row";
+    if (item.checked) row.classList.add("checkbox-checked");
 
-    const cb = document.createElement("input");
-    cb.type = "checkbox";
-    cb.checked = item.checked;
-    cb.addEventListener("change", () => {
-      editingCheckboxItems[ci].checked = cb.checked;
-      text.classList.toggle("edit-checkbox-done", cb.checked);
+    const icon = document.createElement("div");
+    icon.className = "checkbox-icon";
+    icon.setAttribute("role", "checkbox");
+    icon.setAttribute("aria-checked", String(item.checked));
+    icon.addEventListener("click", () => {
+      editingCheckboxItems[ci].checked = !editingCheckboxItems[ci].checked;
+      row.classList.toggle("checkbox-checked", editingCheckboxItems[ci].checked);
+      icon.setAttribute("aria-checked", String(editingCheckboxItems[ci].checked));
+      text.classList.toggle("edit-checkbox-done", editingCheckboxItems[ci].checked);
       scheduleEditAutosave();
     });
 
@@ -749,7 +753,6 @@ function rebuildCheckboxUI(container: HTMLElement): void {
     text.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        // Add a new item below and focus it
         editingCheckboxItems.splice(ci + 1, 0, { text: "", checked: false });
         rebuildCheckboxUI(container);
         const rows = container.querySelectorAll<HTMLElement>(".edit-checkbox-text");
@@ -759,7 +762,6 @@ function rebuildCheckboxUI(container: HTMLElement): void {
         editingCheckboxItems.splice(ci, 1);
         rebuildCheckboxUI(container);
         scheduleEditAutosave();
-        // Focus the previous item, or the next if this was first
         const rows = container.querySelectorAll<HTMLElement>(".edit-checkbox-text");
         const target = ci > 0 ? rows[ci - 1] : rows[0];
         (target as HTMLInputElement | undefined)?.focus();
@@ -779,7 +781,7 @@ function rebuildCheckboxUI(container: HTMLElement): void {
       scheduleEditAutosave();
     });
 
-    row.append(cb, text, removeBtn);
+    row.append(icon, text, removeBtn);
     container.appendChild(row);
   }
 

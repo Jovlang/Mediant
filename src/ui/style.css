@@ -1745,23 +1745,13 @@ body:has(.add-panel[open]) {
   transition: background 110ms ease, border-color 110ms ease, box-shadow 110ms ease, opacity 110ms ease;
 }
 
-.edit-checkbox-row input[type="checkbox"] {
-  appearance: none;
-  width: 0.72rem;
-  height: 0.72rem;
-  margin: 0;
+.edit-checkbox-row .checkbox-icon {
   cursor: pointer;
-  flex-shrink: 0;
-  border: 1.5px solid color-mix(in srgb, var(--text-dim) 58%, transparent);
-  border-radius: 999px;
-  background: transparent;
-  box-sizing: border-box;
-  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
 }
 
-.edit-checkbox-row:hover input[type="checkbox"]:not(:disabled),
+.edit-checkbox-row:hover .checkbox-icon,
 .occurrence-toggle-row:hover .occurrence-toggle-checkbox:not(:disabled) {
-  border-color: color-mix(in srgb, var(--text-dim) 70%, var(--border));
+  border-color: color-mix(in srgb, var(--text-dim) 80%, transparent);
 }
 
 .occurrence-toggle-checkbox:checked {
@@ -1773,13 +1763,6 @@ body:has(.add-panel[open]) {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bg-card) 24%, transparent);
 }
 
-.edit-checkbox-row input[type="checkbox"]:checked {
-  border-color: var(--text-done);
-  background: var(--text-done);
-  box-shadow: inset 0 0 0 1.5px var(--bg-card);
-}
-
-.edit-checkbox-row input[type="checkbox"]:focus-visible,
 .occurrence-toggle-checkbox:focus-visible {
   outline: none;
   border-color: var(--border-today);
