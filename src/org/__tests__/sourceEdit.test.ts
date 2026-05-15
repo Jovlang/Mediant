@@ -144,6 +144,23 @@ describe("replaceOrgBlockInSource", () => {
     const source = "** TODO Task\n";
     expect(replaceOrgBlockInSource(source, 5, "** TODO Other\n")).toBe(source);
   });
+
+  it("does not treat heading-like text inside a DESCRIPTION drawer as an entry boundary", () => {
+    const source =
+      "** Event\n" +
+      ":DESCRIPTION:\n" +
+      "* not a heading\n" +
+      ":END:\n" +
+      "** Next\n";
+    const out = replaceOrgBlockInSource(
+      source,
+      1,
+      "** Event\n:DESCRIPTION:\n* not a heading\n:END:",
+    );
+    expect(out).toBe(
+      "** Event\n:DESCRIPTION:\n* not a heading\n:END:\n** Next\n",
+    );
+  });
 });
 
 describe("toggleDoneInSource", () => {

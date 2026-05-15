@@ -96,8 +96,19 @@ export function removeProperty(
 function entryLineRange(lines: string[], entry: OrgEntry): [number, number] {
   const start = entry.sourceLineNumber - 1;
   let end = lines.length;
+  let inDrawer = false;
   for (let i = start + 1; i < lines.length; i++) {
-    if (HEADING_RE.test(lines[i])) {
+    const line = lines[i];
+    if (inDrawer) {
+      if (DRAWER_CLOSE_RE.test(line)) inDrawer = false;
+      continue;
+    }
+    const m = line.match(DRAWER_OPEN_RE);
+    if (m) {
+      if (m[1] !== "END") inDrawer = true;
+      continue;
+    }
+    if (HEADING_RE.test(line)) {
       end = i;
       break;
     }

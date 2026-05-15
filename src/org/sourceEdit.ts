@@ -13,6 +13,32 @@ const ACTIVE_TIMESTAMP_RE =
 const EN_DAY_ABBREVS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const NO_DAY_ABBREVS = ["sø.", "ma.", "ti.", "on.", "to.", "fr.", "lø."] as const;
 
+const DRAWER_OPEN_RE = /^\s*:([A-Z_]+):\s*$/;
+const DRAWER_CLOSE_RE = /^\s*:END:\s*$/;
+
+/**
+ * Return the index of the first line that starts the NEXT entry after
+ * `startIdx`, skipping drawer contents so that heading-like text inside
+ * a :DESCRIPTION: or :PROPERTIES: block is not mistaken for a heading.
+ */
+function findEntryEnd(lines: string[], startIdx: number): number {
+  let inDrawer = false;
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (inDrawer) {
+      if (DRAWER_CLOSE_RE.test(line)) inDrawer = false;
+      continue;
+    }
+    const m = line.match(DRAWER_OPEN_RE);
+    if (m) {
+      if (m[1] !== "END") inDrawer = true;
+      continue;
+    }
+    if (/^\*+\s/.test(line)) return i;
+  }
+  return lines.length;
+}
+
 /**
  * Replace the block for an entry at `sourceLine` with `newText`. The new
  * block text must include all content (heading, planning, checkboxes, body).
@@ -25,13 +51,7 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
   const startIdx = sourceLine - 1;
   if (startIdx < 0 || startIdx >= lines.length) return source;
 
-  let endIdx = lines.length;
-  for (let i = startIdx + 1; i < lines.length; i++) {
-    if (/^\*+\s/.test(lines[i])) {
-      endIdx = i;
-      break;
-    }
-  }
+  const endIdx = findEntryEnd(lines, startIdx);
 
   const planningRe = /^\s*(?:SCHEDULED|DEADLINE):\s*</;
   const bareRe = /^\s*<\d{4}-\d{2}-\d{2}/;
@@ -107,13 +127,7 @@ export function toggleDoneInSource(source: string, sourceLine: number): string {
     return lines.join("\n");
   }
 
-  let endIdx = lines.length;
-  for (let i = idx + 1; i < lines.length; i++) {
-    if (/^\*+\s/.test(lines[i])) {
-      endIdx = i;
-      break;
-    }
-  }
+  const endIdx = findEntryEnd(lines, idx);
 
   const now = new Date();
   let sawRepeater = false;
@@ -154,13 +168,7 @@ function findEntryBlock(source: string, parentSourceLine: number): CheckboxBlock
   if (startIdx < 0 || startIdx >= lines.length) return null;
   if (!/^\*+\s/.test(lines[startIdx])) return null;
 
-  let endIdx = lines.length;
-  for (let i = startIdx + 1; i < lines.length; i++) {
-    if (/^\*+\s/.test(lines[i])) {
-      endIdx = i;
-      break;
-    }
-  }
+  const endIdx = findEntryEnd(lines, startIdx);
   return { lines, startIdx, endIdx };
 }
 
@@ -289,13 +297,7 @@ export function deleteOrgBlockInSource(source: string, sourceLine: number): stri
   const startIdx = sourceLine - 1;
   if (startIdx < 0 || startIdx >= lines.length) return source;
 
-  let endIdx = lines.length;
-  for (let i = startIdx + 1; i < lines.length; i++) {
-    if (/^\*+\s/.test(lines[i])) {
-      endIdx = i;
-      break;
-    }
-  }
+  const endIdx = findEntryEnd(lines, startIdx);
 
   const before = lines.slice(0, startIdx);
   const after = lines.slice(endIdx);
