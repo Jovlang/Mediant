@@ -495,7 +495,7 @@ For the full breakdown of supported, gracefully ignored, and unsupported syntax,
 | DEADLINE         | `DEADLINE: <2026-05-05 ti.>`                |
 | Checkbox lists   | `- [ ] Pending` / `- [X] Done`              |
 | Progress cookies | `** TODO Task [2/3]` / `** TODO Task [66%]` (treated as text) |
-| Body text        | Free text lines under a heading             |
+| Body text        | `#+begin_src description` block (raw prose lines outside the block are ignored; inline timestamps in prose are not parsed) |
 
 Anything outside this subset is ignored gracefully. Unsupported syntax should not cause parse errors.
 
@@ -642,7 +642,7 @@ The parser reads Org source into structures that reflect the file:
 * timestamps
 * checkbox items
 * progress cookies (treated as text)
-* body text
+* body text (from `#+begin_src description` blocks; raw prose lines and inline timestamps in prose are ignored)
 * selected property drawer values
 
 Parser types should describe Org source faithfully. They should not decide how an entry appears in the agenda.

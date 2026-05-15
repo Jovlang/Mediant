@@ -90,7 +90,7 @@ emacs --batch -L elisp -l elisp/mediant-org-agenda-test.el -f ert-run-tests-batc
 
 See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and unsupported syntax.
 
-**Supported (standard Org):** headings, TODO/DONE, priority cookies (`[#A]`/`[#B]`/`[#C]`), tags, active timestamps, time ranges, repeaters (`+`/`.+`/`++`, units `d`/`w`/`m`/`y`), SCHEDULED, DEADLINE, body text, checkbox lists (`- [ ]`/`- [X]`), progress cookies (`[2/3]`/`[66%]`).
+**Supported (standard Org):** headings, TODO/DONE, priority cookies (`[#A]`/`[#B]`/`[#C]`), tags, active timestamps (standalone-line only — inline timestamps embedded in prose are silently ignored), time ranges, repeaters (`+`/`.+`/`++`, units `d`/`w`/`m`/`y`), SCHEDULED, DEADLINE, body text via `#+begin_src description` blocks, checkbox lists (`- [ ]`/`- [X]`), progress cookies (`[2/3]`/`[66%]`).
 
 **Mediant-specific extensions:** per-occurrence recurrence exceptions via `:EXCEPTION-<date>:` / `:EXCEPTION-NOTE-<date>:` (keyed on the *unshifted* base date), plus `:SERIES-UNTIL:` for an exclusive end date on a repeating series. `SERIES-UNTIL` is evaluated on the repeater's base slots, not the final moved-to date, which is what makes split-series handoff work cleanly. Both ride on ordinary Org property-drawer syntax, so files remain valid Org (Emacs opens and edits them without complaint — it just treats the keys as arbitrary properties).
 
@@ -138,7 +138,7 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 
 ## Testing
 
-Vitest currently covers ten suites (331 tests), plus optional ERT coverage for the Emacs integration:
+Vitest currently covers ten suites (359 tests), plus optional ERT coverage for the Emacs integration:
 
 - `src/org/__tests__/timestamp.test.ts` — parsing, helpers, recurrence expansion edge cases (month boundaries, leap years), per-occurrence exception application (cancelled / shift / reschedule, including midnight rollover in both directions)
 - `src/org/__tests__/parser.test.ts` — headings, states, tags, planning, timestamps, body text, drawers, checkbox items, progress cookies, `parseOverride` grammar, exception-key scanning inside PROPERTIES drawers, full integration
@@ -158,9 +158,9 @@ Always run tests after changes to parser, timestamp, drawer, source-edit, agenda
 
 - Agenda ranges run **startDate 00:00 through final visible day 23:59:59** (local time)
 - Source line numbers are **1-based**
-- Body text is a **single string** with lines joined by `\n`, leading whitespace trimmed
+- Body text is a **single string** read from a `#+begin_src description` block; lines joined by `\n`, two leading spaces stripped per line, leading commas unescaped. Raw prose lines outside the block are ignored.
 - Planning lines only accepted **immediately after a heading** (or another planning line)
-- Timestamp-only body lines are captured as timestamps; mixed prose+timestamp lines are body text
+- Timestamp-only lines (the line contains nothing else) are captured as timestamps; lines with prose mixed with a timestamp (`Meet at <date> sharp.`) are **silently ignored** — they do not appear as timestamps or body text
 - Checkbox list items (`- [ ]`/`- [X]`) are captured into `checkboxItems`, not body text
 - `#+` keyword lines and `# ` comment lines inside entries are **skipped, not preserved as body**
 - Any `:UPPERCASENAME:...:END:` block is skipped **except** `:PROPERTIES:` drawers, where `:EXCEPTION-<date>:`, `:EXCEPTION-NOTE-<date>:`, and `:SERIES-UNTIL:` keys are read; every other property key is still ignored

@@ -71,7 +71,7 @@ Detailed account of how Mediant handles Org-mode syntax. Four categories:
 - Day name after date (any language, with or without trailing dot) — **consumed but ignored**. The date string is authoritative.
 - Optional start time in `HH:MM` format.
 - Optional end time as `-HH:MM` (time range on the same day).
-- Can appear as a standalone line in the entry body, or inline.
+- Must appear as a **standalone line** (the only content on the line). A timestamp embedded in prose (`Meet at <2026-05-18 Mon> sharp.`) is **not** recognized — the line is silently ignored. Use a `#+begin_src description` block for notes that contain dates as text.
 
 ### Repeaters
 
@@ -127,17 +127,23 @@ DEADLINE: <2026-05-05 ti.>
 - In agenda rows, clicking a checkbox row toggles completion and updates the Org source immediately. Text, add, and remove edits are handled by the edit-panel checklist editor for TODO tasks.
 - In the edit panel, checkboxes are interactive toggles with editable labels and add/remove controls that update the Org source immediately.
 
-### Description drawer
+### Description block
 
 ```org
 ** TODO Task
-:DESCRIPTION:
-Free-form description text here.
-:END:
+#+begin_src description
+  Free-form description text here.
+  * this line is NOT an Org heading
+  SCHEDULED: <2026-05-18> this is plain text
+#+end_src
 ```
 
-- Content of a `:DESCRIPTION:` drawer is read as the entry's body text.
-- Written by the edit panel when an item has a description. This keeps arbitrary user text safe from being misinterpreted as Org syntax (headings, planning keywords, timestamps, checkboxes).
+- Content of a `#+begin_src description` block is read as the entry's body text.
+- Written by the edit panel when an item has a description. The block is chosen over a plain `:DESCRIPTION:` drawer because Emacs treats `#+begin_src` content as fully opaque — no Org syntax (headings, planning keywords, timestamps, drawer markers) is parsed inside it.
+- Content lines are indented two spaces by the edit panel. The parser strips exactly two leading spaces when reading back. This means `* foo` (which would be an Org heading at column 0) is stored as `  * foo` and round-trips safely.
+- Lines starting with `#+end_src` or `#+begin_src` inside the block are comma-escaped (prefixed with `,`) before the two-space indent, following Org's own src-block literal convention. The parser strips the leading comma on read-back.
+- Block markers are case-insensitive (`#+BEGIN_SRC description` is equivalent).
+- A `#+begin_src description` block without a matching `#+end_src` absorbs content until end of file; Mediant can still parse the body, but the file is malformed Org.
 
 ### Progress cookies
 
@@ -154,12 +160,14 @@ Free-form description text here.
 ```org
 ** Outdoor activity :outdoors:
 <2026-04-12 Sun 14:00>
-Meet at the main entrance.
+#+begin_src description
+  Meet at the main entrance.
+#+end_src
 ```
 
-- Any non-blank lines under a heading that aren't planning lines or standalone timestamps.
-- Preserved as a string. Shown in the UI as expandable notes.
-- A blank line terminates body accumulation.
+- Free-form notes attached to an entry must be placed in a `#+begin_src description` block (see *Description block* above). The parser reads the block content as the entry's `body` string.
+- Raw prose lines outside a description block (e.g. `Meet at the main entrance.` with no block wrapper) are **silently ignored** — they do not appear in body text.
+- In particular, a line like `Meet at <2026-05-18 Mon> sharp.` is not parsed as a timestamp (the timestamp is embedded in prose, not standalone) and the entire line is discarded. Place such notes inside a `#+begin_src description` block instead.
 
 ---
 
@@ -363,13 +371,24 @@ print("hello")
 #+end_src
 ```
 
-- Block content treated as body text. No syntax highlighting.
+- Non-description source blocks are silently skipped. Only `#+begin_src description` is treated specially (see *Description block* above).
 
 ---
 
 ## Unsupported (may cause unexpected behavior)
 
 These constructs are **not recognized** by the parser. If present, they may be misinterpreted (e.g., treated as body text when they shouldn't be, or partially parsed incorrectly).
+
+### Inline timestamps in prose
+
+```org
+** Meeting
+Meet at <2026-05-18 Mon 14:00> sharp.
+```
+
+- A timestamp embedded in a prose line is **not** recognized as an active timestamp and does not generate an agenda item. The entire line is silently discarded.
+- Only lines whose sole content is a timestamp (optionally surrounded by whitespace) are parsed.
+- To attach a note that contains a date as text, use a `#+begin_src description` block.
 
 ### Diary sexp timestamps
 
