@@ -2057,7 +2057,7 @@ body:has(.add-panel[open]) {
   padding: 0.22rem 0.65rem;
   background: transparent;
   color: var(--text-dim);
-  border: 1px dashed color-mix(in srgb, var(--border) 50%, transparent);
+  border: 1px solid transparent;
   border-radius: 0.45rem;
   font-size: 0.78rem;
   font-family: inherit;
@@ -2069,8 +2069,6 @@ body:has(.add-panel[open]) {
 .field-summon-btn:hover {
   opacity: 1;
   color: var(--text);
-  border-color: color-mix(in srgb, var(--border) 80%, var(--border-today) 20%);
-  background: color-mix(in srgb, var(--bg-card) 60%, transparent);
 }
 
 .occ-optional-fields {
