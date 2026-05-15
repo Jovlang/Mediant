@@ -1586,7 +1586,7 @@ body:has(.add-panel[open]) {
   gap: 0.15rem;
   width: max-content;
   padding: 0.15rem;
-  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 24%, transparent);
   border-radius: 0.6rem;
   background: color-mix(in srgb, var(--bg-card) 66%, var(--bg-panel));
 }
