@@ -1749,7 +1749,7 @@ body:has(.add-panel[open]) {
   cursor: pointer;
 }
 
-.edit-checkbox-row:hover .checkbox-icon,
+.edit-checkbox-row .checkbox-icon:hover,
 .occurrence-toggle-row:hover .occurrence-toggle-checkbox:not(:disabled) {
   border-color: color-mix(in srgb, var(--text-dim) 80%, transparent);
 }
