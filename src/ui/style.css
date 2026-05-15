@@ -338,7 +338,7 @@ body {
 }
 
 .day-block + .day-block {
-  border-top: 1px solid color-mix(in srgb, var(--border-light) 60%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--border-light) 24%, transparent);
 }
 
 .day-block.is-today {
