@@ -255,6 +255,9 @@ describe("active timestamps", () => {
   });
 
   it("mixed prose + timestamp line is ignored (not a timestamp-only line)", () => {
+    // Inline timestamps embedded in prose ("Meet at <date> sharp.") are not
+    // supported — only lines whose entire content is a timestamp are recognised.
+    // Use a #+begin_src description block to store free-text body content.
     const entries = parseOrg(
       "** Event\nMeet at <2026-04-07 ti. 15:00> sharp.\n",
     );
