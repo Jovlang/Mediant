@@ -138,6 +138,7 @@ const MAX_BODY_BYTES = 16 * 1024 * 1024;
 /** Map of relPath → mtime string */
 const fileVersions = new Map();
 const sseClients = new Set();
+let changeSerial = 0;
 
 function orgFilesInDir() {
   if (!isDir) return [inboxRelPath];
@@ -160,24 +161,65 @@ function resolveRelPath(relPath) {
 
 function readAllFiles() {
   const result = {};
+  const seen = new Set();
   for (const rel of orgFilesInDir()) {
     const abs = path.join(dirPath, rel);
     try {
       const content = fs.readFileSync(abs, "utf-8");
       const version = String(fs.statSync(abs).mtimeMs);
+      seen.add(rel);
       fileVersions.set(rel, version);
       result[rel] = { content, version };
     } catch {
       // Skip unreadable files
     }
   }
+  for (const rel of [...fileVersions.keys()]) {
+    if (!seen.has(rel)) fileVersions.delete(rel);
+  }
   return result;
 }
 
 function combinedVersion() {
-  const versions = [...fileVersions.values()];
-  if (versions.length === 0) return "0";
-  return String(Math.max(...versions.map(Number)));
+  return String(changeSerial);
+}
+
+function currentOrgFileVersions() {
+  const next = new Map();
+  for (const rel of orgFilesInDir()) {
+    const abs = path.join(dirPath, rel);
+    try {
+      next.set(rel, String(fs.statSync(abs).mtimeMs));
+    } catch {
+      // Skip files that disappeared between readdir and stat.
+    }
+  }
+  return next;
+}
+
+function versionsDiffer(next) {
+  if (next.size !== fileVersions.size) return true;
+  for (const [rel, version] of next) {
+    if (fileVersions.get(rel) !== version) return true;
+  }
+  return false;
+}
+
+function replaceFileVersions(next) {
+  fileVersions.clear();
+  for (const [rel, version] of next) fileVersions.set(rel, version);
+}
+
+function syncFileVersionsFromDisk() {
+  const next = currentOrgFileVersions();
+  if (!versionsDiffer(next)) return false;
+  replaceFileVersions(next);
+  return true;
+}
+
+function broadcastChange() {
+  changeSerial += 1;
+  broadcast(combinedVersion());
 }
 
 function broadcast(version) {
@@ -194,18 +236,7 @@ function startWatcher() {
       if (watchTimer) clearTimeout(watchTimer);
       watchTimer = setTimeout(() => {
         try {
-          let changed = false;
-          for (const rel of orgFilesInDir()) {
-            const abs = path.join(dirPath, rel);
-            try {
-              const m = String(fs.statSync(abs).mtimeMs);
-              if (m !== fileVersions.get(rel)) {
-                fileVersions.set(rel, m);
-                changed = true;
-              }
-            } catch {}
-          }
-          if (changed) broadcast(combinedVersion());
+          if (syncFileVersionsFromDisk()) broadcastChange();
         } catch {}
       }, 100);
     });
@@ -295,8 +326,8 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       const { path: relPath, content, version } = payload;
-      if (typeof relPath !== "string" || typeof content !== "string") {
-        res.writeHead(400); res.end("missing path or content");
+      if (typeof relPath !== "string" || typeof content !== "string" || typeof version !== "string") {
+        res.writeHead(400); res.end("missing path, content, or version");
         return;
       }
       const absPath = resolveRelPath(relPath);
@@ -305,15 +336,21 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      // Check for conflicts — create inbox.org if it doesn't exist yet.
+      // Check for conflicts. A missing file may only be created by a client
+      // that observed it as missing (`version: ""`); stale clients must not
+      // overwrite a newly-created file or resurrect a deleted one.
       const fileExists = fs.existsSync(absPath);
       if (fileExists) {
         const onDisk = String(fs.statSync(absPath).mtimeMs);
-        if (version && version !== onDisk) {
+        if (version !== onDisk) {
           res.writeHead(409, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ version: onDisk }));
           return;
         }
+      } else if (version !== "") {
+        res.writeHead(409, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ version: "" }));
+        return;
       }
 
       fs.writeFileSync(absPath, content, "utf-8");

@@ -31,8 +31,8 @@ let currentSource = localStorage.getItem("mediant-org-source") ?? "";
 let serverMode = false;
 // Server mode: per-file content + version (mtime string), keyed by relative path.
 let sourceFiles: Map<string, { content: string; version: string }> = new Map();
+let sourceFileEpochs: Map<string, number> = new Map();
 let inboxPath = "inbox.org";
-let serverVersion: string | null = null;
 let agendaLoaded = false;
 let activeTagFilters = new Set<string>();
 let activePriorityFilter: "A" | "B" | "C" | null = null;
@@ -1549,12 +1549,33 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
   });
 }
 
+function editSaveFilePath(): string | null {
+  return serverMode ? (editingSourceFile ?? inboxPath) : null;
+}
+
+function epochForSourcePath(filePath: string | null): number {
+  if (!serverMode) return sourceEpoch;
+  if (filePath === null) return 0;
+  return sourceFileEpochs.get(filePath) ?? 0;
+}
+
+function bumpEpochForSourcePath(filePath: string): void {
+  sourceFileEpochs.set(filePath, (sourceFileEpochs.get(filePath) ?? 0) + 1);
+}
+
+function clearQueuedEditSave(): void {
+  queuedEditSource = null;
+  queuedEditPath = null;
+  queuedEditEpoch = null;
+}
+
 function editSaveBaseSource(): string {
-  const filePath = serverMode ? (editingSourceFile ?? inboxPath) : null;
-  if (queuedEditSource !== null && queuedEditEpoch === sourceEpoch) {
+  const filePath = editSaveFilePath();
+  const currentEpoch = epochForSourcePath(filePath);
+  if (queuedEditSource !== null && queuedEditEpoch === currentEpoch) {
     if (!serverMode || queuedEditPath === filePath) return queuedEditSource;
   }
-  if (inFlightEditSource !== null && inFlightEditEpoch === sourceEpoch) {
+  if (inFlightEditSource !== null && inFlightEditEpoch === currentEpoch) {
     if (!serverMode || inFlightEditPath === filePath) return inFlightEditSource;
   }
   if (serverMode && filePath) return sourceFiles.get(filePath)?.content ?? "";
@@ -1562,7 +1583,7 @@ function editSaveBaseSource(): string {
 }
 
 function editSaveBaseEpoch(): number {
-  return sourceEpoch;
+  return epochForSourcePath(editSaveFilePath());
 }
 
 function restoreFocusAfterPanelClose(): void {
@@ -1589,15 +1610,13 @@ async function drainEditSourceSaves(): Promise<boolean> {
     while (queuedEditSource !== null) {
       const next = queuedEditSource;
       const nextPath = queuedEditPath;
-      const nextEpoch = queuedEditEpoch ?? sourceEpoch;
-      queuedEditSource = null;
-      queuedEditPath = null;
-      queuedEditEpoch = null;
+      const nextEpoch = queuedEditEpoch ?? epochForSourcePath(nextPath);
+      clearQueuedEditSave();
       const currentForPath = serverMode && nextPath
         ? (sourceFiles.get(nextPath)?.content ?? "")
         : currentSource;
       if (next === currentForPath) continue;
-      if (nextEpoch !== sourceEpoch) {
+      if (nextEpoch !== epochForSourcePath(nextPath)) {
         ok = false;
         continue;
       }
@@ -1613,9 +1632,7 @@ async function drainEditSourceSaves(): Promise<boolean> {
         inFlightEditEpoch = null;
       }
       if (result === "failed") {
-        queuedEditSource = null;
-        queuedEditPath = null;
-        queuedEditEpoch = null;
+        clearQueuedEditSave();
         ok = false;
         break;
       }
@@ -2049,6 +2066,19 @@ function closeAddPanel(): void {
   restoreFocusAfterPanelClose();
 }
 
+function closeInvalidatedEditPanel(): void {
+  if (!addPanelEl) return;
+  disarmDeleteBtn();
+  editingLine = null;
+  editingSourceFile = null;
+  editingBaseDate = null;
+  addPanelEl.classList.remove("is-open");
+  addPanelEl.classList.remove("is-editing");
+  addPanelEl.classList.remove("has-occurrence");
+  if (addPanelEl.open) addPanelEl.close();
+  restoreFocusAfterPanelClose();
+}
+
 
 function armDeleteBtn(): void {
   if (!addPanelDeleteBtnEl) return;
@@ -2333,6 +2363,7 @@ async function probeServer(): Promise<boolean> {
     const data = await r.json() as ServerSourceData;
     inboxPath = data.inbox;
     sourceFiles = new Map(Object.entries(data.files));
+    sourceFileEpochs = new Map([...sourceFiles.keys()].map(path => [path, 0]));
     entries = [];
     for (const [path, { content }] of sourceFiles) {
       entries.push(...parseOrg(content, path));
@@ -2361,7 +2392,7 @@ async function persistSource(
   if (serverMode) {
     const filePath = opts.path ?? inboxPath;
     const fileInfo = sourceFiles.get(filePath);
-    const expectedEpoch = opts.expectedEpoch ?? sourceEpoch;
+    const expectedEpoch = opts.expectedEpoch ?? epochForSourcePath(filePath);
     try {
       const r = await fetch("/api/source", {
         method: "PUT",
@@ -2377,7 +2408,7 @@ async function persistSource(
         alert(`Failed to save: ${r.status} ${r.statusText}`);
         return "failed";
       }
-      if (sourceEpoch !== expectedEpoch) {
+      if (epochForSourcePath(filePath) !== expectedEpoch) {
         await reloadFromServer();
         return "stale";
       }
@@ -2406,19 +2437,41 @@ async function reloadFromServer(): Promise<void> {
     if (!r.ok) return;
     const data = await r.json() as ServerSourceData;
     // Check if any file actually changed using per-file version comparison.
-    let anyChanged = data.inbox !== inboxPath || Object.keys(data.files).length !== sourceFiles.size;
-    if (!anyChanged) {
-      for (const [path, { version }] of Object.entries(data.files)) {
-        if (sourceFiles.get(path)?.version !== version) { anyChanged = true; break; }
+    const nextFiles = new Map(Object.entries(data.files));
+    const changedPaths = new Set<string>();
+    const invalidatingPaths = new Set<string>();
+    for (const path of sourceFiles.keys()) {
+      if (!nextFiles.has(path)) {
+        changedPaths.add(path);
+        invalidatingPaths.add(path);
       }
     }
+    for (const [path, { content, version }] of nextFiles) {
+      if (sourceFiles.get(path)?.version !== version) {
+        changedPaths.add(path);
+        const isObservedInFlightSave = path === inFlightEditPath && content === inFlightEditSource;
+        if (!isObservedInFlightSave) invalidatingPaths.add(path);
+      }
+    }
+    const inboxChanged = data.inbox !== inboxPath;
+    const anyChanged = inboxChanged || changedPaths.size > 0;
     if (!anyChanged) return;
-    queuedEditSource = null;
-    queuedEditPath = null;
-    queuedEditEpoch = null;
-    sourceEpoch++;
+    const activeEditPath = editingLine !== null ? editSaveFilePath() : null;
+    const activeEditInvalidated = activeEditPath !== null && invalidatingPaths.has(activeEditPath);
+
+    if (
+      inboxChanged
+      || queuedEditPath === null
+      || invalidatingPaths.has(queuedEditPath)
+    ) {
+      clearQueuedEditSave();
+    }
+    for (const path of invalidatingPaths) bumpEpochForSourcePath(path);
+
+    if (activeEditInvalidated) closeInvalidatedEditPanel();
+
     inboxPath = data.inbox;
-    sourceFiles = new Map(Object.entries(data.files));
+    sourceFiles = nextFiles;
     entries = [];
     for (const [path, { content }] of sourceFiles) {
       entries.push(...parseOrg(content, path));
@@ -2431,12 +2484,8 @@ async function reloadFromServer(): Promise<void> {
 
 function subscribeToServerChanges(): void {
   const es = new EventSource("/api/events");
-  let lastSseData: string | null = null;
   es.onmessage = (ev) => {
-    if (ev.data && ev.data !== lastSseData) {
-      lastSseData = ev.data;
-      void reloadFromServer();
-    }
+    if (ev.data) void reloadFromServer();
   };
   // On transient disconnect EventSource auto-reconnects; nothing to do.
 

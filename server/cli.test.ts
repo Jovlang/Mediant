@@ -146,6 +146,93 @@ describe("server/cli.mjs", () => {
     expect(rereadData.files["inbox.org"].content).toContain("New capture");
     expect(rereadData.files["work.org"].content).toBe("** TODO Work task\n");
   });
+
+  it("directory mode: rejects stale missing-inbox writes after inbox.org is created", async () => {
+    const server = await startServerDir({
+      "work.org": "** TODO Work task\n",
+    });
+
+    const initial = await fetch(server.url("/api/source"));
+    const initialData = await initial.json();
+    expect(initialData.files["inbox.org"]).toBeUndefined();
+
+    const firstCreate = await fetch(server.url("/api/source"), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        path: "inbox.org",
+        content: "** TODO First capture\n",
+        version: "",
+      }),
+    });
+    expect(firstCreate.status).toBe(200);
+
+    const staleCreate = await fetch(server.url("/api/source"), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        path: "inbox.org",
+        content: "** TODO Stale capture\n",
+        version: "",
+      }),
+    });
+    expect(staleCreate.status).toBe(409);
+    expect(await fs.readFile(path.join(server.dirPath, "inbox.org"), "utf-8"))
+      .toBe("** TODO First capture\n");
+  });
+
+  it("directory mode: rejects stale writes that would resurrect deleted files", async () => {
+    const server = await startServerDir({
+      "work.org": "** TODO Work task\n",
+    });
+    const initial = await fetch(server.url("/api/source"));
+    const initialData = await initial.json();
+    const staleVersion = initialData.files["work.org"].version;
+
+    await fs.rm(path.join(server.dirPath, "work.org"));
+
+    const staleWrite = await fetch(server.url("/api/source"), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        path: "work.org",
+        content: "** TODO Resurrected\n",
+        version: staleVersion,
+      }),
+    });
+    expect(staleWrite.status).toBe(409);
+    expect(existsSync(path.join(server.dirPath, "work.org"))).toBe(false);
+  });
+
+  it("directory mode: pushes SSE updates when org files are added and removed", async () => {
+    const server = await startServerDir({
+      "a.org": "** TODO A\n",
+    });
+    const stream = await openEventStream(server.port, "/api/events");
+
+    const initialVersion = await stream.nextEvent();
+    expect(initialVersion).toBeTruthy();
+
+    await forceMtimeTick();
+    await fs.writeFile(path.join(server.dirPath, "b.org"), "** TODO B\n", "utf-8");
+    const addedVersion = await stream.nextEvent();
+    expect(addedVersion).not.toBe(initialVersion);
+
+    const afterAdd = await fetch(server.url("/api/source"));
+    const afterAddData = await afterAdd.json();
+    expect(afterAddData.files["b.org"].content).toBe("** TODO B\n");
+
+    await forceMtimeTick();
+    await fs.rm(path.join(server.dirPath, "b.org"));
+    const removedVersion = await stream.nextEvent();
+    expect(removedVersion).not.toBe(addedVersion);
+
+    const afterRemove = await fetch(server.url("/api/source"));
+    const afterRemoveData = await afterRemove.json();
+    expect(afterRemoveData.files["b.org"]).toBeUndefined();
+
+    await stream.close();
+  });
 });
 
 async function startServer(initialSource: string): Promise<{

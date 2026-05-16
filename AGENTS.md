@@ -68,8 +68,8 @@ emacs --batch -L elisp -l elisp/mediant-org-agenda-test.el -f ert-run-tests-batc
 - `server/cli.mjs` is a self-contained Node script — no dependencies beyond Node built-ins (`http`, `fs`, `child_process`, etc.). Do not add npm deps to it casually.
 - Version token is `mtimeMs` as a string, tracked per file in a `Map<relPath, version>`. `PUT /api/source` takes JSON `{ path, content, version }`; version mismatch → 409, client reloads from disk (disk wins).
 - In directory mode all `.org` files are served; `inbox` in the GET response names where new captures go (`inbox.org` by default). In single-file mode the one file is both the sole source and the inbox.
-- `fs.watch` fires multiple times per write on some platforms — the watcher is debounced 100 ms and only broadcasts on real `mtimeMs` changes.
-- SSE clients receive `data: <combinedVersion>\n\n` where combined version is `max(all file mtimes)`. The client ignores SSE events that produce no per-file version changes (so it doesn't reload after its own PUT).
+- `fs.watch` fires multiple times per write on some platforms — the watcher is debounced 100 ms and only broadcasts on real file-set or `mtimeMs` changes.
+- SSE clients receive `data: <changeToken>\n\n`, a monotonic invalidation hint for the current server process. The client re-reads `/api/source` and ignores events that produce no per-file version changes.
 - Server binds to `127.0.0.1` only. Auth is intentionally absent — the assumption is Tailscale or equivalent for remote access.
 - `--daemon` re-execs the same node script detached with `MEDIANT_CHILD=1` and the flag stripped, then the parent prints the PID and exits. Stop with `kill <pid>`.
 
@@ -139,7 +139,7 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 
 ## Testing
 
-Vitest currently covers eleven suites (364 tests), plus optional ERT coverage for the Emacs integration:
+Vitest currently covers twelve suites (369 tests), plus optional ERT coverage for the Emacs integration:
 
 - `src/org/__tests__/timestamp.test.ts` — parsing, helpers, recurrence expansion edge cases (month boundaries, leap years), per-occurrence exception application (cancelled / shift / reschedule, including midnight rollover in both directions)
 - `src/org/__tests__/parser.test.ts` — headings, states, tags, planning, timestamps, body text, drawers, checkbox items, progress cookies, `parseOverride` grammar, exception-key scanning inside PROPERTIES drawers, full integration
@@ -150,7 +150,8 @@ Vitest currently covers eleven suites (364 tests), plus optional ERT coverage fo
 - `src/ui/__tests__/notifications.test.ts` — notification preference, permission handling, and scheduling behavior
 - `src/__tests__/i18n.test.ts` — locale detection (en/nb/it/de), stored locale preference, string lookup, and fallback behavior
 - `src/__tests__/main.test.ts` — browser-level integration for static mode, TODO toggles, series editing, occurrence exceptions, and persistence
-- `server/cli.test.ts` — CLI/server behavior for static serving, source API versioning (JSON format, per-file versions, 409 conflicts), SSE behavior, and directory mode (multi-file reads, inbox writes)
+- `src/__tests__/main-directory.test.ts` — browser-level integration for directory server mode, origin-file writes, inbox captures, duplicate SSE reloads, and unrelated edit-queue preservation
+- `server/cli.test.ts` — CLI/server behavior for static serving, source API versioning (JSON format, per-file versions, 409 conflicts), SSE behavior, and directory mode (multi-file reads, missing-inbox writes, stale deletion conflicts, add/remove events)
 - `elisp/mediant-org-agenda-test.el` — ERT coverage for the optional Org agenda integration using real temporary Org agenda generation
 
 Always run tests after changes to parser, timestamp, drawer, source-edit, agenda, rendering, notification, i18n, main integration, server logic, or the optional Elisp integration.

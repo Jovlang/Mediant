@@ -597,9 +597,9 @@ In server mode, Mediant exposes three endpoints on top of the static UI.
 | ------ | ------------- | ------------------------------------------------------------------------------------------ |
 | `GET`  | `/api/source` | Returns JSON: `{ files: { [relPath]: { content, version } }, inbox: string }`.            |
 | `PUT`  | `/api/source` | Writes one file. Body JSON: `{ path, content, version }`. Version mismatch returns `409`. |
-| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <combinedVersion>` when any file changes on disk. |
+| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <changeToken>` when any file changes on disk. |
 
-The version for each file is its modification timestamp (milliseconds).
+The version for each file is its modification timestamp (milliseconds). SSE change tokens are monotonic invalidation hints for the current server process; clients re-read `/api/source` and compare per-file versions.
 
 Write conflicts are rejected with `409`. The UI then reloads all files from disk.
 
