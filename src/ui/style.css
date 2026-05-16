@@ -565,7 +565,7 @@ body {
 .deadline-item {
   grid-template-columns: 4.35ch 1fr;
   padding: 0.68rem var(--section-padding-x);
-  padding-left: calc(0.75rem + var(--global-row-fringe-width));
+  padding-left: calc(0.5rem + var(--global-row-fringe-width));
   gap: 0 0.85rem;
 }
 
