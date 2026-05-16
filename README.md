@@ -17,7 +17,7 @@ DEADLINE: <2026-05-31 Sun +1y>
 ** Public holiday :holiday:
 <2026-04-05 Sun>
 
-** TODO Read Shakespeare
+** TODO Read Shakespeare :books:
 ```
 
 ---
