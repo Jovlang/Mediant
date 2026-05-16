@@ -10,17 +10,15 @@ Mediant treats the agenda as three distinct spaces:
 * **Calendar** — things that have a place in time
 * **Someday** — possible futures that should remain visible without demanding attention
 
-Two headings illustrate the model:
-
 ```org
+** TODO Pay tax balance :finance:
+DEADLINE: <2026-05-31 Sun +1y>
+
 ** Public holiday :holiday:
 <2026-04-05 Sun>
 
-** TODO Pay tax balance :finance:
-DEADLINE: <2026-05-31 Sun +1y>
+** TODO Read Shakespeare
 ```
-
-An event and a recurring deadline task. Each field has one obvious location in the source.
 
 ---
 
