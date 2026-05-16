@@ -1,12 +1,12 @@
 # Mediant
 
-A calm, focused web agenda for an Org-mode file.
+A calm, focused agenda backed by one Org-readable `Mediant.org` file.
 
-Mediant gives one plain `.org` file a clean, readable interface.
+Mediant gives one strict Org-readable `Mediant.org` file a clean, readable agenda interface.
 
 It is built around two simple ideas:
 
-> Your tasks should stay as plain text files,
+> Your agenda should stay as one readable text file,
 > but the interface should still feel modern, fast, and pleasant to use.
 
 And:
@@ -19,7 +19,7 @@ Mediant treats the agenda as three distinct spaces:
 * **Calendar** — things that have a place in time
 * **Someday** — possible futures that should remain visible without demanding attention
 
-It is a web agenda UI for people who like plain text but want to check their week from any device, not just from inside Emacs.
+It is not Org-mode on the web. It is a calm agenda app backed by one Org-readable Mediant.org file.
 
 ---
 
@@ -37,72 +37,29 @@ It does not try to own your workflow.
 
 The intended shape is smaller:
 
-> Your plain text files.
+> One Mediant.org text file.
 > One focused agenda.
 > Different kinds of future separated into different spaces.
 
-### Mediant.org dialect
+### Why not full Org?
 
-Mediant.org is not merely a reduced subset of Org-mode. It is a deliberate Org-readable dialect designed around Mediant's agenda model.
+Mediant avoids full Org compatibility because a calm edit panel requires clear source mappings.
 
-That means Mediant rejects broad Org compatibility when it would create ambiguous editing rules, overloaded source locations, or a DevTools-like UI. Features are not added just because Org-mode supports them.
+Every editable field should have one obvious canonical source location. Features like tag inheritance, arbitrary inline timestamps, multiple semantic timestamps, and org-directory indexing make that contract ambiguous.
 
-Mediant can add its own syntax when the syntax models real calendar or task behavior that the agenda needs, while preserving one clear source location and one clear UI meaning.
-
-Recurrence exceptions are the model case. Plain Org repeaters describe an unbroken series, but real calendars need one-off changes: a skipped class, a shifted rehearsal, a final meeting note, or a semester cutoff. Mediant stores those changes next to the repeating entry in ordinary property drawers so the file stays Org-readable, while Mediant gives the properties agenda meaning:
-
-```org
-** Weekly dance class :music:social:fitness:
-<2026-04-08 Wed 18:00-21:00 +1w>
-:PROPERTIES:
-:SERIES-UNTIL: 2026-04-29
-:EXCEPTION-NOTE-2026-04-22: Last class of the semester
-:END:
-```
-
-The semantics are intentionally direct:
-
-* the heading is one recurring event series
-* the standalone timestamp is the canonical event timestamp
-* `+1w` expands weekly occurrences
-* `:SERIES-UNTIL:` limits the recurrence series
-* `:EXCEPTION-NOTE-YYYY-MM-DD:` attaches a note to one occurrence
-* the exception key is the base occurrence date, not the shifted or rendered date
-* the syntax is Mediant-specific but remains valid Org because it uses a normal property drawer
-
-This is allowed because it models real life: recurring events have endings and per-occurrence notes. It keeps one canonical event source, avoids arbitrary inline timestamp interpretation, round-trips cleanly through Emacs, is easy to show in Mediant's UI, and supports Mediant's core purpose: a calm agenda for real human schedules.
-
-This is different from unsupported Org features. Tag inheritance creates derived state that is unclear to edit. Multiple timestamps create ambiguous source mappings. Inline timestamps in prose make the agenda depend on arbitrary body text. Full org-directory support turns Mediant into a database/indexer. Org-roam, backlinks, and custom agenda commands are outside the product model.
-
-The rule is:
-
-* Mediant may extend Org where the extension strengthens Mediant's agenda model.
-* Mediant should not chase Org features for compatibility alone.
-
-The invariants are:
-
-* one item should have one canonical temporal source
-* every editable UI field must map to one obvious source location
-* unknown Org should be preserved where possible, not interpreted
-* Mediant may preserve more Org than it understands
-* Mediant may understand more Org than it edits
-* Mediant should only edit canonical, simple fields
-
-In short: Mediant.org is an Org-readable agenda language. It borrows Org syntax where useful, preserves Org text where possible, and adds small Mediant-specific semantics only when they make real-world agenda editing better.
+Mediant may extend Org where the extension strengthens Mediant's agenda model. It should not chase Org features for compatibility alone.
 
 ---
 
 ## Why Mediant exists
 
-Org-mode is powerful because it stores rich personal information in ordinary text files. You can edit them anywhere, version them, sync them, grep them, and keep them for decades.
+Org-mode is powerful because it stores rich personal information as ordinary text. Mediant keeps that benefit, but narrows the format to one Mediant.org file with predictable agenda semantics.
 
-You can also use Org-agenda to generate a schedule and a todo list from Org source.
-
-However, Org-agenda requires Emacs. What if you want to comfortably view and edit your agenda on your phone?
+Emacs Org-agenda can already generate schedules and todo lists, but it lives inside Emacs. What if you want to comfortably view and edit your agenda on your phone?
 
 Mediant exists for that layer.
 
-It keeps Org as the source of truth, then renders the agenda in a browser UI.
+It keeps Mediant.org as the source of truth, then renders the agenda in a browser UI.
 
 The goal is not to expose every possible Org feature, but to make the common personal-agenda workflow feel clear, fast, and calm.
 
@@ -199,18 +156,18 @@ Mediant is for “my stuff”.
 Mediant has three layers:
 
 ```text
-.org file → parser → agenda → UI
+Mediant.org → parser → agenda → UI
 ```
 
-The `.org` file is the source of truth.
+The Mediant.org file is the source of truth.
 
-The parser reads a practical subset of Org syntax into structured entries.
+The parser reads the Mediant.org dialect into structured entries.
 
 The agenda generator decides what should appear as a deadline, in the calendar, in someday, or not at all for the current view.
 
-The UI renders that agenda and writes common edits back into the original Org source.
+The UI renders that agenda and writes common edits back into the original Mediant.org source.
 
-This separation is important: parsing remains about Org syntax, while agenda classification remains about what the interface needs to show.
+This separation is important: parsing remains about the source dialect, while agenda classification remains about what the interface needs to show.
 
 ---
 
@@ -220,7 +177,7 @@ Mediant can run in two modes.
 
 ### Static mode
 
-Paste Org content into the browser.
+Paste Mediant.org dialect content into the browser.
 
 Everything stays in `localStorage`.
 
@@ -229,32 +186,34 @@ There is no server, no account, no database, and no install step beyond hosting 
 This is useful for:
 
 * trying Mediant
-* temporary agendas
+* temporary Mediant.org agendas
 * simple personal lists
 * static hosting
 * browser-only use
 
 ### Server mode
 
-Run Mediant against a single Org file. With no target, Mediant uses `./Mediant.org`.
+Run Mediant against one Mediant.org file. With no target, Mediant uses `./Mediant.org`.
 
 ```sh
 mediant                      # ./Mediant.org
-mediant ~/org/todo.org       # explicit file
+mediant ~/org/Mediant.org    # explicit file
 mediant ~/org/               # ~/org/Mediant.org
 ```
 
+Passing a directory is only a convenience for selecting that directory's `Mediant.org`; Mediant does not load every `.org` file in the directory.
+
 Mediant starts a tiny Node server bound to `127.0.0.1`. The browser hydrates from disk, writes edits back to the same file, and receives live updates when that file changes externally.
 
-That means you can edit the source file from Emacs and see the browser UI update automatically.
+That means you can edit the Mediant.org file from Emacs and see the browser UI update automatically.
 
 This is useful for:
 
-* using Org as the real storage format
+* using Mediant.org as the real storage format
 * combining Emacs editing with a browser agenda
 * local desktop use
 * mobile access through Tailscale, SSH tunnels, or a reverse proxy
-* syncing the source file with Dropbox, Syncthing, git, Nextcloud, or anything else
+* syncing Mediant.org with Dropbox, Syncthing, git, Nextcloud, or anything else
 
 Mediant does not include authentication. If you expose it beyond localhost, put it behind something you trust.
 
@@ -306,13 +265,15 @@ Build once:
 npm run build
 ```
 
-Run Mediant against an Org file. With no argument, the default source is `./Mediant.org`.
+Run Mediant against one Mediant.org file. With no argument, the default source is `./Mediant.org`.
 
 ```sh
 node server/cli.mjs                       # ./Mediant.org
-node server/cli.mjs ~/org/todo.org        # explicit file
+node server/cli.mjs ~/org/Mediant.org     # explicit file
 node server/cli.mjs ~/org/                # ~/org/Mediant.org
 ```
+
+Passing a directory selects `Mediant.org` inside that directory. It is not an org-directory indexing mode.
 
 By default, the server listens on:
 
@@ -358,12 +319,12 @@ kill <pid>
 
 In server mode:
 
-* the browser loads the source file from disk
-* UI edits are written back to the source file
-* new captures are appended to the source file
+* the browser loads the Mediant.org source file from disk
+* UI edits are written back to that file
+* new captures are appended to that file
 * external edits are detected automatically
 * updates are pushed to the browser with Server-Sent Events
-* the file on disk is the source of truth
+* the Mediant.org file on disk is the source of truth
 
 Conflict strategy: **disk wins**.
 
@@ -420,7 +381,7 @@ Click an item to open the edit panel.
 
 Edits autosave as fields change. There is no separate Save button.
 
-The editor preserves body text and updates the relevant part of the original Org source.
+The editor preserves source text it does not own and updates the relevant canonical fields in the Mediant.org source.
 
 ### Work with tags
 
@@ -432,7 +393,7 @@ Active filters can be cleared by clicking a selected tag again.
 
 ### Work with priorities
 
-Mediant understands Org priority cookies such as:
+Mediant understands Org priority cookies in the Mediant.org dialect, such as:
 
 ```org
 ** TODO [#A] Pay invoice
@@ -507,30 +468,35 @@ Days and numeric months may be one or two digits. Ambiguous date forms without a
 
 ---
 
-## Supported Org syntax
+## Mediant.org syntax
 
-Mediant reads and writes Mediant.org: a deliberate Org-readable dialect, not a generic attempt at full Org compatibility. The key simplifications to know up front:
+Mediant reads and writes Mediant.org: a deliberate Org-readable dialect, not a generic attempt at full Org compatibility. Its canonical model is intentionally small:
 
-- **Two canonical entry types** — Mediant treats entries as either events or TODO tasks.
+- **Events** — plain headings with a standalone active timestamp as the first semantic body line.
+- **Tasks** — `TODO` or `DONE` headings with an optional planning line containing `DEADLINE:`, `SCHEDULED:`, or both.
 - **Standalone timestamps only** — active timestamps are only recognised when they are the sole content of a line. Timestamps embedded in heading titles or body prose are not extracted into the agenda.
 - **No tag inheritance** — tags are only read from the heading they appear on; parent tags do not propagate to children.
 - **Two TODO states** — only `TODO` and `DONE` are recognised; any other keyword is treated as part of the title.
 
-The canonical event shape is a plain heading followed by an active timestamp on its own line:
+Canonical event:
 
 ```org
-** Team check-in :work:
-<2026-04-07 Tue 15:15-16:00>
+** Public holiday :holiday:
+<2026-04-05 Sun>
 ```
 
-The canonical task shape is a `TODO` or `DONE` heading, optionally followed immediately by one planning line containing `DEADLINE:`, `SCHEDULED:`, or both. When both are present, `DEADLINE:` must come before `SCHEDULED:`.
+Canonical task:
 
 ```org
-** TODO Pay invoice
-DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
+** TODO Pay tax balance :finance:
+DEADLINE: <2026-05-31 Sun +1y>
 ```
 
-Everything Mediant does not recognise is preserved verbatim in the source file on write. For the full breakdown see [`ORG-SYNTAX.md`](ORG-SYNTAX.md).
+When a task has both deadline and scheduled planning, `DEADLINE:` must come before `SCHEDULED:`.
+
+Body/notes content has a stricter rule than timestamps. Raw prose outside a description block is preserved on write, but it is not agenda semantics and is not treated as an editable note field. Inline timestamps in prose are preserved as text and ignored by the agenda. Description blocks (`#+begin_src description`) are parsed as body content and shown and edited in the edit panel.
+
+Everything Mediant does not recognise is preserved verbatim where possible. For the full breakdown see [`ORG-SYNTAX.md`](ORG-SYNTAX.md).
 
 | Feature          | Example                                     |
 | ---------------- | ------------------------------------------- |
@@ -548,7 +514,7 @@ Everything Mediant does not recognise is preserved verbatim in the source file o
 
 ---
 
-## Mediant-specific Org extensions
+## Mediant-specific syntax extensions
 
 Mediant adds two small extensions on top of ordinary Org property drawers:
 
@@ -663,12 +629,12 @@ In server mode, Mediant exposes three endpoints on top of the static UI.
 | Method | Path          | Purpose                                                                                    |
 | ------ | ------------- | ------------------------------------------------------------------------------------------ |
 | `GET`  | `/api/source` | Returns JSON: `{ content, version }`. |
-| `PUT`  | `/api/source` | Writes the source file. Body JSON: `{ content, version }`. Version mismatch returns `409`. |
-| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <changeToken>` when the source file changes on disk. |
+| `PUT`  | `/api/source` | Writes the Mediant.org source file. Body JSON: `{ content, version }`. Version mismatch returns `409`. |
+| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <changeToken>` when the Mediant.org source file changes on disk. |
 
-The version is the source file's modification timestamp (milliseconds). SSE change tokens are monotonic invalidation hints for the current server process; clients re-read `/api/source` and compare the version.
+The version is the Mediant.org source file's modification timestamp (milliseconds). SSE change tokens are monotonic invalidation hints for the current server process; clients re-read `/api/source` and compare the version.
 
-Write conflicts are rejected with `409`. The UI then reloads the source file from disk.
+Write conflicts are rejected with `409`. The UI then reloads the Mediant.org source file from disk.
 
 ---
 
@@ -677,13 +643,13 @@ Write conflicts are rejected with `409`. The UI then reloads the source file fro
 Mediant is split into three main stages:
 
 ```text
-.org file → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
-             OrgEntry[]          Agenda model          HTML/CSS
+Mediant.org → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
+               OrgEntry[]          Agenda model          HTML/CSS
 ```
 
 ### Parser layer
 
-The parser reads Org source into structures that reflect the source file:
+The parser reads Mediant.org source into structures that reflect the Mediant.org file:
 
 * headings
 * TODO state
@@ -693,14 +659,14 @@ The parser reads Org source into structures that reflect the source file:
 * timestamps
 * checkbox items
 * progress cookies (treated as text)
-* body text (from `#+begin_src description` blocks; raw prose lines and inline timestamps in prose are ignored)
+* body text (from `#+begin_src description` blocks; raw prose lines are preserved but not parsed as body, and inline timestamps in prose are ignored as agenda semantics)
 * selected property drawer values
 
-Parser types should describe Org source faithfully. They should not decide how an entry appears in the agenda.
+Parser types should describe Mediant.org source faithfully. They should not decide how an entry appears in the agenda.
 
 ### Agenda layer
 
-The agenda generator turns parsed Org entries into display-oriented structures:
+The agenda generator turns parsed Mediant.org entries into display-oriented structures:
 
 * deadline items
 * agenda days
@@ -727,7 +693,7 @@ The UI renders the agenda and wires interaction:
 * notifications
 * source mutation helpers
 
-The UI writes back to the original Org source rather than maintaining a separate database.
+The UI writes back to the original Mediant.org source rather than maintaining a separate database.
 
 ---
 
@@ -738,9 +704,9 @@ src/
   org/
     model.ts            — Parser output types
     timestamp.ts        — Timestamp parsing, Date conversion, recurrence expansion, exception handling
-    parser.ts           — Line-by-line Org parser
+    parser.ts           — Line-by-line Mediant.org parser
     drawer.ts           — Property-drawer mutation helpers
-    sourceEdit.ts       — Raw Org source mutation helpers for UI writes
+    sourceEdit.ts       — Raw Mediant.org source mutation helpers for UI writes
     __tests__/          — Timestamp, parser, and drawer tests
 
   agenda/
@@ -794,11 +760,11 @@ The test suite covers parser behavior, timestamp handling, recurrence expansion,
 
 ## Local storage
 
-Mediant uses browser `localStorage` for UI preferences and, in static mode, the pasted Org source.
+Mediant uses browser `localStorage` for UI preferences and, in static mode, the pasted Mediant.org source.
 
 | Key                       | Purpose                                                    |
 | ------------------------- | ---------------------------------------------------------- |
-| `mediant-org-source`      | Pasted Org content in static mode. Ignored in server mode. |
+| `mediant-org-source`      | Pasted Mediant.org content in static mode. Ignored in server mode. |
 | `mediant-hide-tags`       | Whether agenda tag labels are hidden.                      |
 | `mediant-hide-empty-days` | Whether empty days are hidden.                             |
 | `mediant-hide-completed`  | Whether DONE entries and skipped occurrences are hidden.   |
@@ -807,19 +773,19 @@ Mediant uses browser `localStorage` for UI preferences and, in static mode, the 
 | `mediant-notifications`   | Whether browser reminders are enabled.                     |
 | `mediant-locale`          | Selected UI locale: `en`, `nb`, `it`, or `de`.             |
 
-In static mode, the Org source lives in the browser.
+In static mode, the Mediant.org source lives in the browser.
 
-In server mode, the Org source lives in the file passed to the CLI, or `Mediant.org` when the target is omitted or is a directory. UI preferences are still browser-local.
+In server mode, the Mediant.org source lives in the file passed to the CLI, or `Mediant.org` when the target is omitted or is a directory. UI preferences are still browser-local.
 
 ---
 
 ## Non-goals
 
-Mediant intentionally does not support everything Org-mode can do.
+Mediant intentionally does not support arbitrary Org-mode.
 
 Current non-goals include:
 
-* full Org-mode syntax
+* full or arbitrary Org-mode syntax
 * heading hierarchy in the agenda view
 * arbitrary property drawer semantics
 * habits
@@ -833,7 +799,7 @@ Current non-goals include:
 * a database backend
 * accounts or cloud sync
 
-For unsupported Org syntax, the preferred behavior is graceful ignoring rather than failure.
+For unsupported syntax, the preferred behavior is graceful ignoring and preservation where possible rather than failure.
 
 ---
 
@@ -841,7 +807,7 @@ For unsupported Org syntax, the preferred behavior is graceful ignoring rather t
 
 Mediant is designed so the important data remains outside Mediant.
 
-Your Org file can be edited with other tools, synced with whatever you prefer, backed up normally, and read without this project.
+Your Mediant.org file can be edited with other tools, synced with whatever you prefer, backed up normally, and read without this project.
 
 Mediant should make the file nicer to use, not make the file depend on Mediant.
 
