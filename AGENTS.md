@@ -91,6 +91,8 @@ emacs --batch -L elisp -l elisp/mediant-org-agenda-test.el -f ert-run-tests-batc
 
 See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and unsupported syntax.
 
+**Canonical entries:** Mediant has two first-class entry shapes. Events are plain headings followed by an active timestamp on its own line. TODO tasks are `TODO`/`DONE` headings, optionally followed immediately by one planning line containing `DEADLINE:`, `SCHEDULED:`, or both; when both are present, `DEADLINE:` comes before `SCHEDULED:`.
+
 **Supported (standard Org):** headings, TODO/DONE, priority cookies (`[#A]`/`[#B]`/`[#C]`), tags, active timestamps (standalone-line only — inline timestamps embedded in prose are silently ignored), time ranges, repeaters (`+`/`.+`/`++`, units `d`/`w`/`m`/`y`), SCHEDULED, DEADLINE, body text via `#+begin_src description` blocks, checkbox lists (`- [ ]`/`- [X]`), progress cookies (`[2/3]`/`[66%]`).
 
 **Mediant-specific extensions:** per-occurrence recurrence exceptions via `:EXCEPTION-<date>:` / `:EXCEPTION-NOTE-<date>:` (keyed on the *unshifted* base date), plus `:SERIES-UNTIL:` for an exclusive end date on a repeating series. `SERIES-UNTIL` is evaluated on the repeater's base slots, not the final moved-to date, which is what makes split-series handoff work cleanly. Both ride on ordinary Org property-drawer syntax, so files remain valid Org (Emacs opens and edits them without complaint — it just treats the keys as arbitrary properties).
@@ -101,8 +103,7 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 
 ## UI structure
 
-- **Overdue section** at the very top — TODO items past their DEADLINE or SCHEDULED date, sorted most overdue first. Shows days overdue + kind badge (DEADLINE/SCHEDULED) + clickable TODO badge before the title. Red-accented border and labels.
-- **Upcoming deadlines section** below overdue (global, not per-day). Due text is rendered as `Today` or compact day counts like `12d`, with urgency colors that progress from red to orange to yellow to a calmer tone as the due date gets farther away.
+- **Combined deadline/overdue overview** at the very top — one global overview containing overdue TODO items and, when enabled, upcoming deadlines. Overdue rows are sorted most overdue first and show days overdue + kind badge (DEADLINE/SCHEDULED) + clickable TODO badge before the title. Upcoming deadline rows duplicate deadline tasks that also appear in the calendar; due text is rendered as `Today` or compact day counts like `12d`, with urgency colors that progress from red to orange to yellow to a calmer tone as the due date gets farther away.
 - **Day cards** (7 consecutive days by default, or 30 days with the month-ahead toggle), each containing:
   - All-day section: title + metadata row showing `all day` · #tags
   - Deadline items: title + metadata row showing `deadline` · time (if present) · #tags
@@ -112,12 +113,12 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 - **Today** indicated by blue border + small blue dot (not a text badge)
 - **Day headings** are clickable/focusable controls. Activating a day heading opens the add-item panel in Event mode with that day prefilled in the When field.
 - **Hide empty days** — toolbar toggle removes day blocks with no visible agenda items. If no day blocks remain, the day-card container is not rendered. Preference persists in localStorage (`mediant-hide-empty-days`).
-- **Hide completed & skipped** — toolbar toggle filters out DONE entries and `skipped` (cancelled-occurrence) items from the day cards, and drops DONE entries from the someday section. Filtering happens in `renderAgendaBase` after tag filtering, so it composes with `Hide empty days` (filtered days that fall to zero items collapse). Overdue and upcoming-deadlines collectors already restrict to TODO/non-cancelled items, so they need no extra filter. Preference persists in localStorage (`mediant-hide-completed`).
-- **Hide upcoming deadlines** — settings toggle collapses the upcoming-deadlines section entirely. Preference persists in localStorage (`mediant-hide-deadlines`).
+- **Hide completed & skipped** — toolbar toggle filters out DONE entries and `skipped` (cancelled-occurrence) items from the day cards, and drops DONE entries from the someday section. Filtering happens in `renderAgendaBase` after tag filtering, so it composes with `Hide empty days` (filtered days that fall to zero items collapse). Overdue and upcoming-deadline collectors already restrict to TODO/non-cancelled items, so they need no extra filter. Preference persists in localStorage (`mediant-hide-completed`).
+- **Hide upcoming deadlines** — settings toggle hides the optional upcoming-deadline rows in the combined overview. Deadline tasks still appear in the day cards, and overdue rows remain visible when present. Preference persists in localStorage (`mediant-hide-deadlines`).
 - **Month-ahead view** — settings toggle expands the day-card range from 7 days to 30 days. Prev/next navigation moves by the active range length. Preference persists in localStorage (`mediant-month-ahead`).
 - **Tags** rendered as plain `#tag` text below the item title.
 - **Hide tags** — settings toggle hides agenda tag labels without clearing active tag filters. Active filters remain visible in the header so they can be removed. Preference persists in localStorage (`mediant-hide-tags`).
-- **Tag filtering** — clicking a tag toggles it in the active filter set. Filtering applies to the visible agenda range, overdue section, upcoming deadlines, and someday section. Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible.
+- **Tag filtering** — clicking a tag toggles it in the active filter set. Filtering applies to the visible agenda range, the combined deadline/overdue overview, and the someday section. Multiple selected tags use AND semantics: an item must contain every selected tag to remain visible.
 - **Tag picker keyboard support** — in the add/edit panel, `ArrowUp`/`ArrowDown` move through tag suggestions, `Enter` selects the highlighted suggestion, and `Backspace` on an empty tag field removes the last selected pill.
 - **TODO badges** — state badges display semantic text labels (`scheduled`, `task`, `done`, `deadline`) rather than the raw `TODO`/`DONE` keyword; `data-state` always holds the actual TODO/DONE value for CSS targeting and toggle behavior. Click/keyboard toggle and accessible labels are unchanged.
 - **Priority badges** — `[#A]`/`[#B]`/`[#C]` rendered as small colored badges (red/amber/blue) nested inside the item title so the row grid templates stay fixed. Do not duplicate priority in metadata rows; it should appear before the title everywhere.

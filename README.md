@@ -41,13 +41,13 @@ The goal is not to expose every possible Org feature, but to make the common per
 
 ## The shape of the agenda
 
-Mediant has three sections:
+Mediant has three core sections.
 
-### Deadlines
+### Deadline / Overdue Overview
 
 Deadlines are things that exert pressure.
 
-Overdue items and approaching deadlines appear together and are sorted by temporal distance.
+Overdue items and approaching deadlines appear together in one combined overview at the top. Overdue rows are always part of this section. Upcoming deadline rows are optional; deadline tasks still appear on their calendar day when those rows are hidden.
 
 This section answers questions like:
 
@@ -58,13 +58,13 @@ This section answers questions like:
 
 Deadlines have gravity.
 
-They are not simply calendar events. They are obligations moving toward you.
+They are calendar items with pressure attached: they live on the calendar, and the overview duplicates them when you want to scan urgency directly.
 
 ### Calendar
 
 The calendar shows things that already have a place in time.
 
-Scheduled tasks, timed events, all-day events, and recurring occurrences appear inside the active date range.
+Scheduled tasks, deadline tasks, timed events, all-day events, and recurring occurrences appear inside the active date range.
 
 This section answers questions like:
 
@@ -96,8 +96,8 @@ It's a place for possible futures.
 
 These sections intentionally follow different rules because they serve different purposes:
 
-* pressure at the top
-* plans in the middle
+* deadline and overdue pressure at the top
+* calendar commitments in the middle
 * possibilities below
 
 ---
@@ -109,8 +109,8 @@ Mediant is designed for fast visual scanning.
 It gives you:
 
 * overdue items at the top
-* upcoming deadlines grouped by temporal urgency
-* scheduled tasks and timed events in the calendar
+* optional upcoming deadlines grouped by temporal urgency
+* scheduled tasks, deadline tasks, and timed events in the calendar
 * recurring tasks and events with per-occurrence exceptions
 * quick capture with keybindings
 * add and edit panels
@@ -464,9 +464,24 @@ Days and numeric months may be one or two digits. Ambiguous date forms without a
 
 Mediant reads and writes a deliberate subset of Org syntax. The key simplifications to know up front:
 
+- **Two canonical entry types** — Mediant treats entries as either events or TODO tasks.
 - **Standalone timestamps only** — active timestamps are only recognised when they are the sole content of a line. Timestamps embedded in heading titles or body prose are not extracted into the agenda.
 - **No tag inheritance** — tags are only read from the heading they appear on; parent tags do not propagate to children.
 - **Two TODO states** — only `TODO` and `DONE` are recognised; any other keyword is treated as part of the title.
+
+The canonical event shape is a plain heading followed by an active timestamp on its own line:
+
+```org
+** Team check-in :work:
+<2026-04-07 Tue 15:15-16:00>
+```
+
+The canonical task shape is a `TODO` or `DONE` heading, optionally followed immediately by one planning line containing `DEADLINE:`, `SCHEDULED:`, or both. When both are present, `DEADLINE:` must come before `SCHEDULED:`.
+
+```org
+** TODO Pay invoice
+DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
+```
 
 Everything Mediant does not recognise is preserved verbatim in the source file on write. For the full breakdown see [`ORG-SYNTAX.md`](ORG-SYNTAX.md).
 
@@ -617,7 +632,7 @@ Mediant is split into three main stages:
 
 ### Parser layer
 
-The parser reads Org source into structures that reflect each file:
+The parser reads Org source into structures that reflect the source file:
 
 * headings
 * TODO state
@@ -645,13 +660,13 @@ The agenda generator turns parsed Org entries into display-oriented structures:
 
 Classification happens here, not in the parser.
 
-This is where Mediant's three-space model is created: deadlines, calendar, and someday are not just visual sections. They are distinct agenda classifications with different sorting and display logic.
+This is where Mediant creates calendar items, the combined deadline/overdue overview, and someday items. These are display classifications with different sorting and filtering rules, not parser concepts.
 
 ### UI layer
 
 The UI renders the agenda and wires interaction:
 
-* deadline overview
+* combined deadline/overdue overview
 * calendar
 * someday list
 * filters
@@ -736,7 +751,7 @@ Mediant uses browser `localStorage` for UI preferences and, in static mode, the 
 | `mediant-hide-tags`       | Whether agenda tag labels are hidden.                      |
 | `mediant-hide-empty-days` | Whether empty days are hidden.                             |
 | `mediant-hide-completed`  | Whether DONE entries and skipped occurrences are hidden.   |
-| `mediant-hide-deadlines`  | Whether the upcoming deadlines section is hidden.          |
+| `mediant-hide-deadlines`  | Whether optional deadline overview rows are hidden.        |
 | `mediant-month-ahead`     | Whether the agenda shows 30 days instead of 7.             |
 | `mediant-notifications`   | Whether browser reminders are enabled.                     |
 | `mediant-locale`          | Selected UI locale: `en`, `nb`, `it`, or `de`.             |

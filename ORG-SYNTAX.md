@@ -6,12 +6,41 @@ Mediant reads and writes a deliberate subset of Org-mode. The subset is chosen f
 
 These are conscious design decisions, not gaps to be filled later:
 
+- **Two canonical entry types.** Mediant's first-class entries are events and TODO tasks. An event is a plain heading followed by an active timestamp on its own line. A task is a `TODO` or `DONE` heading, optionally followed immediately by one planning line containing `DEADLINE:`, `SCHEDULED:`, or both; when both are present, `DEADLINE:` comes first.
 - **No tag inheritance.** Tags are only recognised on the heading line they appear on. A parent heading's tags do not propagate to its children.
 - **Standalone timestamps only.** An active timestamp generates an agenda item only when it is the sole content of a line (possibly with surrounding whitespace). Timestamps embedded in a heading title are preserved as plain text in the title and are not interpreted by the agenda. Timestamps embedded in body prose are preserved verbatim in the source but do not generate agenda items.
 - **Two TODO states.** Only `TODO` and `DONE` are treated as state keywords. Any other keyword (NEXT, WAITING, CANCELLED, etc.) is treated as part of the heading title.
 - **Single-file recurrence.** Repeating timestamps are expanded from the base date in the same heading. There is no cross-file dependency or "ARCHIVE" awareness.
 
 Everything else — drawers, inactive timestamps, plain prose lines, inline markup, links, tables, comments, source blocks — is preserved verbatim on write and silently ignored by the agenda.
+
+---
+
+## Canonical entry shapes
+
+Mediant creates and edits two canonical kinds of entry. Other Org content may be preserved or partially parsed, but these are the shapes the UI treats as first-class.
+
+### Event
+
+An event is a heading without a TODO state followed by an active timestamp on a line by itself:
+
+```org
+** Team check-in :work:
+<2026-04-07 Tue 15:15-16:00>
+```
+
+The standalone timestamp may be all-day, timed, ranged, or repeating. It is what places the event in the agenda.
+
+### TODO task
+
+A task is a `TODO` or `DONE` heading. It may be undated, or it may be followed immediately by a planning line containing `DEADLINE:`, `SCHEDULED:`, or both. When both are present, `DEADLINE:` must come before `SCHEDULED:`.
+
+```org
+** TODO Pay invoice
+DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
+```
+
+`DEADLINE:` places the task on its calendar day and feeds the combined deadline/overdue overview. Overdue rows are always shown when present; upcoming deadline rows can be hidden. `SCHEDULED:` places the task on the calendar. With both present, the same task can appear as both a deadline item and a scheduled task.
 
 ---
 
@@ -113,7 +142,8 @@ Everything else — drawers, inactive timestamps, plain prose lines, inline mark
 SCHEDULED: <2026-04-14 ti. 12:00>
 ```
 
-- Must appear on the line(s) immediately following a heading.
+- In the canonical task shape, appears on the planning line immediately following a `TODO` or `DONE` heading.
+- For compatibility, the parser also accepts consecutive planning lines immediately after the heading.
 - The keyword `SCHEDULED:` followed by a space and an active timestamp.
 - Produces a planning entry with `kind: "scheduled"`.
 
@@ -124,6 +154,7 @@ DEADLINE: <2026-05-05 ti.>
 ```
 
 - Same rules as SCHEDULED.
+- In the canonical task shape, `DEADLINE:` comes before `SCHEDULED:` when they share the same planning line.
 - Produces a planning entry with `kind: "deadline"`.
 
 ### Checkbox lists
