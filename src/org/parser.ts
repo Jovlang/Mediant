@@ -16,15 +16,14 @@
  *
  * ── Timestamp capture rules ──────────────────────────────────────────
  *
- * Active timestamps are captured in three contexts:
- *   1. Inline in headings — extracted from the title text, added to
- *      entry.timestamps, and removed from entry.title.
- *   2. Timestamp-only body lines — lines whose content is nothing but
+ * Active timestamps are captured in one context only:
+ *   1. Timestamp-only body lines — lines whose content is nothing but
  *      one or more active timestamps (and whitespace). These are added
  *      to entry.timestamps and NOT included in body text.
- *   3. Mixed prose + timestamp — a body line that contains both prose
- *      and an active timestamp is treated as body text in v1. The
- *      timestamp is NOT extracted into entry.timestamps.
+ *
+ * Timestamps that are NOT extracted into entry.timestamps:
+ *   - Embedded in heading titles — preserved as plain text in entry.title.
+ *   - Mixed prose + timestamp body lines — preserved verbatim in source.
  *
  * ── Skipped constructs ───────────────────────────────────────────────
  *
@@ -304,9 +303,7 @@ function parseHeading(match: RegExpMatchArray, lineNumber: number): MutableEntry
     remainder = remainder.slice(0, -tagsMatch[0].length);
   }
 
-  // Extract any inline timestamps from the title
-  const inlineTimestamps = parseTimestamps(remainder);
-  const title = remainder.replace(new RegExp(TIMESTAMP_RE.source, "g"), "").trim();
+  const title = remainder.trim();
 
   return {
     level,
@@ -315,7 +312,7 @@ function parseHeading(match: RegExpMatchArray, lineNumber: number): MutableEntry
     title,
     tags,
     planning: [],
-    timestamps: inlineTimestamps,
+    timestamps: [],
     checkboxItems: [],
     body: "",
     sourceLineNumber: lineNumber,

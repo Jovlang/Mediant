@@ -463,9 +463,13 @@ Days and numeric months may be one or two digits. Ambiguous date forms without a
 
 ## Supported Org syntax
 
-Mediant supports a practical subset of Org syntax for agenda use.
+Mediant reads and writes a deliberate subset of Org syntax. The key simplifications to know up front:
 
-For the full breakdown of supported, gracefully ignored, and unsupported syntax, see [`ORG-SYNTAX.md`](ORG-SYNTAX.md).
+- **Standalone timestamps only** — active timestamps are only recognised when they are the sole content of a line. Timestamps embedded in heading titles or body prose are not extracted into the agenda.
+- **No tag inheritance** — tags are only read from the heading they appear on; parent tags do not propagate to children.
+- **Two TODO states** — only `TODO` and `DONE` are recognised; any other keyword is treated as part of the title.
+
+Everything Mediant does not recognise is preserved verbatim in the source file on write. For the full breakdown see [`ORG-SYNTAX.md`](ORG-SYNTAX.md).
 
 | Feature          | Example                                     |
 | ---------------- | ------------------------------------------- |
@@ -473,15 +477,13 @@ For the full breakdown of supported, gracefully ignored, and unsupported syntax,
 | TODO / DONE      | `** TODO Some task` / `** DONE Finished`    |
 | Priority cookies | `** TODO [#A] Urgent task`                  |
 | Tags             | `** Heading :tag1:tag2:`                    |
-| Active timestamp | `<2026-04-07 ti. 15:15-16:00>`              |
+| Active timestamp | `<2026-04-07 ti. 15:15-16:00>` (standalone line only) |
 | Repeater         | `<2026-04-07 ti. 15:15-16:00 +1w>`          |
 | SCHEDULED        | `SCHEDULED: <2026-04-14 ti. 12:00>`         |
 | DEADLINE         | `DEADLINE: <2026-05-05 ti.>`                |
 | Checkbox lists   | `- [ ] Pending` / `- [X] Done`              |
 | Progress cookies | `** TODO Task [2/3]` / `** TODO Task [66%]` (treated as text) |
-| Body text        | `#+begin_src description` block (raw prose lines outside the block are ignored; inline timestamps in prose are not parsed) |
-
-Anything outside this subset is ignored gracefully. Unsupported syntax should not cause parse errors.
+| Body text        | `#+begin_src description` block             |
 
 ---
 

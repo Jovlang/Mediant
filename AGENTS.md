@@ -162,7 +162,7 @@ Always run tests after changes to parser, timestamp, drawer, source-edit, agenda
 - Source line numbers are **1-based**
 - Body text is a **single string** read from a `#+begin_src description` block; lines joined by `\n`, two leading spaces stripped per line, leading commas unescaped. Raw prose lines outside the block are ignored.
 - Planning lines only accepted **immediately after a heading** (or another planning line)
-- Timestamp-only lines (the line contains nothing else) are captured as timestamps; lines with prose mixed with a timestamp (`Meet at <date> sharp.`) are **not parsed** — they do not appear as timestamps or body text, but are **preserved verbatim** in the source on write
+- Timestamp-only lines (the line contains nothing else) are captured as `entry.timestamps`; timestamps embedded in heading titles are preserved as plain text in `entry.title` and not captured; timestamps in prose body lines are preserved verbatim in source — none of the non-standalone forms generate agenda items
 - Any line in an entry body that Mediant does not explicitly own (raw prose, blank lines, inactive timestamps, etc.) is **preserved verbatim** in the source on write; the write path only replaces the heading, planning, description block content, and checkboxes
 - Checkbox list items (`- [ ]`/`- [X]`) are captured into `checkboxItems`, not body text
 - `#+` keyword lines and `# ` comment lines inside entries are **skipped, not preserved as body**

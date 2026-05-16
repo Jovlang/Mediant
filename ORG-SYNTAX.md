@@ -1,11 +1,26 @@
 # Org Syntax Reference
 
-Detailed account of how Mediant handles Org-mode syntax. Four categories:
+Mediant reads and writes a deliberate subset of Org-mode. The subset is chosen for simplicity: every feature Mediant does support is parsed correctly and round-trips without loss, and everything it does not support is either preserved verbatim or silently skipped — it never corrupts content it doesn't understand.
+
+## Deliberate simplifications
+
+These are conscious design decisions, not gaps to be filled later:
+
+- **No tag inheritance.** Tags are only recognised on the heading line they appear on. A parent heading's tags do not propagate to its children.
+- **Standalone timestamps only.** An active timestamp generates an agenda item only when it is the sole content of a line (possibly with surrounding whitespace). Timestamps embedded in a heading title are preserved as plain text in the title and are not interpreted by the agenda. Timestamps embedded in body prose are preserved verbatim in the source but do not generate agenda items.
+- **Two TODO states.** Only `TODO` and `DONE` are treated as state keywords. Any other keyword (NEXT, WAITING, CANCELLED, etc.) is treated as part of the heading title.
+- **Single-file recurrence.** Repeating timestamps are expanded from the base date in the same heading. There is no cross-file dependency or "ARCHIVE" awareness.
+
+Everything else — drawers, inactive timestamps, plain prose lines, inline markup, links, tables, comments, source blocks — is preserved verbatim on write and silently ignored by the agenda.
+
+---
+
+## Categories
 
 1. **Supported** — standard Org syntax parsed and used in the agenda
 2. **Mediant-specific extensions** — syntax Mediant *adds on top of* Org. Emacs does not interpret these as anything special; files remain valid Org.
-3. **Gracefully ignored** — recognized but silently skipped, will not cause errors
-4. **Unsupported** — not recognized; may cause unexpected behavior if present
+3. **Gracefully ignored** — silently skipped; content is preserved in the source file on write
+4. **Unsupported** — not recognised; may cause unexpected behaviour if present
 
 ---
 
@@ -71,7 +86,7 @@ Detailed account of how Mediant handles Org-mode syntax. Four categories:
 - Day name after date (any language, with or without trailing dot) — **consumed but ignored**. The date string is authoritative.
 - Optional start time in `HH:MM` format.
 - Optional end time as `-HH:MM` (time range on the same day).
-- Must appear as a **standalone line** (the only content on the line). A timestamp embedded in prose (`Meet at <2026-05-18 Mon> sharp.`) is **not** recognized — the line is silently ignored. Use a `#+begin_src description` block to store description text that contains dates.
+- Must appear as a **standalone line** (the only content on the line) to generate an agenda item. Timestamps embedded in a heading title are preserved as plain text. Timestamps embedded in body prose are preserved verbatim in the source. Neither generates an agenda item.
 
 ### Repeaters
 
@@ -244,7 +259,7 @@ SCHEDULED: <2026-04-27 ma. 17:00-18:00 +1w>
 
 ## Gracefully ignored
 
-These constructs are recognized and silently skipped. They will not produce entries, cause parse errors, or corrupt adjacent entries.
+These constructs are silently skipped by the parser — they do not produce agenda entries or populate the data model. All such lines are preserved verbatim in the source file on write.
 
 ### File-level keywords
 
@@ -380,15 +395,17 @@ print("hello")
 
 These constructs are **not recognized** by the parser. If present, they may be misinterpreted (e.g., treated as body text when they shouldn't be, or partially parsed incorrectly).
 
-### Inline timestamps in prose
+### Inline timestamps in prose or heading titles
 
 ```org
-** Meeting
+** Meeting <2026-05-18 Mon 14:00>
 Meet at <2026-05-18 Mon 14:00> sharp.
 ```
 
-- A timestamp embedded in a prose line is **not** recognized as an active timestamp and does not generate an agenda item. The entire line is silently discarded.
-- Only lines whose sole content is a timestamp (optionally surrounded by whitespace) are parsed.
+- Timestamps embedded in a heading title are preserved as plain text in `entry.title` and do not generate agenda items.
+- Timestamps embedded in a body prose line are preserved verbatim in the source and do not generate agenda items.
+- This is a deliberate simplification — see *Deliberate simplifications* above.
+- Only standalone timestamp lines (the line contains nothing else) are parsed as active timestamps.
 - To include description text that contains a date, use a `#+begin_src description` block.
 
 ### Diary sexp timestamps
@@ -418,7 +435,7 @@ Meet at <2026-05-18 Mon 14:00> sharp.
 ** Task one
 ```
 
-- `Task one` does **not** inherit the `:work:` tag from its parent. Only tags explicitly on the heading line are parsed.
+- `Task one` does **not** inherit the `:work:` tag from its parent. Only tags explicitly on the heading line are parsed. This is a deliberate simplification — see *Deliberate simplifications* above.
 
 ### Column view / custom agenda commands
 
