@@ -1,6 +1,6 @@
 # Mediant
 
-A calm, focused agenda backed by one Org-readable `Mediant.org` file.
+A calm, focused agenda backed by one plain text file: `Mediant.org`.
 
 > Not every future thing is the same kind of thing.
 
