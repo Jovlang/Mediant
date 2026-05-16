@@ -121,9 +121,9 @@ DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
 ### Active timestamps
 
 ```org
-<2026-04-07 ti.>
-<2026-04-07 ti. 15:15>
-<2026-04-07 ti. 15:15-16:00>
+<2026-04-07 Tue>
+<2026-04-07 Tue 15:15>
+<2026-04-07 Tue 15:15-16:00>
 <2026-04-07 Sat 12:00>
 ```
 
@@ -137,9 +137,9 @@ DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
 ### Repeaters
 
 ```org
-<2026-04-07 ti. 15:15-16:00 +1w>
-<2026-04-06 ma. .+1d>
-<2026-04-08 on. ++1w>
+<2026-04-07 Tue 15:15-16:00 +1w>
+<2026-04-06 Mon .+1d>
+<2026-04-08 Wed ++1w>
 ```
 
 - Appended inside the timestamp before the closing `>`.
@@ -156,7 +156,7 @@ DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
 ### SCHEDULED
 
 ```org
-SCHEDULED: <2026-04-14 ti. 12:00>
+SCHEDULED: <2026-04-14 Tue 12:00>
 ```
 
 - In the canonical task shape, appears on the planning line immediately following a `TODO` or `DONE` heading.
@@ -167,7 +167,7 @@ SCHEDULED: <2026-04-14 ti. 12:00>
 ### DEADLINE
 
 ```org
-DEADLINE: <2026-05-05 ti.>
+DEADLINE: <2026-05-05 Tue>
 ```
 
 - Same rules as SCHEDULED.
@@ -254,7 +254,7 @@ Both key families are keyed by the *unshifted* base occurrence date (`YYYY-MM-DD
 
 ```org
 ** TODO Yoga :health:
-SCHEDULED: <2026-04-27 ma. 17:00-18:00 +1w>
+SCHEDULED: <2026-04-27 Mon 17:00-18:00 +1w>
 :PROPERTIES:
 :EXCEPTION-2026-04-27: cancelled
 :EXCEPTION-2026-05-04: shift +45m
@@ -319,7 +319,7 @@ A repeating timestamp in standard Org runs forever. Mediant adds a `:SERIES-UNTI
 
 ```org
 ** Yoga :health:
-SCHEDULED: <2026-04-27 ma. 17:00-18:00 +1w>
+SCHEDULED: <2026-04-27 Mon 17:00-18:00 +1w>
 :PROPERTIES:
 :SERIES-UNTIL: 2026-07-01
 :END:
@@ -357,7 +357,7 @@ These constructs are silently skipped by the parser — they do not produce agen
 ### Inactive timestamps
 
 ```org
-[2026-04-07 ti. 15:15-16:00]
+[2026-04-07 Tue 15:15-16:00]
 ```
 
 - Square-bracket timestamps. Not parsed into the agenda model — they do not generate agenda items or populate `entry.timestamps`.
@@ -366,7 +366,7 @@ These constructs are silently skipped by the parser — they do not produce agen
 ### Timestamp ranges (spanning days)
 
 ```org
-<2026-04-07 ti.>--<2026-04-09 to.>
+<2026-04-07 Tue>--<2026-04-09 Thu>
 ```
 
 - Two timestamps connected by `--`. Mediant currently parses this as a single active timestamp on the opening date and stores the closing date as parser metadata. It does **not** yet render the event across every spanned day.
@@ -386,7 +386,7 @@ These constructs are silently skipped by the parser — they do not produce agen
 
 ```org
 :LOGBOOK:
-CLOCK: [2026-04-07 ti. 10:00]--[2026-04-07 ti. 11:30] =>  1:30
+CLOCK: [2026-04-07 Tue 10:00]--[2026-04-07 Tue 11:30] =>  1:30
 :END:
 ```
 
@@ -405,7 +405,7 @@ CLOCK: [2026-04-07 ti. 10:00]--[2026-04-07 ti. 11:30] =>  1:30
 ### CLOSED planning
 
 ```org
-CLOSED: [2026-04-07 ti. 14:00]
+CLOSED: [2026-04-07 Tue 14:00]
 ```
 
 - Recognized as a planning keyword but not stored.

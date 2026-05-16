@@ -504,10 +504,10 @@ Everything Mediant does not recognise is preserved verbatim where possible. For 
 | TODO / DONE      | `** TODO Some task` / `** DONE Finished`    |
 | Priority cookies | `** TODO [#A] Urgent task`                  |
 | Tags             | `** Heading :tag1:tag2:`                    |
-| Active timestamp | `<2026-04-07 ti. 15:15-16:00>` (standalone line only) |
-| Repeater         | `<2026-04-07 ti. 15:15-16:00 +1w>`          |
-| SCHEDULED        | `SCHEDULED: <2026-04-14 ti. 12:00>`         |
-| DEADLINE         | `DEADLINE: <2026-05-05 ti.>`                |
+| Active timestamp | `<2026-04-07 Tue 15:15-16:00>` (standalone line only) |
+| Repeater         | `<2026-04-07 Tue 15:15-16:00 +1w>`          |
+| SCHEDULED        | `SCHEDULED: <2026-04-14 Tue 12:00>`         |
+| DEADLINE         | `DEADLINE: <2026-05-05 Tue>`                |
 | Checkbox lists   | `- [ ] Pending` / `- [X] Done`              |
 | Progress cookies | `** TODO Task [2/3]` / `** TODO Task [66%]` (treated as text) |
 | Body text        | `#+begin_src description` block             |
@@ -535,7 +535,7 @@ Example:
 
 ```org
 ** TODO Yoga :health:
-SCHEDULED: <2026-04-27 ma. 17:00-18:00 +1w>
+SCHEDULED: <2026-04-27 Mon 17:00-18:00 +1w>
 :PROPERTIES:
 :EXCEPTION-2026-05-04: shift +45m
 :EXCEPTION-NOTE-2026-05-04: Bring mat and water
