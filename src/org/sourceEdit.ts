@@ -63,6 +63,7 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
 
   const planningRe = /^\s*(?:SCHEDULED|DEADLINE):\s*</;
   const bareRe = /^\s*<\d{4}-\d{2}-\d{2}/;
+  const inactiveBareRe = /^\s*\[\d{4}-\d{2}-\d{2}/;
   const checkboxRe = /^\s*-\s+\[[ X]\]\s+/;
   const drawerOpenRe = /^\s*:([A-Z_]+):\s*$/;
   const drawerCloseRe = /^\s*:END:\s*$/;
@@ -95,6 +96,7 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
     }
 
     if (planningRe.test(line)) continue;
+    if (inactiveBareRe.test(line)) { preserved.push(line); continue; }
     if (bareRe.test(line)) {
       if (shouldDropAllBare) continue;
       if (dropReplacementBare) {
@@ -116,7 +118,7 @@ export function replaceOrgBlockInSource(source: string, sourceLine: number, newT
       continue;
     }
 
-    // raw body text lines and blank lines: drop (body is owned by #+begin_description in newText)
+    preserved.push(line);
   }
 
   return [

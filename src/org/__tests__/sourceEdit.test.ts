@@ -17,44 +17,38 @@ beforeEach(() => {
 });
 
 describe("replaceOrgBlockInSource", () => {
-  it("replaces planning fields; body must be included in newText", () => {
+  it("replaces heading and planning lines", () => {
     const source =
       "** TODO Task\n" +
-      "SCHEDULED: <2026-04-07 ti.>\n" +
-      "Body line.\n";
+      "SCHEDULED: <2026-04-07 ti.>";
 
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** TODO Task renamed\nDEADLINE: <2026-04-09 to.>\n\nBody line.",
+      "** TODO Task renamed\nDEADLINE: <2026-04-09 to.>",
     );
 
     expect(updated).toBe(
       "** TODO Task renamed\n" +
-      "DEADLINE: <2026-04-09 to.>\n" +
-      "\n" +
-      "Body line.",
+      "DEADLINE: <2026-04-09 to.>",
     );
   });
 
-  it("drops old body and checkbox lines because newText re-emits them", () => {
+  it("replaces old checkbox lines with newText checkboxes", () => {
     const source =
       "** TODO Task\n" +
       "- [ ] First\n" +
-      "- [X] Second\n" +
-      "Notes.\n";
+      "- [X] Second";
 
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** TODO Task\n- [X] Replacement\n\nNotes.",
+      "** TODO Task\n- [X] Replacement",
     );
 
     expect(updated).toBe(
       "** TODO Task\n" +
-      "- [X] Replacement\n" +
-      "\n" +
-      "Notes.",
+      "- [X] Replacement",
     );
   });
 
@@ -62,21 +56,57 @@ describe("replaceOrgBlockInSource", () => {
     const source =
       "** Event\n" +
       "<2026-04-07 ti. 10:00>\n" +
-      "<2026-04-08 on. 11:00>\n" +
-      "Body.\n";
+      "<2026-04-08 on. 11:00>";
 
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** Event updated\n<2026-04-07 ti. 12:00>\n\nBody.",
+      "** Event updated\n<2026-04-07 ti. 12:00>",
     );
 
     expect(updated).toBe(
       "** Event updated\n" +
       "<2026-04-07 ti. 12:00>\n" +
-      "\n" +
-      "Body.\n" +
       "<2026-04-08 on. 11:00>",
+    );
+  });
+
+  it("preserves inactive bare timestamps when replacing an entry", () => {
+    const source =
+      "** TODO Jeg burde lage mitt eget tivoli.\n" +
+      "[2026-05-16 lø. 17:53]";
+
+    const updated = replaceOrgBlockInSource(
+      source,
+      1,
+      "** TODO Jeg burde lage mitt eget tivoli.",
+    );
+
+    expect(updated).toBe(
+      "** TODO Jeg burde lage mitt eget tivoli.\n" +
+      "[2026-05-16 lø. 17:53]",
+    );
+  });
+
+  it("preserves raw prose lines and blank lines not owned by newText", () => {
+    const source =
+      "** TODO Task\n" +
+      "SCHEDULED: <2026-04-07 ti.>\n" +
+      "\n" +
+      "Some hand-written notes.\n" +
+      "Meet at <2026-05-18 ma. 14:00> sharp.";
+
+    const updated = replaceOrgBlockInSource(
+      source,
+      1,
+      "** TODO Task renamed",
+    );
+
+    expect(updated).toBe(
+      "** TODO Task renamed\n" +
+      "\n" +
+      "Some hand-written notes.\n" +
+      "Meet at <2026-05-18 ma. 14:00> sharp.",
     );
   });
 
@@ -84,59 +114,50 @@ describe("replaceOrgBlockInSource", () => {
     const source =
       "** TODO Task\n" +
       "DEADLINE: <2026-04-10 fr.>\n" +
-      "SCHEDULED: <2026-04-07 ti.>\n" +
-      "Body.\n";
+      "SCHEDULED: <2026-04-07 ti.>";
 
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** TODO Task\nSCHEDULED: <2026-04-11 lø.>\n\nBody.",
+      "** TODO Task\nSCHEDULED: <2026-04-11 lø.>",
     );
 
     expect(updated).toBe(
       "** TODO Task\n" +
-      "SCHEDULED: <2026-04-11 lø.>\n" +
-      "\n" +
-      "Body.",
+      "SCHEDULED: <2026-04-11 lø.>",
     );
   });
 
   it("removes old bare event timestamps when converting an event to an unscheduled TODO", () => {
     const source =
       "** Event\n" +
-      "<2026-04-07 ti. 10:00>\n" +
-      "Body.\n";
+      "<2026-04-07 ti. 10:00>";
 
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** TODO Event\n\nBody.",
+      "** TODO Event",
     );
 
     expect(updated).toBe(
-      "** TODO Event\n" +
-      "\n" +
-      "Body.",
+      "** TODO Event",
     );
   });
 
   it("removes old planning lines when converting a scheduled TODO to an event", () => {
     const source =
       "** TODO Task\n" +
-      "SCHEDULED: <2026-04-07 ti.>\n" +
-      "Body.\n";
+      "SCHEDULED: <2026-04-07 ti.>";
 
     const updated = replaceOrgBlockInSource(
       source,
       1,
-      "** Task\n<2026-04-08 on. 11:00>\n\nBody.",
+      "** Task\n<2026-04-08 on. 11:00>",
     );
 
     expect(updated).toBe(
       "** Task\n" +
-      "<2026-04-08 on. 11:00>\n" +
-      "\n" +
-      "Body.",
+      "<2026-04-08 on. 11:00>",
     );
   });
 

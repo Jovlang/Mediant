@@ -166,8 +166,8 @@ DEADLINE: <2026-05-05 ti.>
 ```
 
 - An entry's description must be placed in a `#+begin_src description` block (see *Description block* above). The parser reads the block content as the entry's `body` string.
-- Raw prose lines outside a description block (e.g. `Meet at the main entrance.` with no block wrapper) are **silently ignored** — they do not appear in body text.
-- In particular, a line like `Meet at <2026-05-18 Mon> sharp.` is not parsed as a timestamp (the timestamp is embedded in prose, not standalone) and the entire line is discarded. Place such text inside a `#+begin_src description` block instead.
+- Raw prose lines outside a description block (e.g. `Meet at the main entrance.` with no block wrapper) are **not parsed into the model** — they do not appear in `entry.body`. However, they are **preserved verbatim in the source file** when Mediant writes back an entry.
+- In particular, a line like `Meet at <2026-05-18 Mon> sharp.` is not parsed as a timestamp (the timestamp is embedded in prose, not standalone) and does not appear in the agenda. The line is still preserved in the source. Place such text inside a `#+begin_src description` block to have it shown in the edit panel.
 
 ---
 
@@ -263,7 +263,8 @@ These constructs are recognized and silently skipped. They will not produce entr
 [2026-04-07 ti. 15:15-16:00]
 ```
 
-- Square-bracket timestamps. Recognized by the parser but not added to any entry's timestamps. They do not generate agenda items.
+- Square-bracket timestamps. Not parsed into the agenda model — they do not generate agenda items or populate `entry.timestamps`.
+- Preserved verbatim in the source file when Mediant writes back an entry, whether they appear on their own line or embedded in prose. All unrecognized lines round-trip safely through the edit panel.
 
 ### Timestamp ranges (spanning days)
 
