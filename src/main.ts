@@ -1642,10 +1642,15 @@ function formatRepeaterValue(
   return repeater ? `${repeater.mark}${repeater.value}${repeater.unit}` : "";
 }
 
+/** Return the entry currently open in the edit panel. */
+function findEditingEntry() {
+  return entries.find(e => e.sourceLineNumber === editingLine && (!editingSourceFile || e.sourceFile === editingSourceFile));
+}
+
 /** Return the content and relative path for the file containing `sourceLine`. */
-function fileForLine(sourceLine: number): { content: string; path: string | undefined } {
+function fileForLine(sourceLine: number, sourceFile?: string): { content: string; path: string | undefined } {
   if (!serverMode) return { content: currentSource, path: undefined };
-  const entry = entries.find(e => e.sourceLineNumber === sourceLine);
+  const entry = entries.find(e => e.sourceLineNumber === sourceLine && (!sourceFile || e.sourceFile === sourceFile));
   const filePath = entry?.sourceFile || inboxPath;
   return { content: sourceFiles.get(filePath)?.content ?? "", path: filePath };
 }
@@ -1655,23 +1660,23 @@ function inboxContent(): string {
   return serverMode ? (sourceFiles.get(inboxPath)?.content ?? "") : currentSource;
 }
 
-function replaceOrgBlock(sourceLine: number, newText: string): void {
-  const { content, path } = fileForLine(sourceLine);
+function replaceOrgBlock(sourceLine: number, sourceFile: string, newText: string): void {
+  const { content, path } = fileForLine(sourceLine, sourceFile);
   void persistSource(replaceOrgBlockInSource(content, sourceLine, newText), { path });
 }
 
-async function toggleDone(sourceLine: number): Promise<void> {
-  const { content, path } = fileForLine(sourceLine);
+async function toggleDone(sourceLine: number, sourceFile: string): Promise<void> {
+  const { content, path } = fileForLine(sourceLine, sourceFile);
   await persistSource(toggleDoneInSource(content, sourceLine), { path });
 }
 
-async function toggleCheckbox(parentSourceLine: number, index: number): Promise<void> {
-  const { content, path } = fileForLine(parentSourceLine);
+async function toggleCheckbox(parentSourceLine: number, index: number, sourceFile: string): Promise<void> {
+  const { content, path } = fileForLine(parentSourceLine, sourceFile);
   await persistSource(toggleCheckboxInSource(content, parentSourceLine, index), { path });
 }
 
 function deleteOrgBlock(sourceLine: number): void {
-  const { content, path } = fileForLine(sourceLine);
+  const { content, path } = fileForLine(sourceLine, editingSourceFile ?? undefined);
   void persistSource(deleteOrgBlockInSource(content, sourceLine), { path });
 }
 
@@ -1744,7 +1749,7 @@ function tsToDateTimeDisplay(ts: { date: string; startTime: string | null; endTi
   return t ? `${d} ${t}` : d;
 }
 
-function openEditPanel(sourceLine: number, baseDate: string | null = null): void {
+function openEditPanel(sourceLine: number, sourceFile: string, baseDate: string | null = null): void {
   if (!addPanelEl || !addPanelRefs) return;
   disarmDeleteBtn();
 
@@ -1760,7 +1765,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   revealedOccNote = false;
   revealedDescription = false;
 
-  const entry = entries.find(e => e.sourceLineNumber === sourceLine);
+  const entry = entries.find(e => e.sourceLineNumber === sourceLine && (!sourceFile || e.sourceFile === sourceFile));
   if (!entry) return;
 
   editingLine = sourceLine;
@@ -1924,7 +1929,7 @@ function refreshOccurrenceSection(opts: { resetOccurrenceInput?: boolean } = {})
   if (!addPanelRefs) return;
   const refs = addPanelRefs;
   if (editingLine === null || editingBaseDate === null) return;
-  const entry = entries.find(e => e.sourceLineNumber === editingLine);
+  const entry = findEditingEntry();
   if (!entry) return;
 
   const base = pickBaseTimestamp(entry);
@@ -1973,7 +1978,7 @@ function refreshOccurrenceSection(opts: { resetOccurrenceInput?: boolean } = {})
 
 async function toggleOccurrenceSkipped(): Promise<void> {
   if (editingLine === null || editingBaseDate === null || !addPanelRefs) return;
-  const entry = entries.find(e => e.sourceLineNumber === editingLine);
+  const entry = findEditingEntry();
   if (!entry) return;
   const baseSource = editSaveBaseSource();
   const updated = addPanelRefs.skipCheckbox.checked
@@ -1985,7 +1990,7 @@ async function toggleOccurrenceSkipped(): Promise<void> {
 
 async function toggleOccurrenceIsLast(): Promise<void> {
   if (editingLine === null || editingBaseDate === null || !addPanelRefs) return;
-  const entry = entries.find(e => e.sourceLineNumber === editingLine);
+  const entry = findEditingEntry();
   if (!entry) return;
   const nextBaseKey = nextOccurrenceBoundary(pickBaseTimestamp(entry), editingBaseDate);
   if (nextBaseKey === null) return;
@@ -1999,7 +2004,7 @@ async function toggleOccurrenceIsLast(): Promise<void> {
 
 async function applyOverride(value: string, opts: { resetInput?: boolean } = {}): Promise<void> {
   if (editingLine === null || editingBaseDate === null) return;
-  const entry = entries.find(e => e.sourceLineNumber === editingLine);
+  const entry = findEditingEntry();
   if (!entry) return;
   const updated = upsertProperty(editSaveBaseSource(), entry, `EXCEPTION-${editingBaseDate}`, value);
   await queueEditSourceSave(updated);
@@ -2008,7 +2013,7 @@ async function applyOverride(value: string, opts: { resetInput?: boolean } = {})
 
 async function applyNote(text: string): Promise<void> {
   if (editingLine === null || editingBaseDate === null) return;
-  const entry = entries.find(e => e.sourceLineNumber === editingLine);
+  const entry = findEditingEntry();
   if (!entry) return;
   const updated = upsertProperty(editSaveBaseSource(), entry, `EXCEPTION-NOTE-${editingBaseDate}`, text);
   await queueEditSourceSave(updated);
@@ -2017,7 +2022,7 @@ async function applyNote(text: string): Promise<void> {
 
 async function clearException(which: "override" | "note"): Promise<void> {
   if (editingLine === null || editingBaseDate === null) return;
-  const entry = entries.find(e => e.sourceLineNumber === editingLine);
+  const entry = findEditingEntry();
   if (!entry) return;
   const key = which === "override"
     ? `EXCEPTION-${editingBaseDate}`
@@ -2548,17 +2553,20 @@ function setupNavigation(): void {
       clearTagFilters();
     } else if (action === "edit") {
       const line = Number(btn.dataset.line);
+      const sourceFile = btn.dataset.sourceFile ?? "";
       const baseDate = btn.dataset.baseDate ?? null;
-      if (line) openEditPanel(line, baseDate);
+      if (line) openEditPanel(line, sourceFile, baseDate);
     } else if (action === "toggle-done") {
       e.stopPropagation();
       const line = Number(btn.dataset.line);
-      if (line) void toggleDone(line);
+      const sourceFile = btn.dataset.sourceFile ?? "";
+      if (line) void toggleDone(line, sourceFile);
     } else if (action === "toggle-checkbox") {
       e.stopPropagation();
       const line = Number(btn.dataset.line);
+      const sourceFile = btn.dataset.sourceFile ?? "";
       const index = Number(btn.dataset.checkboxIndex);
-      if (line && Number.isInteger(index) && index >= 0) void toggleCheckbox(line, index);
+      if (line && Number.isInteger(index) && index >= 0) void toggleCheckbox(line, index, sourceFile);
     }
   });
 }

@@ -284,6 +284,7 @@ function renderTemporalGravity(overdue: OverdueItem[], deadlines: DeadlineItem[]
       time.classList.add("is-toggleable");
       time.dataset.action = "toggle-done";
       time.dataset.line = String(item.entry.sourceLineNumber);
+      time.dataset.sourceFile = item.entry.sourceFile;
       time.setAttribute("role", "button");
       time.setAttribute("tabindex", "0");
       time.setAttribute("aria-label", item.entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
@@ -304,6 +305,7 @@ function renderTemporalGravity(overdue: OverdueItem[], deadlines: DeadlineItem[]
       time.classList.add("is-toggleable");
       time.dataset.action = "toggle-done";
       time.dataset.line = String(dl.entry.sourceLineNumber);
+      time.dataset.sourceFile = dl.entry.sourceFile;
       time.setAttribute("role", "button");
       time.setAttribute("tabindex", "0");
       time.setAttribute("aria-label", dl.entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
@@ -311,7 +313,7 @@ function renderTemporalGravity(overdue: OverdueItem[], deadlines: DeadlineItem[]
     const title = renderTitle(dl.entry);
     if (dl.baseDate) title.dataset.baseDate = dl.baseDate;
     const checklist = dl.entry.checkboxItems.length > 0
-      ? renderCheckboxItems(dl.entry.checkboxItems, dl.entry.sourceLineNumber)
+      ? renderCheckboxItems(dl.entry.checkboxItems, dl.entry.sourceLineNumber, dl.entry.sourceFile)
       : null;
     row.append(time, renderTitleWithTags(title, dl.entry.tags, dl.instanceNote, checklist));
     section.appendChild(row);
@@ -337,7 +339,7 @@ function renderSomeday(items: SomedayItem[]): HTMLElement {
     const state = renderStateBadge(item.entry, "TODO");
     const title = renderTitle(item.entry);
     const checklist = item.entry.checkboxItems.length > 0
-      ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber)
+      ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber, item.entry.sourceFile)
       : null;
 
     row.append(state, renderTitleWithTags(title, item.entry.tags, null, checklist));
@@ -440,7 +442,7 @@ function renderItem(
     title.insertBefore(renderOverrideChip(item.override, moveDirection(item)), title.firstChild);
   }
   const checklist = item.entry.checkboxItems.length > 0
-    ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber)
+    ? renderCheckboxItems(item.entry.checkboxItems, item.entry.sourceLineNumber, item.entry.sourceFile)
     : null;
   const metadata = metadataForItem(item, hasTime, stateBadge);
   row.append(renderTitleWithTags(title, item.entry.tags, item.instanceNote, checklist, metadata));
@@ -513,7 +515,7 @@ function renderItemForCategory(item: AgendaItem): HTMLElement {
 // ── State badge ─────────────────────────────────────────────────────
 
 function renderStateBadge(
-  entry: { todo: "TODO" | "DONE" | null; sourceLineNumber: number },
+  entry: { todo: "TODO" | "DONE" | null; sourceLineNumber: number; sourceFile: string },
   fallback?: string,
 ): HTMLElement {
   const state = el("span", "item-state");
@@ -522,6 +524,7 @@ function renderStateBadge(
     state.classList.add("is-toggleable");
     state.dataset.action = "toggle-done";
     state.dataset.line = String(entry.sourceLineNumber);
+    state.dataset.sourceFile = entry.sourceFile;
     state.setAttribute("role", "button");
     state.setAttribute("tabindex", "0");
     state.setAttribute("aria-label", entry.todo === "TODO" ? t("markDone") : t("markNotDone"));
@@ -536,7 +539,7 @@ function renderStateBadge(
 }
 
 function renderStateTextBadge(
-  entry: { todo: "TODO" | "DONE" | null; sourceLineNumber: number },
+  entry: { todo: "TODO" | "DONE" | null; sourceLineNumber: number; sourceFile: string },
   fallback?: string,
 ): HTMLElement {
   const state = renderStateBadge(entry, fallback);
@@ -551,11 +554,12 @@ function renderStateTextBadge(
 // ── Helpers ──────────────────────────────────────────────────────────
 
 function renderTitle(
-  entry: { title: string; priority: "A" | "B" | "C" | null; sourceLineNumber: number },
+  entry: { title: string; priority: "A" | "B" | "C" | null; sourceLineNumber: number; sourceFile: string },
 ): HTMLElement {
   const title = el("span", "item-title");
   title.dataset.action = "edit";
   title.dataset.line = String(entry.sourceLineNumber);
+  title.dataset.sourceFile = entry.sourceFile;
   title.setAttribute("role", "button");
   title.setAttribute("tabindex", "0");
   if (entry.priority) {
@@ -579,17 +583,20 @@ function priorityMarks(priority: "A" | "B" | "C"): string {
 function renderCheckboxItems(
   items: readonly { text: string; checked: boolean }[],
   parentSourceLine: number,
+  parentSourceFile: string,
 ): HTMLElement {
   const list = el("div", "checkbox-list");
   const hideCompleted = currentRenderOptions.hideCompletedAndSkipped === true;
   const rows = el("div", "checkbox-list-items");
   rows.dataset.line = String(parentSourceLine);
+  rows.dataset.sourceFile = parentSourceFile;
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     if (hideCompleted && item.checked) continue;
     const row = el("div", "checkbox-item");
     if (item.checked) row.classList.add("checkbox-checked");
     row.dataset.line = String(parentSourceLine);
+    row.dataset.sourceFile = parentSourceFile;
     row.dataset.checkboxIndex = String(i);
     row.dataset.action = "toggle-checkbox";
     row.setAttribute("role", "button");
