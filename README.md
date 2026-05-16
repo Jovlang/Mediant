@@ -2,15 +2,6 @@
 
 A calm, focused agenda backed by one Org-readable `Mediant.org` file.
 
-Mediant gives one strict Org-readable `Mediant.org` file a clean, readable agenda interface.
-
-It is built around two simple ideas:
-
-> Your agenda should stay as one readable text file,
-> but the interface should still feel modern, fast, and pleasant to use.
-
-And:
-
 > Not every future thing is the same kind of thing.
 
 Mediant treats the agenda as three distinct spaces:
@@ -19,49 +10,17 @@ Mediant treats the agenda as three distinct spaces:
 * **Calendar** — things that have a place in time
 * **Someday** — possible futures that should remain visible without demanding attention
 
-It is not Org-mode on the web. It is a calm agenda app backed by one Org-readable Mediant.org file.
+Two headings illustrate the model:
 
----
+```org
+** Public holiday :holiday:
+<2026-04-05 Sun>
 
-## What Mediant is not
+** TODO Pay tax balance :finance:
+DEADLINE: <2026-05-31 Sun +1y>
+```
 
-Mediant is deliberately not trying to become all of Org-mode in the browser.
-
-It does not aim to replace Emacs Org.
-
-It does not attempt to support every Org syntax feature.
-
-It does not provide collaboration, accounts, teams, ACLs, dashboards, or a database backend.
-
-It does not try to own your workflow.
-
-The intended shape is smaller:
-
-> One Mediant.org text file.
-> One focused agenda.
-> Different kinds of future separated into different spaces.
-
-### Why not full Org?
-
-Mediant avoids full Org compatibility because a calm edit panel requires clear source mappings.
-
-Every editable field should have one obvious canonical source location. Features like tag inheritance, arbitrary inline timestamps, multiple semantic timestamps, and org-directory indexing make that contract ambiguous.
-
-Mediant may extend Org where the extension strengthens Mediant's agenda model. It should not chase Org features for compatibility alone.
-
----
-
-## Why Mediant exists
-
-Org-mode is powerful because it stores rich personal information as ordinary text. Mediant keeps that benefit, but narrows the format to one Mediant.org file with predictable agenda semantics.
-
-Emacs Org-agenda can already generate schedules and todo lists, but it lives inside Emacs. What if you want to comfortably view and edit your agenda on your phone?
-
-Mediant exists for that layer.
-
-It keeps Mediant.org as the source of truth, then renders the agenda in a browser UI.
-
-The goal is not to expose every possible Org feature, but to make the common personal-agenda workflow feel clear, fast, and calm.
+An event and a recurring deadline task. Each field has one obvious location in the source.
 
 ---
 
@@ -147,7 +106,7 @@ It gives you:
 
 The interface tries to stay quiet. Features are available, but they should not make the default view feel like a dashboard, a team workspace, or a database admin panel.
 
-Mediant is for “my stuff”.
+Mediant is for "my stuff".
 
 ---
 
@@ -167,7 +126,7 @@ The agenda generator decides what should appear as a deadline, in the calendar, 
 
 The UI renders that agenda and writes common edits back into the original Mediant.org source.
 
-This separation is important: parsing remains about the source dialect, while agenda classification remains about what the interface needs to show.
+Parsing is about the source dialect. Agenda classification is about what the interface needs to show.
 
 ---
 
@@ -470,13 +429,15 @@ Days and numeric months may be one or two digits. Ambiguous date forms without a
 
 ## Mediant.org syntax
 
-Mediant reads and writes Mediant.org: a deliberate Org-readable dialect, not a generic attempt at full Org compatibility. Its canonical model is intentionally small:
+Mediant reads and writes a small Org-readable dialect. Its model is intentionally narrow:
 
 - **Events** — plain headings with a standalone active timestamp as the first semantic body line.
 - **Tasks** — `TODO` or `DONE` headings with an optional planning line containing `DEADLINE:`, `SCHEDULED:`, or both.
 - **Standalone timestamps only** — active timestamps are only recognised when they are the sole content of a line. Timestamps embedded in heading titles or body prose are not extracted into the agenda.
 - **No tag inheritance** — tags are only read from the heading they appear on; parent tags do not propagate to children.
 - **Two TODO states** — only `TODO` and `DONE` are recognised; any other keyword is treated as part of the title.
+
+Every editable field maps to one obvious location in the source file. Features like tag inheritance, inline timestamps, and org-directory indexing weaken that contract, so Mediant does not support them.
 
 Canonical event:
 
@@ -494,7 +455,7 @@ DEADLINE: <2026-05-31 Sun +1y>
 
 When a task has both deadline and scheduled planning, `DEADLINE:` must come before `SCHEDULED:`.
 
-Body/notes content has a stricter rule than timestamps. Raw prose outside a description block is preserved on write, but it is not agenda semantics and is not treated as an editable note field. Inline timestamps in prose are preserved as text and ignored by the agenda. Description blocks (`#+begin_src description`) are parsed as body content and shown and edited in the edit panel.
+Raw prose outside a description block is preserved on write but not parsed as body content. Inline timestamps in prose are preserved as text and do not generate agenda items. Description blocks (`#+begin_src description`) are parsed as body content and shown in the edit panel.
 
 Everything Mediant does not recognise is preserved verbatim where possible. For the full breakdown see [`ORG-SYNTAX.md`](ORG-SYNTAX.md).
 
@@ -521,11 +482,7 @@ Mediant adds two small extensions on top of ordinary Org property drawers:
 * recurrence exceptions
 * series truncation
 
-These are used to represent per-occurrence changes to repeating entries.
-
-Because they are stored as normal property drawer keys, the file remains valid Org. Emacs can open and edit it without knowing anything about Mediant.
-
-Compatibility boundary: recurrence exceptions and series truncation are Mediant-specific semantics, not native Emacs Org behavior. Plain Emacs Org will preserve these properties, but its agenda will still follow the underlying repeater as if no Mediant exception existed unless you enable the optional Elisp integration below.
+These represent per-occurrence changes to repeating entries. Because they use standard property drawer syntax, the file stays valid Org — Emacs opens, edits, and saves it normally. Emacs agenda ignores these keys unless the optional Elisp integration below is enabled.
 
 ### Recurrence exceptions
 
@@ -593,11 +550,7 @@ See [`ORG-SYNTAX.md`](ORG-SYNTAX.md#mediant-specific-extensions) for the full gr
 
 ## Optional Emacs Org agenda integration
 
-Out of the box, Emacs treats Mediant's exception properties as ordinary properties.
-
-That is safe: they round-trip normally, but Org agenda will still show every base occurrence.
-
-This is the main place where Mediant's Org support intentionally diverges from plain Emacs Org: Mediant interprets `EXCEPTION-*`, `EXCEPTION-NOTE-*`, and `SERIES-UNTIL` as recurrence controls; plain Emacs Org does not.
+Out of the box, Emacs treats Mediant's exception properties as ordinary properties — they round-trip safely, and Org agenda shows every base occurrence normally.
 
 The bundled Elisp integration teaches Org agenda to honor Mediant recurrence exceptions when displaying the agenda.
 
@@ -780,10 +733,6 @@ In server mode, the Mediant.org source lives in the file passed to the CLI, or `
 ---
 
 ## Non-goals
-
-Mediant intentionally does not support arbitrary Org-mode.
-
-Current non-goals include:
 
 * full or arbitrary Org-mode syntax
 * heading hierarchy in the agenda view
