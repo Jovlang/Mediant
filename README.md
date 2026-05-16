@@ -512,6 +512,8 @@ These are used to represent per-occurrence changes to repeating entries.
 
 Because they are stored as normal property drawer keys, the file remains valid Org. Emacs can open and edit it without knowing anything about Mediant.
 
+Compatibility boundary: recurrence exceptions and series truncation are Mediant-specific semantics, not native Emacs Org behavior. Plain Emacs Org will preserve these properties, but its agenda will still follow the underlying repeater as if no Mediant exception existed unless you enable the optional Elisp integration below.
+
 ### Recurrence exceptions
 
 A repeating Org entry may have one-off changes keyed by the unshifted base occurrence date.
@@ -581,6 +583,8 @@ See [`ORG-SYNTAX.md`](ORG-SYNTAX.md#mediant-specific-extensions) for the full gr
 Out of the box, Emacs treats Mediant's exception properties as ordinary properties.
 
 That is safe: they round-trip normally, but Org agenda will still show every base occurrence.
+
+This is the main place where Mediant's Org support intentionally diverges from plain Emacs Org: Mediant interprets `EXCEPTION-*`, `EXCEPTION-NOTE-*`, and `SERIES-UNTIL` as recurrence controls; plain Emacs Org does not.
 
 The bundled Elisp integration teaches Org agenda to honor Mediant recurrence exceptions when displaying the agenda.
 

@@ -223,6 +223,8 @@ Syntax that Mediant layers on top of standard Org. These use ordinary Org constr
 
 Currently there are two extensions: **recurrence exceptions** and **series end dates**.
 
+This is a deliberate compatibility boundary. Mediant's source file remains valid Org text, but recurrence exceptions are Mediant semantics, not Emacs Org semantics. Plain Emacs Org agenda will continue to show the base repeater occurrences unless the optional `elisp/mediant-org-agenda.el` integration is enabled.
+
 When Mediant creates a new `:PROPERTIES:` drawer, it writes it in the Org-compatible property position: immediately after the heading and any planning lines, before body text or standalone active timestamp lines. The parser still reads Mediant extension keys from any `:PROPERTIES:` drawer inside an entry so older files continue to work, but new writes should preserve compatibility with Org's property APIs.
 
 ### Recurrence exceptions
@@ -260,7 +262,7 @@ SCHEDULED: <2026-04-27 ma. 17:00-18:00 +1w>
 - Each `:EXCEPTION-<date>:` value is validated against the grammar above on parse. An unrecognized value is silently dropped (the occurrence renders as normal); a matching `:EXCEPTION-NOTE-<date>:` on the same date is still honoured.
 - The edit panel's "This occurrence" controls are the UI surface for these properties and always write the unshifted base date, so property values round-trip cleanly. The skip and stop-repeat toggles, move date/time field, note field, and Clear override action persist immediately; there is no separate Move or Save note step.
 
-**Interop with Emacs:** the file remains valid Org. Plain Emacs treats `:EXCEPTION-2026-05-04:` as just another property and gives the entry its normal repeating-timestamp agenda behaviour. To make Org agenda interpret these properties, load `elisp/mediant-org-agenda.el` and enable `mediant-org-agenda-mode`. The integration is display-only: it hides cancelled occurrences, moves shifted/rescheduled occurrences, and renders notes (and applies `SERIES-UNTIL` — see below), but does not provide Emacs commands for editing exception properties.
+**Interop with Emacs:** the file remains valid Org. Plain Emacs treats `:EXCEPTION-2026-05-04:` as just another property and gives the entry its normal repeating-timestamp agenda behaviour. That means Mediant can skip, shift, or reschedule an occurrence that plain Emacs Org agenda still shows at its base slot. To make Org agenda interpret these properties, load `elisp/mediant-org-agenda.el` and enable `mediant-org-agenda-mode`. The integration is display-only: it hides cancelled occurrences, moves shifted/rescheduled occurrences, and renders notes (and applies `SERIES-UNTIL` - see below), but does not provide Emacs commands for editing exception properties.
 
 ### Series end date
 
