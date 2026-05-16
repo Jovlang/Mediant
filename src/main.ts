@@ -29,6 +29,9 @@ let entries = parseOrg("");
 let currentStart = todayMidnight();
 let currentSource = localStorage.getItem("mediant-org-source") ?? "";
 let serverMode = false;
+// Server mode: per-file content + version (mtime string), keyed by relative path.
+let sourceFiles: Map<string, { content: string; version: string }> = new Map();
+let inboxPath = "inbox.org";
 let serverVersion: string | null = null;
 let agendaLoaded = false;
 let activeTagFilters = new Set<string>();
@@ -131,9 +134,13 @@ let revealedOccCancel = false;
 let revealedOccMove = false;
 let revealedOccNote = false;
 let revealedDescription = false;
+// Which file is currently open in the edit/add panel (server mode only).
+let editingSourceFile: string | null = null;
 let queuedEditSource: string | null = null;
+let queuedEditPath: string | null = null;
 let queuedEditEpoch: number | null = null;
 let inFlightEditSource: string | null = null;
+let inFlightEditPath: string | null = null;
 let inFlightEditEpoch: number | null = null;
 let editSaveInFlight = false;
 let editSavePromise: Promise<boolean> | null = null;
@@ -204,13 +211,14 @@ async function submitQuickCapture(): Promise<void> {
   const text = quickCaptureInputEl.value.trim();
   if (!text) return;
 
-  const updated = appendQuickCaptureToTasks(currentSource, text);
-  if (updated === currentSource) return;
+  const src = inboxContent();
+  const updated = appendQuickCaptureToTasks(src, text);
+  if (updated === src) return;
 
   quickCaptureInputEl.readOnly = true;
   if (quickCaptureErrorEl) quickCaptureErrorEl.textContent = "";
   try {
-    const result = await persistSource(updated);
+    const result = await persistSource(updated, { path: serverMode ? inboxPath : undefined });
     if (result === "saved") {
       quickCaptureInputEl.value = "";
     } else if (quickCaptureErrorEl) {
@@ -1542,8 +1550,14 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
 }
 
 function editSaveBaseSource(): string {
-  if (queuedEditSource !== null && queuedEditEpoch === sourceEpoch) return queuedEditSource;
-  if (inFlightEditSource !== null && inFlightEditEpoch === sourceEpoch) return inFlightEditSource;
+  const filePath = serverMode ? (editingSourceFile ?? inboxPath) : null;
+  if (queuedEditSource !== null && queuedEditEpoch === sourceEpoch) {
+    if (!serverMode || queuedEditPath === filePath) return queuedEditSource;
+  }
+  if (inFlightEditSource !== null && inFlightEditEpoch === sourceEpoch) {
+    if (!serverMode || inFlightEditPath === filePath) return inFlightEditSource;
+  }
+  if (serverMode && filePath) return sourceFiles.get(filePath)?.content ?? "";
   return currentSource;
 }
 
@@ -1561,6 +1575,7 @@ function restoreFocusAfterPanelClose(): void {
 function queueEditSourceSave(updated: string): Promise<boolean> {
   if (updated === editSaveBaseSource()) return editSavePromise ?? Promise.resolve(true);
   queuedEditSource = updated;
+  queuedEditPath = serverMode ? (editingSourceFile ?? inboxPath) : null;
   queuedEditEpoch = editSaveBaseEpoch();
   if (editSaveInFlight && editSavePromise) return editSavePromise;
   editSavePromise = drainEditSourceSaves();
@@ -1573,25 +1588,33 @@ async function drainEditSourceSaves(): Promise<boolean> {
   try {
     while (queuedEditSource !== null) {
       const next = queuedEditSource;
+      const nextPath = queuedEditPath;
       const nextEpoch = queuedEditEpoch ?? sourceEpoch;
       queuedEditSource = null;
+      queuedEditPath = null;
       queuedEditEpoch = null;
-      if (next === currentSource) continue;
+      const currentForPath = serverMode && nextPath
+        ? (sourceFiles.get(nextPath)?.content ?? "")
+        : currentSource;
+      if (next === currentForPath) continue;
       if (nextEpoch !== sourceEpoch) {
         ok = false;
         continue;
       }
       inFlightEditSource = next;
+      inFlightEditPath = nextPath;
       inFlightEditEpoch = nextEpoch;
       let result: "saved" | "stale" | "failed";
       try {
-        result = await persistSource(next, { expectedEpoch: nextEpoch });
+        result = await persistSource(next, { expectedEpoch: nextEpoch, path: nextPath ?? undefined });
       } finally {
         inFlightEditSource = null;
+        inFlightEditPath = null;
         inFlightEditEpoch = null;
       }
       if (result === "failed") {
         queuedEditSource = null;
+        queuedEditPath = null;
         queuedEditEpoch = null;
         ok = false;
         break;
@@ -1619,25 +1642,43 @@ function formatRepeaterValue(
   return repeater ? `${repeater.mark}${repeater.value}${repeater.unit}` : "";
 }
 
+/** Return the content and relative path for the file containing `sourceLine`. */
+function fileForLine(sourceLine: number): { content: string; path: string | undefined } {
+  if (!serverMode) return { content: currentSource, path: undefined };
+  const entry = entries.find(e => e.sourceLineNumber === sourceLine);
+  const filePath = entry?.sourceFile || inboxPath;
+  return { content: sourceFiles.get(filePath)?.content ?? "", path: filePath };
+}
+
+/** Content of the inbox file (or currentSource in static mode). */
+function inboxContent(): string {
+  return serverMode ? (sourceFiles.get(inboxPath)?.content ?? "") : currentSource;
+}
+
 function replaceOrgBlock(sourceLine: number, newText: string): void {
-  const updated = replaceOrgBlockInSource(currentSource, sourceLine, newText);
-  void persistSource(updated);
+  const { content, path } = fileForLine(sourceLine);
+  void persistSource(replaceOrgBlockInSource(content, sourceLine, newText), { path });
 }
 
 async function toggleDone(sourceLine: number): Promise<void> {
-  await persistSource(toggleDoneInSource(currentSource, sourceLine));
+  const { content, path } = fileForLine(sourceLine);
+  await persistSource(toggleDoneInSource(content, sourceLine), { path });
 }
 
 async function toggleCheckbox(parentSourceLine: number, index: number): Promise<void> {
-  await persistSource(toggleCheckboxInSource(currentSource, parentSourceLine, index));
+  const { content, path } = fileForLine(parentSourceLine);
+  await persistSource(toggleCheckboxInSource(content, parentSourceLine, index), { path });
 }
 
 function deleteOrgBlock(sourceLine: number): void {
-  void persistSource(deleteOrgBlockInSource(currentSource, sourceLine));
+  const { content, path } = fileForLine(sourceLine);
+  void persistSource(deleteOrgBlockInSource(content, sourceLine), { path });
 }
 
 function appendOrgText(orgText: string): void {
-  void persistSource(appendAgendaItemToSource(currentSource, orgText));
+  void persistSource(appendAgendaItemToSource(inboxContent(), orgText), {
+    path: serverMode ? inboxPath : undefined,
+  });
 }
 
 function openAddPanel(prefillDate: string | null = null, prefillTitle: string | null = null, defaultType: "todo" | "event" = "todo"): void {
@@ -1656,6 +1697,7 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   revealedOccNote = false;
   revealedDescription = false;
   editingLine = null;
+  editingSourceFile = serverMode ? inboxPath : null;
   editingBaseDate = null;
   editingLevel = 1;
   editingPriority = null;
@@ -1722,6 +1764,7 @@ function openEditPanel(sourceLine: number, baseDate: string | null = null): void
   if (!entry) return;
 
   editingLine = sourceLine;
+  editingSourceFile = serverMode ? (entry.sourceFile || inboxPath) : null;
   editingBaseDate = baseDate;
   editingLevel = entry.level;
   editingPriority = entry.priority;
@@ -2192,7 +2235,6 @@ async function init(): Promise<void> {
   // Org file and skip the textarea input screen entirely.
   const isServer = await probeServer();
   if (isServer) {
-    entries = parseOrg(currentSource);
     currentStart = todayMidnight();
     render();
     subscribeToServerChanges();
@@ -2274,12 +2316,22 @@ function exceedsLimit(source: string): boolean {
  * the configured Org file via /api/source instead of localStorage, and
  * subscribes to /api/events for external file changes.
  */
+interface ServerSourceData {
+  files: Record<string, { content: string; version: string }>;
+  inbox: string;
+}
+
 async function probeServer(): Promise<boolean> {
   try {
     const r = await fetch("/api/source");
     if (!r.ok) return false;
-    serverVersion = r.headers.get("X-Version");
-    currentSource = await r.text();
+    const data = await r.json() as ServerSourceData;
+    inboxPath = data.inbox;
+    sourceFiles = new Map(Object.entries(data.files));
+    entries = [];
+    for (const [path, { content }] of sourceFiles) {
+      entries.push(...parseOrg(content, path));
+    }
     serverMode = true;
     return true;
   } catch {
@@ -2294,7 +2346,7 @@ async function probeServer(): Promise<boolean> {
  */
 async function persistSource(
   updated: string,
-  opts: { expectedEpoch?: number } = {},
+  opts: { expectedEpoch?: number; path?: string } = {},
 ): Promise<"saved" | "stale" | "failed"> {
   if (exceedsLimit(updated)) {
     alert("Source exceeds the 4 MB limit.");
@@ -2302,11 +2354,15 @@ async function persistSource(
   }
 
   if (serverMode) {
+    const filePath = opts.path ?? inboxPath;
+    const fileInfo = sourceFiles.get(filePath);
     const expectedEpoch = opts.expectedEpoch ?? sourceEpoch;
     try {
-      const headers: Record<string, string> = { "Content-Type": "text/plain; charset=utf-8" };
-      if (serverVersion) headers["If-Match"] = serverVersion;
-      const r = await fetch("/api/source", { method: "PUT", headers, body: updated });
+      const r = await fetch("/api/source", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({ path: filePath, content: updated, version: fileInfo?.version ?? "" }),
+      });
       if (r.status === 409) {
         alert("File was modified externally; reloading from disk.");
         await reloadFromServer();
@@ -2320,8 +2376,11 @@ async function persistSource(
         await reloadFromServer();
         return "stale";
       }
-      serverVersion = r.headers.get("X-Version");
-      applyParsedSource(updated);
+      const result = await r.json() as { version: string };
+      sourceFiles.set(filePath, { content: updated, version: result.version });
+      // Re-parse only the file that changed
+      entries = entries.filter(e => e.sourceFile !== filePath);
+      entries.push(...parseOrg(updated, filePath));
       render();
       return "saved";
     } catch (e) {
@@ -2340,14 +2399,25 @@ async function reloadFromServer(): Promise<void> {
   try {
     const r = await fetch("/api/source");
     if (!r.ok) return;
-    const nextVersion = r.headers.get("X-Version");
-    const nextSource = await r.text();
-    if (nextVersion === serverVersion && nextSource === currentSource) return;
-    serverVersion = nextVersion;
+    const data = await r.json() as ServerSourceData;
+    // Check if any file actually changed using per-file version comparison.
+    let anyChanged = data.inbox !== inboxPath || Object.keys(data.files).length !== sourceFiles.size;
+    if (!anyChanged) {
+      for (const [path, { version }] of Object.entries(data.files)) {
+        if (sourceFiles.get(path)?.version !== version) { anyChanged = true; break; }
+      }
+    }
+    if (!anyChanged) return;
     queuedEditSource = null;
+    queuedEditPath = null;
     queuedEditEpoch = null;
     sourceEpoch++;
-    applyParsedSource(nextSource);
+    inboxPath = data.inbox;
+    sourceFiles = new Map(Object.entries(data.files));
+    entries = [];
+    for (const [path, { content }] of sourceFiles) {
+      entries.push(...parseOrg(content, path));
+    }
     render();
   } catch {
     // swallow — next SSE event or user action will retry
@@ -2356,8 +2426,10 @@ async function reloadFromServer(): Promise<void> {
 
 function subscribeToServerChanges(): void {
   const es = new EventSource("/api/events");
+  let lastSseData: string | null = null;
   es.onmessage = (ev) => {
-    if (ev.data && ev.data !== serverVersion) {
+    if (ev.data && ev.data !== lastSseData) {
+      lastSseData = ev.data;
       void reloadFromServer();
     }
   };

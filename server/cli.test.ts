@@ -39,43 +39,47 @@ afterAll(async () => {
 });
 
 describe("server/cli.mjs", () => {
-  it("serves the source file with an X-Version header", async () => {
+  it("serves all org files as JSON with per-file version info", async () => {
     const server = await startServer("** TODO First\n");
     const response = await fetch(server.url("/api/source"));
     expect(response.status).toBe(200);
-    expect(response.headers.get("X-Version")).toBeTruthy();
-    expect(await response.text()).toBe("** TODO First\n");
+    expect(response.headers.get("Content-Type")).toMatch(/application\/json/);
+    const data = await response.json();
+    expect(data.inbox).toBe("agenda.org");
+    expect(data.files["agenda.org"]).toBeDefined();
+    expect(data.files["agenda.org"].content).toBe("** TODO First\n");
+    expect(data.files["agenda.org"].version).toBeTruthy();
   });
 
-  it("writes updates with If-Match and returns a new version", async () => {
+  it("writes updates with JSON body and returns a new version", async () => {
     const server = await startServer("** TODO Before\n");
     const initial = await fetch(server.url("/api/source"));
-    const version = initial.headers.get("X-Version");
+    const initData = await initial.json();
+    const version = initData.files["agenda.org"].version;
     expect(version).toBeTruthy();
 
     const put = await fetch(server.url("/api/source"), {
       method: "PUT",
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "If-Match": version!,
-      },
-      body: "** TODO After\n",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ path: "agenda.org", content: "** TODO After\n", version }),
     });
 
     expect(put.status).toBe(200);
-    const nextVersion = put.headers.get("X-Version");
-    expect(nextVersion).toBeTruthy();
-    expect(nextVersion).not.toBe(version);
+    const putResult = await put.json();
+    expect(putResult.version).toBeTruthy();
+    expect(putResult.version).not.toBe(version);
 
     const reread = await fetch(server.url("/api/source"));
-    expect(await reread.text()).toBe("** TODO After\n");
-    expect(reread.headers.get("X-Version")).toBe(nextVersion);
+    const rereadData = await reread.json();
+    expect(rereadData.files["agenda.org"].content).toBe("** TODO After\n");
+    expect(rereadData.files["agenda.org"].version).toBe(putResult.version);
   });
 
-  it("rejects stale If-Match writes with 409 and keeps the on-disk content", async () => {
+  it("rejects stale version writes with 409 and keeps the on-disk content", async () => {
     const server = await startServer("** TODO Original\n");
     const initial = await fetch(server.url("/api/source"));
-    const staleVersion = initial.headers.get("X-Version");
+    const initData = await initial.json();
+    const staleVersion = initData.files["agenda.org"].version;
     expect(staleVersion).toBeTruthy();
 
     await forceMtimeTick();
@@ -83,17 +87,14 @@ describe("server/cli.mjs", () => {
 
     const put = await fetch(server.url("/api/source"), {
       method: "PUT",
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "If-Match": staleVersion!,
-      },
-      body: "** TODO Client write\n",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ path: "agenda.org", content: "** TODO Client write\n", version: staleVersion }),
     });
 
     expect(put.status).toBe(409);
-    const onDiskVersion = put.headers.get("X-Version");
-    expect(onDiskVersion).toBeTruthy();
-    expect(onDiskVersion).not.toBe(staleVersion);
+    const conflict = await put.json();
+    expect(conflict.version).toBeTruthy();
+    expect(conflict.version).not.toBe(staleVersion);
     expect(await fs.readFile(server.orgPath, "utf-8")).toBe("** TODO External\n");
   });
 
@@ -112,6 +113,38 @@ describe("server/cli.mjs", () => {
     expect(changedVersion).not.toBe(initialVersion);
 
     await stream.close();
+  });
+
+  it("directory mode: reads all org files and captures new entries to inbox.org", async () => {
+    const server = await startServerDir({
+      "work.org": "** TODO Work task\n",
+      "inbox.org": "** TODO Inbox task\n",
+    });
+
+    const response = await fetch(server.url("/api/source"));
+    const data = await response.json();
+    expect(data.inbox).toBe("inbox.org");
+    expect(data.files["work.org"]).toBeDefined();
+    expect(data.files["inbox.org"]).toBeDefined();
+    expect(data.files["work.org"].content).toBe("** TODO Work task\n");
+
+    // Write to inbox.org specifically
+    const inboxVersion = data.files["inbox.org"].version;
+    const put = await fetch(server.url("/api/source"), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        path: "inbox.org",
+        content: "** TODO Inbox task\n** TODO New capture\n",
+        version: inboxVersion,
+      }),
+    });
+    expect(put.status).toBe(200);
+
+    const reread = await fetch(server.url("/api/source"));
+    const rereadData = await reread.json();
+    expect(rereadData.files["inbox.org"].content).toContain("New capture");
+    expect(rereadData.files["work.org"].content).toBe("** TODO Work task\n");
   });
 });
 
@@ -152,6 +185,48 @@ async function startServer(initialSource: string): Promise<{
   return {
     port,
     orgPath,
+    url: (pathname: string) => `http://127.0.0.1:${port}${pathname}`,
+  };
+}
+
+async function startServerDir(files: Record<string, string>): Promise<{
+  port: number;
+  dirPath: string;
+  url: (pathname: string) => string;
+}> {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "mediant-server-test-"));
+  for (const [name, content] of Object.entries(files)) {
+    await fs.writeFile(path.join(tmpDir, name), content, "utf-8");
+  }
+
+  const port = await getFreePort();
+  const proc = spawn(process.execPath, ["server/cli.mjs", tmpDir, "--port", String(port)], {
+    cwd: repoRoot,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  await waitForServerReady(proc, port);
+
+  let stopped = false;
+  const stop = async (): Promise<void> => {
+    if (stopped) return;
+    stopped = true;
+    proc.kill("SIGTERM");
+    await Promise.race([
+      onceExit(proc),
+      sleep(1_000),
+    ]);
+    if (proc.exitCode === null && !proc.killed) {
+      proc.kill("SIGKILL");
+      await onceExit(proc);
+    }
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  };
+  runningServers.push(stop);
+
+  return {
+    port,
+    dirPath: tmpDir,
     url: (pathname: string) => `http://127.0.0.1:${port}${pathname}`,
   };
 }

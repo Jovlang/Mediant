@@ -121,7 +121,7 @@ const CHECKBOX_RE = /^\s*-\s+\[([ X])\]\s+(.+)/;
  * Drawer contents (:PROPERTIES:...:END:, :LOGBOOK:...:END:) are skipped.
  * Unknown constructs are treated as body text.
  */
-export function parseOrg(source: string): OrgEntry[] {
+export function parseOrg(source: string, sourceFile = ""): OrgEntry[] {
   const lines = source.split("\n");
   const entries: OrgEntry[] = [];
 
@@ -182,7 +182,7 @@ export function parseOrg(source: string): OrgEntry[] {
     const headingMatch = line.match(HEADING_RE);
     if (headingMatch) {
       if (current) {
-        entries.push(finalizeEntry(current));
+        entries.push(finalizeEntry(current, sourceFile));
       }
       inDescBlock = false; // reset in case of unclosed block
       current = parseHeading(headingMatch, lineNumber);
@@ -245,7 +245,7 @@ export function parseOrg(source: string): OrgEntry[] {
 
   // Finalize last entry
   if (current) {
-    entries.push(finalizeEntry(current));
+    entries.push(finalizeEntry(current, sourceFile));
   }
 
   return entries;
@@ -437,7 +437,7 @@ function isValidYMD(raw: string): boolean {
     && date.getDate() === day;
 }
 
-function finalizeEntry(entry: MutableEntry): OrgEntry {
+function finalizeEntry(entry: MutableEntry, sourceFile: string): OrgEntry {
   const exceptions = new Map<string, RecurrenceException>();
   for (const [date, ex] of entry.exceptions) {
     if (ex.override === null && ex.note === null) continue;
@@ -454,6 +454,7 @@ function finalizeEntry(entry: MutableEntry): OrgEntry {
     checkboxItems: entry.checkboxItems,
     body: entry.body,
     sourceLineNumber: entry.sourceLineNumber,
+    sourceFile,
     exceptions,
     seriesUntil: entry.seriesUntil,
   };

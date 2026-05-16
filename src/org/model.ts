@@ -81,6 +81,8 @@ export interface OrgEntry {
   readonly checkboxItems: readonly CheckboxItem[];
   readonly body: string;
   readonly sourceLineNumber: number;
+  /** Relative path of the .org file this entry was parsed from. Empty string in static mode. */
+  readonly sourceFile: string;
   /**
    * Per-occurrence deviations keyed by base date (YYYY-MM-DD).
    * Always present; an empty map means no exceptions. The map is

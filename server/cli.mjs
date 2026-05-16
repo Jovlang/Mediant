@@ -1,6 +1,11 @@
 #!/usr/bin/env node
-// Mediant local server. Serves the built UI and a single Org file
+// Mediant local server. Serves the built UI and one or more Org files
 // over localhost with read/write + change notifications.
+//
+// Single-file mode:  mediant ~/org/todo.org
+// Directory mode:    mediant ~/org/
+//   Reads all *.org files in the directory; new entries are written to
+//   inbox.org within that directory.
 
 import http from "node:http";
 import net from "node:net";
@@ -9,9 +14,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 
-const HELP = `Usage: mediant <file.org> [options]
+const HELP = `Usage: mediant <file.org | directory> [options]
 
-Serve the Mediant agenda UI against a local Org file.
+Serve the Mediant agenda UI against a local Org file or directory.
+
+  Single-file mode:  mediant ~/org/todo.org
+  Directory mode:    mediant ~/org/
+    All *.org files in the directory are shown in the agenda.
+    New entries are captured to inbox.org within that directory.
 
 Options:
   --port N        Port to listen on (default: 4242)
@@ -27,7 +37,7 @@ function die(msg) {
 }
 
 function parseArgs(argv) {
-  const args = { file: null, port: 4242, daemon: false };
+  const args = { target: null, port: 4242, daemon: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--help" || a === "-h") {
@@ -41,13 +51,13 @@ function parseArgs(argv) {
       args.port = v;
     } else if (a.startsWith("-")) {
       die(`Unknown option: ${a}\n\n${HELP}`);
-    } else if (args.file === null) {
-      args.file = a;
+    } else if (args.target === null) {
+      args.target = a;
     } else {
       die(`Unexpected argument: ${a}`);
     }
   }
-  if (!args.file) {
+  if (!args.target) {
     console.error(HELP);
     process.exit(1);
   }
@@ -56,13 +66,22 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv.slice(2));
 
-const filePath = path.resolve(args.file);
-if (!fs.existsSync(filePath)) die(`File not found: ${filePath}`);
-try {
-  const st = fs.statSync(filePath);
-  if (!st.isFile()) die(`Not a regular file: ${filePath}`);
-} catch (e) {
-  die(`Cannot stat ${filePath}: ${e.message}`);
+const targetPath = path.resolve(args.target);
+if (!fs.existsSync(targetPath)) die(`Not found: ${targetPath}`);
+
+const stat = fs.statSync(targetPath);
+const isDir = stat.isDirectory();
+
+// In single-file mode the "directory" is the parent folder and the single
+// file acts as both the only source and the inbox.
+let dirPath, inboxRelPath;
+if (isDir) {
+  dirPath = targetPath;
+  inboxRelPath = "inbox.org";
+} else {
+  if (!stat.isFile()) die(`Not a regular file or directory: ${targetPath}`);
+  dirPath = path.dirname(targetPath);
+  inboxRelPath = path.basename(targetPath);
 }
 
 function probePort(port) {
@@ -116,8 +135,50 @@ const MIME = {
 
 const MAX_BODY_BYTES = 16 * 1024 * 1024;
 
-let currentVersion = String(fs.statSync(filePath).mtimeMs);
+/** Map of relPath → mtime string */
+const fileVersions = new Map();
 const sseClients = new Set();
+
+function orgFilesInDir() {
+  if (!isDir) return [inboxRelPath];
+  try {
+    return fs.readdirSync(dirPath)
+      .filter(f => f.endsWith(".org"))
+      .sort();
+  } catch {
+    return [];
+  }
+}
+
+function resolveRelPath(relPath) {
+  const abs = path.resolve(dirPath, relPath);
+  // Guard against path traversal
+  if (!abs.startsWith(dirPath + path.sep) && abs !== dirPath) return null;
+  if (!abs.endsWith(".org")) return null;
+  return abs;
+}
+
+function readAllFiles() {
+  const result = {};
+  for (const rel of orgFilesInDir()) {
+    const abs = path.join(dirPath, rel);
+    try {
+      const content = fs.readFileSync(abs, "utf-8");
+      const version = String(fs.statSync(abs).mtimeMs);
+      fileVersions.set(rel, version);
+      result[rel] = { content, version };
+    } catch {
+      // Skip unreadable files
+    }
+  }
+  return result;
+}
+
+function combinedVersion() {
+  const versions = [...fileVersions.values()];
+  if (versions.length === 0) return "0";
+  return String(Math.max(...versions.map(Number)));
+}
 
 function broadcast(version) {
   for (const res of sseClients) {
@@ -125,21 +186,26 @@ function broadcast(version) {
   }
 }
 
-// Debounced file watcher. fs.watch can fire multiple times per write on
-// some platforms; coalesce within 100ms and only broadcast on real mtime
-// changes.
 let watchTimer = null;
 function startWatcher() {
+  const watchTarget = isDir ? dirPath : path.join(dirPath, inboxRelPath);
   try {
-    fs.watch(filePath, () => {
+    fs.watch(watchTarget, { recursive: false }, () => {
       if (watchTimer) clearTimeout(watchTimer);
       watchTimer = setTimeout(() => {
         try {
-          const m = String(fs.statSync(filePath).mtimeMs);
-          if (m !== currentVersion) {
-            currentVersion = m;
-            broadcast(m);
+          let changed = false;
+          for (const rel of orgFilesInDir()) {
+            const abs = path.join(dirPath, rel);
+            try {
+              const m = String(fs.statSync(abs).mtimeMs);
+              if (m !== fileVersions.get(rel)) {
+                fileVersions.set(rel, m);
+                changed = true;
+              }
+            } catch {}
           }
+          if (changed) broadcast(combinedVersion());
         } catch {}
       }, 100);
     });
@@ -147,6 +213,9 @@ function startWatcher() {
     console.warn(`mediant: file watch unavailable (${e.message}) — external edits won't push`);
   }
 }
+
+// Seed initial versions
+readAllFiles();
 startWatcher();
 
 function serveStatic(req, res) {
@@ -201,15 +270,14 @@ const server = http.createServer(async (req, res) => {
 
   if (url === "/api/source" && req.method === "GET") {
     try {
-      const data = fs.readFileSync(filePath, "utf-8");
-      currentVersion = String(fs.statSync(filePath).mtimeMs);
-      console.log(`mediant: read  ${new Date().toISOString()}  ${data.length} bytes`);
+      const files = readAllFiles();
+      const body = JSON.stringify({ files, inbox: inboxRelPath });
+      console.log(`mediant: read  ${new Date().toISOString()}  ${Object.keys(files).length} file(s)`);
       res.writeHead(200, {
-        "Content-Type": "text/plain; charset=utf-8",
-        "X-Version": currentVersion,
+        "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "no-store",
       });
-      res.end(data);
+      res.end(body);
     } catch (e) {
       res.writeHead(500); res.end(`read failed: ${e.message}`);
     }
@@ -218,22 +286,43 @@ const server = http.createServer(async (req, res) => {
 
   if (url === "/api/source" && req.method === "PUT") {
     try {
-      const ifMatch = req.headers["if-match"];
-      const onDisk = String(fs.statSync(filePath).mtimeMs);
-      if (ifMatch && ifMatch !== onDisk) {
-        res.writeHead(409, {
-          "Content-Type": "text/plain",
-          "X-Version": onDisk,
-        });
-        res.end("version mismatch");
+      const rawBody = await readBody(req);
+      let payload;
+      try {
+        payload = JSON.parse(rawBody);
+      } catch {
+        res.writeHead(400); res.end("invalid JSON");
         return;
       }
-      const body = await readBody(req);
-      fs.writeFileSync(filePath, body, "utf-8");
-      currentVersion = String(fs.statSync(filePath).mtimeMs);
-      console.log(`mediant: write ${new Date().toISOString()}  ${body.length} bytes`);
-      res.writeHead(200, { "X-Version": currentVersion });
-      res.end();
+      const { path: relPath, content, version } = payload;
+      if (typeof relPath !== "string" || typeof content !== "string") {
+        res.writeHead(400); res.end("missing path or content");
+        return;
+      }
+      const absPath = resolveRelPath(relPath);
+      if (!absPath) {
+        res.writeHead(400); res.end("invalid path");
+        return;
+      }
+
+      // Check for conflicts — create inbox.org if it doesn't exist yet.
+      const fileExists = fs.existsSync(absPath);
+      if (fileExists) {
+        const onDisk = String(fs.statSync(absPath).mtimeMs);
+        if (version && version !== onDisk) {
+          res.writeHead(409, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ version: onDisk }));
+          return;
+        }
+      }
+
+      fs.writeFileSync(absPath, content, "utf-8");
+      const newVersion = String(fs.statSync(absPath).mtimeMs);
+      fileVersions.set(relPath, newVersion);
+      const combined = combinedVersion();
+      console.log(`mediant: write ${new Date().toISOString()}  ${relPath}  ${content.length} bytes`);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ version: newVersion, combined }));
     } catch (e) {
       res.writeHead(500); res.end(`write failed: ${e.message}`);
     }
@@ -247,7 +336,7 @@ const server = http.createServer(async (req, res) => {
       "Connection": "keep-alive",
       "X-Accel-Buffering": "no",
     });
-    res.write(`data: ${currentVersion}\n\n`);
+    res.write(`data: ${combinedVersion()}\n\n`);
     sseClients.add(res);
     const ping = setInterval(() => {
       try { res.write(": ping\n\n"); } catch {}
@@ -272,14 +361,18 @@ server.on("error", (e) => {
 
 server.listen(args.port, "127.0.0.1", () => {
   if (!process.env.MEDIANT_CHILD) {
-    console.log(`mediant: serving ${filePath}`);
+    if (isDir) {
+      console.log(`mediant: serving directory ${dirPath}`);
+      console.log(`mediant: inbox → ${inboxRelPath}`);
+    } else {
+      console.log(`mediant: serving ${path.join(dirPath, inboxRelPath)}`);
+    }
     console.log(`mediant: http://localhost:${args.port}`);
   }
 });
 
 function shutdown() {
   server.close(() => process.exit(0));
-  // If connections linger (SSE), force-exit quickly.
   setTimeout(() => process.exit(0), 500).unref();
 }
 process.on("SIGINT", shutdown);

@@ -633,10 +633,10 @@ describe("main.ts integration", () => {
     vi.stubGlobal("fetch", vi.fn((input: string, init?: RequestInit) => {
       if (input !== "/api/source") throw new Error(`unexpected fetch: ${input}`);
       const method = init?.method ?? "GET";
-      if (method === "GET") return Promise.resolve(makeMockResponse(200, serverSource, "v1"));
+      if (method === "GET") return Promise.resolve(makeServerGetResponse(serverSource, "v1"));
       if (method === "PUT") {
         putCalls.push(String(init?.body ?? ""));
-        return Promise.resolve(makeMockResponse(200, "", "v2"));
+        return Promise.resolve(makePutResponse("v2"));
       }
       throw new Error(`unexpected method: ${method}`);
     }));
@@ -663,7 +663,7 @@ describe("main.ts integration", () => {
     await flush();
 
     expect(putCalls).toHaveLength(1);
-    const updatedSource = putCalls[0];
+    const updatedSource = JSON.parse(putCalls[0]).content as string;
     expect(updatedSource).toContain("* Workshop updated :work:");
     expect(updatedSource).toContain("<2026-04-20 Mon 13:00>");
     expect(updatedSource).not.toContain("[1/2]");
@@ -678,7 +678,7 @@ describe("main.ts integration", () => {
       "",
     ].join("\n");
     let serverVersion = "v1";
-    const putCalls: Array<{ body: string; ifMatch: string | null }> = [];
+    const putCalls: Array<{ body: string; version: string | null }> = [];
     let resolveFirstPut: (() => void) | null = null;
 
     const eventSources: Array<{ emit: (data: string) => void }> = [];
@@ -702,21 +702,22 @@ describe("main.ts integration", () => {
       if (input !== "/api/source") throw new Error(`unexpected fetch: ${input}`);
       const method = init?.method ?? "GET";
       if (method === "GET") {
-        return Promise.resolve(makeMockResponse(200, serverSource, serverVersion));
+        return Promise.resolve(makeServerGetResponse(serverSource, serverVersion));
       }
       if (method !== "PUT") throw new Error(`unexpected method: ${method}`);
 
-      const headers = (init?.headers ?? {}) as Record<string, string>;
+      const bodyText = String(init?.body ?? "");
+      const bodyJson = JSON.parse(bodyText);
       putCalls.push({
-        body: String(init?.body ?? ""),
-        ifMatch: headers["If-Match"] ?? null,
+        body: bodyText,
+        version: bodyJson.version ?? null,
       });
       if (putCalls.length === 1) {
         return new Promise((resolve) => {
-          resolveFirstPut = () => resolve(makeMockResponse(200, "", "v1a"));
+          resolveFirstPut = () => resolve(makePutResponse("v1a"));
         });
       }
-      return Promise.resolve(makeMockResponse(200, "", `v${putCalls.length + 1}`));
+      return Promise.resolve(makePutResponse(`v${putCalls.length + 1}`));
     }));
 
     await import("../main.ts");
@@ -735,8 +736,8 @@ describe("main.ts integration", () => {
     titleInput!.dispatchEvent(new Event("input", { bubbles: true }));
     await flush();
     expect(putCalls).toHaveLength(1);
-    expect(putCalls[0].body).toContain("** TODO Yoga one");
-    expect(putCalls[0].ifMatch).toBe("v1");
+    expect(JSON.parse(putCalls[0].body).content).toContain("** TODO Yoga one");
+    expect(putCalls[0].version).toBe("v1");
 
     titleInput!.value = "Yoga two";
     titleInput!.dispatchEvent(new Event("input", { bubbles: true }));
@@ -793,17 +794,31 @@ function makeKeydownEvent(key: string, target: EventTarget): KeyboardEvent {
   return event;
 }
 
-function makeMockResponse(status: number, body = "", version: string | null = null) {
+function makeMockResponse(status: number, body = "") {
   return {
     ok: status >= 200 && status < 300,
     status,
     statusText: status === 200 ? "OK" : "Error",
     headers: {
-      get(name: string): string | null {
-        if (name.toLowerCase() === "x-version") return version;
-        return null;
-      },
+      get(_name: string): string | null { return null; },
     },
     text: async (): Promise<string> => body,
+    json: async () => JSON.parse(body || "null"),
   };
+}
+
+function makeServerGetResponse(source: string, version: string, fileName = "source.org") {
+  const body = JSON.stringify({
+    files: { [fileName]: { content: source, version } },
+    inbox: fileName,
+  });
+  return makeMockResponse(200, body);
+}
+
+function makePutResponse(version: string) {
+  return makeMockResponse(200, JSON.stringify({ version, combined: version }));
+}
+
+function make409Response(version: string) {
+  return makeMockResponse(409, JSON.stringify({ version }));
 }
