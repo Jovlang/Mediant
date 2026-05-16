@@ -656,9 +656,10 @@ src/
     model.ts            — Parser output types
     timestamp.ts        — Timestamp parsing, Date conversion, recurrence expansion, exception handling
     parser.ts           — Line-by-line Mediant.org parser
+    description.ts      — Description block formatting helpers (indent + escape for #+begin_src description)
     drawer.ts           — Property-drawer mutation helpers
     sourceEdit.ts       — Raw Mediant.org source mutation helpers for UI writes
-    __tests__/          — Timestamp, parser, and drawer tests
+    __tests__/          — Timestamp, parser, description, drawer, and source-edit tests
 
   agenda/
     model.ts            — Render-oriented agenda types
