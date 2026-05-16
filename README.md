@@ -1,8 +1,8 @@
 # Mediant
 
-A calm, focused web agenda for Org-mode files.
+A calm, focused web agenda for an Org-mode file.
 
-Mediant gives a plain `.org` file (or directory) a clean, readable interface.
+Mediant gives one plain `.org` file a clean, readable interface.
 
 It is built around two simple ideas:
 
@@ -27,7 +27,7 @@ It is a web agenda UI for people who like plain text but want to check their wee
 
 Org-mode is powerful because it stores rich personal information in ordinary text files. You can edit them anywhere, version them, sync them, grep them, and keep them for decades.
 
-You can also use Org-agenda to generate a schedule and a todo list sourced from your various Org files.
+You can also use Org-agenda to generate a schedule and a todo list from Org source.
 
 However, Org-agenda requires Emacs. What if you want to comfortably view and edit your agenda on your phone?
 
@@ -130,10 +130,10 @@ Mediant is for “my stuff”.
 Mediant has three layers:
 
 ```text
-.org files → parser → agenda → UI
+.org file → parser → agenda → UI
 ```
 
-The `.org` file or directory is the source of truth.
+The `.org` file is the source of truth.
 
 The parser reads a practical subset of Org syntax into structured entries.
 
@@ -167,27 +167,25 @@ This is useful for:
 
 ### Server mode
 
-Run Mediant against a single Org file or an entire directory:
+Run Mediant against a single Org file. With no target, Mediant uses `./Mediant.org`.
 
 ```sh
-mediant ~/org/todo.org       # single file
-mediant ~/org/               # all .org files in the directory
+mediant                      # ./Mediant.org
+mediant ~/org/todo.org       # explicit file
+mediant ~/org/               # ~/org/Mediant.org
 ```
 
-Mediant starts a tiny Node server bound to `127.0.0.1`. The browser hydrates from disk, writes edits back, and receives live updates when files change externally.
+Mediant starts a tiny Node server bound to `127.0.0.1`. The browser hydrates from disk, writes edits back to the same file, and receives live updates when that file changes externally.
 
-In directory mode, the agenda is built from every `.org` file in the directory. New entries — quick captures, add-panel items — are always written to `inbox.org` inside that directory. Edits to existing entries write back to the file they came from.
-
-That means you can edit any file from Emacs and see the browser UI update automatically.
+That means you can edit the source file from Emacs and see the browser UI update automatically.
 
 This is useful for:
 
 * using Org as the real storage format
-* keeping a multi-file org setup (work.org, personal.org, inbox.org, …) with one unified agenda view
 * combining Emacs editing with a browser agenda
 * local desktop use
 * mobile access through Tailscale, SSH tunnels, or a reverse proxy
-* syncing files with Dropbox, Syncthing, git, Nextcloud, or anything else
+* syncing the source file with Dropbox, Syncthing, git, Nextcloud, or anything else
 
 Mediant does not include authentication. If you expose it beyond localhost, put it behind something you trust.
 
@@ -261,11 +259,12 @@ Build once:
 npm run build
 ```
 
-Run Mediant against an Org file or directory:
+Run Mediant against an Org file. With no argument, the default source is `./Mediant.org`.
 
 ```sh
-node server/cli.mjs ~/org/todo.org        # single file
-node server/cli.mjs ~/org/                # directory
+node server/cli.mjs                       # ./Mediant.org
+node server/cli.mjs ~/org/todo.org        # explicit file
+node server/cli.mjs ~/org/                # ~/org/Mediant.org
 ```
 
 By default, the server listens on:
@@ -277,13 +276,13 @@ http://localhost:4242
 Use another port:
 
 ```sh
-node server/cli.mjs ~/org/ --port 7000
+node server/cli.mjs --port 7000
 ```
 
 Run in the background:
 
 ```sh
-node server/cli.mjs ~/org/ --daemon
+node server/cli.mjs --daemon
 ```
 
 After installing globally or linking the package:
@@ -297,9 +296,9 @@ npm link
 You can run:
 
 ```sh
-mediant ~/org/
-mediant ~/org/ --port 7000
-mediant ~/org/ --daemon
+mediant
+mediant --port 7000
+mediant --daemon
 ```
 
 A daemon prints its PID when it starts. Stop it with:
@@ -312,16 +311,16 @@ kill <pid>
 
 In server mode:
 
-* the browser loads all Org files from disk
-* UI edits are written back to the originating file
-* new captures always go to `inbox.org` (single-file mode: the file itself acts as inbox)
+* the browser loads the source file from disk
+* UI edits are written back to the source file
+* new captures are appended to the source file
 * external edits are detected automatically
 * updates are pushed to the browser with Server-Sent Events
-* the files on disk are the source of truth
+* the file on disk is the source of truth
 
 Conflict strategy: **disk wins**.
 
-If a file changes underneath the browser, the server rejects the stale write with `409`, and the UI reloads from disk.
+If the file changes underneath the browser, the server rejects the stale write with `409`, and the UI reloads from disk.
 
 ### Security
 
@@ -597,13 +596,13 @@ In server mode, Mediant exposes three endpoints on top of the static UI.
 
 | Method | Path          | Purpose                                                                                    |
 | ------ | ------------- | ------------------------------------------------------------------------------------------ |
-| `GET`  | `/api/source` | Returns JSON: `{ files: { [relPath]: { content, version } }, inbox: string }`.            |
-| `PUT`  | `/api/source` | Writes one file. Body JSON: `{ path, content, version }`. Version mismatch returns `409`. |
-| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <changeToken>` when any file changes on disk. |
+| `GET`  | `/api/source` | Returns JSON: `{ content, version }`. |
+| `PUT`  | `/api/source` | Writes the source file. Body JSON: `{ content, version }`. Version mismatch returns `409`. |
+| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <changeToken>` when the source file changes on disk. |
 
-The version for each file is its modification timestamp (milliseconds). SSE change tokens are monotonic invalidation hints for the current server process; clients re-read `/api/source` and compare per-file versions.
+The version is the source file's modification timestamp (milliseconds). SSE change tokens are monotonic invalidation hints for the current server process; clients re-read `/api/source` and compare the version.
 
-Write conflicts are rejected with `409`. The UI then reloads all files from disk.
+Write conflicts are rejected with `409`. The UI then reloads the source file from disk.
 
 ---
 
@@ -612,7 +611,7 @@ Write conflicts are rejected with `409`. The UI then reloads all files from disk
 Mediant is split into three main stages:
 
 ```text
-.org files → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
+.org file → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
              OrgEntry[]          Agenda model          HTML/CSS
 ```
 
@@ -744,7 +743,7 @@ Mediant uses browser `localStorage` for UI preferences and, in static mode, the 
 
 In static mode, the Org source lives in the browser.
 
-In server mode, the Org source lives in the file or directory passed to the CLI. UI preferences are still browser-local.
+In server mode, the Org source lives in the file passed to the CLI, or `Mediant.org` when the target is omitted or is a directory. UI preferences are still browser-local.
 
 ---
 

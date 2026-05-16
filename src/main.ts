@@ -29,10 +29,7 @@ let entries = parseOrg("");
 let currentStart = todayMidnight();
 let currentSource = localStorage.getItem("mediant-org-source") ?? "";
 let serverMode = false;
-// Server mode: per-file content + version (mtime string), keyed by relative path.
-let sourceFiles: Map<string, { content: string; version: string }> = new Map();
-let sourceFileEpochs: Map<string, number> = new Map();
-let inboxPath = "inbox.org";
+let serverSourceVersion: string | null = null;
 let agendaLoaded = false;
 let activeTagFilters = new Set<string>();
 let activePriorityFilter: "A" | "B" | "C" | null = null;
@@ -134,13 +131,9 @@ let revealedOccCancel = false;
 let revealedOccMove = false;
 let revealedOccNote = false;
 let revealedDescription = false;
-// Which file is currently open in the edit/add panel (server mode only).
-let editingSourceFile: string | null = null;
 let queuedEditSource: string | null = null;
-let queuedEditPath: string | null = null;
 let queuedEditEpoch: number | null = null;
 let inFlightEditSource: string | null = null;
-let inFlightEditPath: string | null = null;
 let inFlightEditEpoch: number | null = null;
 let editSaveInFlight = false;
 let editSavePromise: Promise<boolean> | null = null;
@@ -211,14 +204,14 @@ async function submitQuickCapture(): Promise<void> {
   const text = quickCaptureInputEl.value.trim();
   if (!text) return;
 
-  const src = inboxContent();
+  const src = currentSource;
   const updated = appendQuickCaptureToTasks(src, text);
   if (updated === src) return;
 
   quickCaptureInputEl.readOnly = true;
   if (quickCaptureErrorEl) quickCaptureErrorEl.textContent = "";
   try {
-    const result = await persistSource(updated, { path: serverMode ? inboxPath : undefined });
+    const result = await persistSource(updated);
     if (result === "saved") {
       quickCaptureInputEl.value = "";
     } else if (quickCaptureErrorEl) {
@@ -1549,41 +1542,24 @@ function buildPanelOrgText(opts: { focusInvalid: boolean }): string | null {
   });
 }
 
-function editSaveFilePath(): string | null {
-  return serverMode ? (editingSourceFile ?? inboxPath) : null;
-}
-
-function epochForSourcePath(filePath: string | null): number {
-  if (!serverMode) return sourceEpoch;
-  if (filePath === null) return 0;
-  return sourceFileEpochs.get(filePath) ?? 0;
-}
-
-function bumpEpochForSourcePath(filePath: string): void {
-  sourceFileEpochs.set(filePath, (sourceFileEpochs.get(filePath) ?? 0) + 1);
-}
-
 function clearQueuedEditSave(): void {
   queuedEditSource = null;
-  queuedEditPath = null;
   queuedEditEpoch = null;
 }
 
 function editSaveBaseSource(): string {
-  const filePath = editSaveFilePath();
-  const currentEpoch = epochForSourcePath(filePath);
+  const currentEpoch = sourceEpoch;
   if (queuedEditSource !== null && queuedEditEpoch === currentEpoch) {
-    if (!serverMode || queuedEditPath === filePath) return queuedEditSource;
+    return queuedEditSource;
   }
   if (inFlightEditSource !== null && inFlightEditEpoch === currentEpoch) {
-    if (!serverMode || inFlightEditPath === filePath) return inFlightEditSource;
+    return inFlightEditSource;
   }
-  if (serverMode && filePath) return sourceFiles.get(filePath)?.content ?? "";
   return currentSource;
 }
 
 function editSaveBaseEpoch(): number {
-  return epochForSourcePath(editSaveFilePath());
+  return sourceEpoch;
 }
 
 function restoreFocusAfterPanelClose(): void {
@@ -1596,7 +1572,6 @@ function restoreFocusAfterPanelClose(): void {
 function queueEditSourceSave(updated: string): Promise<boolean> {
   if (updated === editSaveBaseSource()) return editSavePromise ?? Promise.resolve(true);
   queuedEditSource = updated;
-  queuedEditPath = serverMode ? (editingSourceFile ?? inboxPath) : null;
   queuedEditEpoch = editSaveBaseEpoch();
   if (editSaveInFlight && editSavePromise) return editSavePromise;
   editSavePromise = drainEditSourceSaves();
@@ -1609,26 +1584,20 @@ async function drainEditSourceSaves(): Promise<boolean> {
   try {
     while (queuedEditSource !== null) {
       const next = queuedEditSource;
-      const nextPath = queuedEditPath;
-      const nextEpoch = queuedEditEpoch ?? epochForSourcePath(nextPath);
+      const nextEpoch = queuedEditEpoch ?? sourceEpoch;
       clearQueuedEditSave();
-      const currentForPath = serverMode && nextPath
-        ? (sourceFiles.get(nextPath)?.content ?? "")
-        : currentSource;
-      if (next === currentForPath) continue;
-      if (nextEpoch !== epochForSourcePath(nextPath)) {
+      if (next === currentSource) continue;
+      if (nextEpoch !== sourceEpoch) {
         ok = false;
         continue;
       }
       inFlightEditSource = next;
-      inFlightEditPath = nextPath;
       inFlightEditEpoch = nextEpoch;
       let result: "saved" | "stale" | "failed";
       try {
-        result = await persistSource(next, { expectedEpoch: nextEpoch, path: nextPath ?? undefined });
+        result = await persistSource(next, { expectedEpoch: nextEpoch });
       } finally {
         inFlightEditSource = null;
-        inFlightEditPath = null;
         inFlightEditEpoch = null;
       }
       if (result === "failed") {
@@ -1661,46 +1630,27 @@ function formatRepeaterValue(
 
 /** Return the entry currently open in the edit panel. */
 function findEditingEntry() {
-  return entries.find(e => e.sourceLineNumber === editingLine && (!editingSourceFile || e.sourceFile === editingSourceFile));
+  return entries.find(e => e.sourceLineNumber === editingLine);
 }
 
-/** Return the content and relative path for the file containing `sourceLine`. */
-function fileForLine(sourceLine: number, sourceFile?: string): { content: string; path: string | undefined } {
-  if (!serverMode) return { content: currentSource, path: undefined };
-  const entry = entries.find(e => e.sourceLineNumber === sourceLine && (!sourceFile || e.sourceFile === sourceFile));
-  const filePath = entry?.sourceFile || inboxPath;
-  return { content: sourceFiles.get(filePath)?.content ?? "", path: filePath };
+function replaceOrgBlock(sourceLine: number, _sourceFile: string, newText: string): void {
+  void persistSource(replaceOrgBlockInSource(currentSource, sourceLine, newText));
 }
 
-/** Content of the inbox file (or currentSource in static mode). */
-function inboxContent(): string {
-  return serverMode ? (sourceFiles.get(inboxPath)?.content ?? "") : currentSource;
+async function toggleDone(sourceLine: number, _sourceFile: string): Promise<void> {
+  await persistSource(toggleDoneInSource(currentSource, sourceLine));
 }
 
-function replaceOrgBlock(sourceLine: number, sourceFile: string, newText: string): void {
-  const { content, path } = fileForLine(sourceLine, sourceFile);
-  void persistSource(replaceOrgBlockInSource(content, sourceLine, newText), { path });
-}
-
-async function toggleDone(sourceLine: number, sourceFile: string): Promise<void> {
-  const { content, path } = fileForLine(sourceLine, sourceFile);
-  await persistSource(toggleDoneInSource(content, sourceLine), { path });
-}
-
-async function toggleCheckbox(parentSourceLine: number, index: number, sourceFile: string): Promise<void> {
-  const { content, path } = fileForLine(parentSourceLine, sourceFile);
-  await persistSource(toggleCheckboxInSource(content, parentSourceLine, index), { path });
+async function toggleCheckbox(parentSourceLine: number, index: number, _sourceFile: string): Promise<void> {
+  await persistSource(toggleCheckboxInSource(currentSource, parentSourceLine, index));
 }
 
 function deleteOrgBlock(sourceLine: number): void {
-  const { content, path } = fileForLine(sourceLine, editingSourceFile ?? undefined);
-  void persistSource(deleteOrgBlockInSource(content, sourceLine), { path });
+  void persistSource(deleteOrgBlockInSource(currentSource, sourceLine));
 }
 
 function appendOrgText(orgText: string): void {
-  void persistSource(appendAgendaItemToSource(inboxContent(), orgText), {
-    path: serverMode ? inboxPath : undefined,
-  });
+  void persistSource(appendAgendaItemToSource(currentSource, orgText));
 }
 
 function openAddPanel(prefillDate: string | null = null, prefillTitle: string | null = null, defaultType: "todo" | "event" = "todo"): void {
@@ -1719,7 +1669,6 @@ function openAddPanel(prefillDate: string | null = null, prefillTitle: string | 
   revealedOccNote = false;
   revealedDescription = false;
   editingLine = null;
-  editingSourceFile = serverMode ? inboxPath : null;
   editingBaseDate = null;
   editingLevel = 1;
   editingPriority = null;
@@ -1766,7 +1715,7 @@ function tsToDateTimeDisplay(ts: { date: string; startTime: string | null; endTi
   return t ? `${d} ${t}` : d;
 }
 
-function openEditPanel(sourceLine: number, sourceFile: string, baseDate: string | null = null): void {
+function openEditPanel(sourceLine: number, _sourceFile: string, baseDate: string | null = null): void {
   if (!addPanelEl || !addPanelRefs) return;
   disarmDeleteBtn();
 
@@ -1782,11 +1731,10 @@ function openEditPanel(sourceLine: number, sourceFile: string, baseDate: string 
   revealedOccNote = false;
   revealedDescription = false;
 
-  const entry = entries.find(e => e.sourceLineNumber === sourceLine && (!sourceFile || e.sourceFile === sourceFile));
+  const entry = entries.find(e => e.sourceLineNumber === sourceLine);
   if (!entry) return;
 
   editingLine = sourceLine;
-  editingSourceFile = serverMode ? (entry.sourceFile || inboxPath) : null;
   editingBaseDate = baseDate;
   editingLevel = entry.level;
   editingPriority = entry.priority;
@@ -2070,7 +2018,6 @@ function closeInvalidatedEditPanel(): void {
   if (!addPanelEl) return;
   disarmDeleteBtn();
   editingLine = null;
-  editingSourceFile = null;
   editingBaseDate = null;
   addPanelEl.classList.remove("is-open");
   addPanelEl.classList.remove("is-editing");
@@ -2352,8 +2299,8 @@ function exceedsLimit(source: string): boolean {
  * subscribes to /api/events for external file changes.
  */
 interface ServerSourceData {
-  files: Record<string, { content: string; version: string }>;
-  inbox: string;
+  content: string;
+  version: string;
 }
 
 async function probeServer(): Promise<boolean> {
@@ -2361,13 +2308,8 @@ async function probeServer(): Promise<boolean> {
     const r = await fetch("/api/source");
     if (!r.ok) return false;
     const data = await r.json() as ServerSourceData;
-    inboxPath = data.inbox;
-    sourceFiles = new Map(Object.entries(data.files));
-    sourceFileEpochs = new Map([...sourceFiles.keys()].map(path => [path, 0]));
-    entries = [];
-    for (const [path, { content }] of sourceFiles) {
-      entries.push(...parseOrg(content, path));
-    }
+    serverSourceVersion = data.version;
+    applyParsedSource(data.content);
     serverMode = true;
     return true;
   } catch {
@@ -2382,7 +2324,7 @@ async function probeServer(): Promise<boolean> {
  */
 async function persistSource(
   updated: string,
-  opts: { expectedEpoch?: number; path?: string } = {},
+  opts: { expectedEpoch?: number } = {},
 ): Promise<"saved" | "stale" | "failed"> {
   if (exceedsLimit(updated)) {
     alert("Source exceeds the 4 MB limit.");
@@ -2390,14 +2332,12 @@ async function persistSource(
   }
 
   if (serverMode) {
-    const filePath = opts.path ?? inboxPath;
-    const fileInfo = sourceFiles.get(filePath);
-    const expectedEpoch = opts.expectedEpoch ?? epochForSourcePath(filePath);
+    const expectedEpoch = opts.expectedEpoch ?? sourceEpoch;
     try {
       const r = await fetch("/api/source", {
         method: "PUT",
         headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ path: filePath, content: updated, version: fileInfo?.version ?? "" }),
+        body: JSON.stringify({ content: updated, version: serverSourceVersion ?? "" }),
       });
       if (r.status === 409) {
         alert("File was modified externally; reloading from disk.");
@@ -2408,15 +2348,13 @@ async function persistSource(
         alert(`Failed to save: ${r.status} ${r.statusText}`);
         return "failed";
       }
-      if (epochForSourcePath(filePath) !== expectedEpoch) {
+      if (sourceEpoch !== expectedEpoch) {
         await reloadFromServer();
         return "stale";
       }
       const result = await r.json() as { version: string };
-      sourceFiles.set(filePath, { content: updated, version: result.version });
-      // Re-parse only the file that changed
-      entries = entries.filter(e => e.sourceFile !== filePath);
-      entries.push(...parseOrg(updated, filePath));
+      serverSourceVersion = result.version;
+      applyParsedSource(updated);
       render();
       return "saved";
     } catch (e) {
@@ -2436,46 +2374,18 @@ async function reloadFromServer(): Promise<void> {
     const r = await fetch("/api/source");
     if (!r.ok) return;
     const data = await r.json() as ServerSourceData;
-    // Check if any file actually changed using per-file version comparison.
-    const nextFiles = new Map(Object.entries(data.files));
-    const changedPaths = new Set<string>();
-    const invalidatingPaths = new Set<string>();
-    for (const path of sourceFiles.keys()) {
-      if (!nextFiles.has(path)) {
-        changedPaths.add(path);
-        invalidatingPaths.add(path);
-      }
-    }
-    for (const [path, { content, version }] of nextFiles) {
-      if (sourceFiles.get(path)?.version !== version) {
-        changedPaths.add(path);
-        const isObservedInFlightSave = path === inFlightEditPath && content === inFlightEditSource;
-        if (!isObservedInFlightSave) invalidatingPaths.add(path);
-      }
-    }
-    const inboxChanged = data.inbox !== inboxPath;
-    const anyChanged = inboxChanged || changedPaths.size > 0;
-    if (!anyChanged) return;
-    const activeEditPath = editingLine !== null ? editSaveFilePath() : null;
-    const activeEditInvalidated = activeEditPath !== null && invalidatingPaths.has(activeEditPath);
+    if (serverSourceVersion === data.version) return;
 
-    if (
-      inboxChanged
-      || queuedEditPath === null
-      || invalidatingPaths.has(queuedEditPath)
-    ) {
+    const isObservedInFlightSave = data.content === inFlightEditSource;
+    const invalidatesActiveEdit = !isObservedInFlightSave;
+    if (invalidatesActiveEdit) {
       clearQueuedEditSave();
+      sourceEpoch += 1;
+      if (editingLine !== null) closeInvalidatedEditPanel();
     }
-    for (const path of invalidatingPaths) bumpEpochForSourcePath(path);
 
-    if (activeEditInvalidated) closeInvalidatedEditPanel();
-
-    inboxPath = data.inbox;
-    sourceFiles = nextFiles;
-    entries = [];
-    for (const [path, { content }] of sourceFiles) {
-      entries.push(...parseOrg(content, path));
-    }
+    serverSourceVersion = data.version;
+    applyParsedSource(data.content);
     render();
   } catch {
     // swallow — next SSE event or user action will retry

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// Mediant local server. Serves the built UI and one or more Org files
-// over localhost with read/write + change notifications.
+// Mediant local server. Serves the built UI and one Org file over localhost
+// with read/write + change notifications.
 //
-// Single-file mode:  mediant ~/org/todo.org
-// Directory mode:    mediant ~/org/
-//   Reads all *.org files in the directory; new entries are written to
-//   inbox.org within that directory.
+// Default source:  ./Mediant.org
+// Explicit file:   mediant ~/org/todo.org
+// Directory target: mediant ~/org/
+//   Uses ~/org/Mediant.org as the single source of truth.
 
 import http from "node:http";
 import net from "node:net";
@@ -14,14 +14,17 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 
-const HELP = `Usage: mediant <file.org | directory> [options]
+const DEFAULT_SOURCE_FILE = "Mediant.org";
 
-Serve the Mediant agenda UI against a local Org file or directory.
+const HELP = `Usage: mediant [file.org | directory] [options]
 
-  Single-file mode:  mediant ~/org/todo.org
-  Directory mode:    mediant ~/org/
-    All *.org files in the directory are shown in the agenda.
-    New entries are captured to inbox.org within that directory.
+Serve the Mediant agenda UI against one local Org file.
+
+  Default:           mediant
+                     uses ./Mediant.org
+  Explicit file:     mediant ~/org/todo.org
+  Directory target:  mediant ~/org/
+                     uses ~/org/Mediant.org
 
 Options:
   --port N        Port to listen on (default: 4242)
@@ -57,31 +60,33 @@ function parseArgs(argv) {
       die(`Unexpected argument: ${a}`);
     }
   }
-  if (!args.target) {
-    console.error(HELP);
-    process.exit(1);
-  }
   return args;
 }
 
 const args = parseArgs(process.argv.slice(2));
 
-const targetPath = path.resolve(args.target);
-if (!fs.existsSync(targetPath)) die(`Not found: ${targetPath}`);
+function resolveSourcePath(target) {
+  const resolvedTarget = path.resolve(target ?? DEFAULT_SOURCE_FILE);
+  if (fs.existsSync(resolvedTarget)) {
+    const stat = fs.statSync(resolvedTarget);
+    if (stat.isDirectory()) return path.join(resolvedTarget, DEFAULT_SOURCE_FILE);
+    if (!stat.isFile()) die(`Not a regular file or directory: ${resolvedTarget}`);
+    return resolvedTarget;
+  }
+  return resolvedTarget;
+}
 
-const stat = fs.statSync(targetPath);
-const isDir = stat.isDirectory();
+const sourcePath = resolveSourcePath(args.target);
+if (!sourcePath.endsWith(".org")) die(`Source must be an .org file: ${sourcePath}`);
 
-// In single-file mode the "directory" is the parent folder and the single
-// file acts as both the only source and the inbox.
-let dirPath, inboxRelPath;
-if (isDir) {
-  dirPath = targetPath;
-  inboxRelPath = "inbox.org";
-} else {
-  if (!stat.isFile()) die(`Not a regular file or directory: ${targetPath}`);
-  dirPath = path.dirname(targetPath);
-  inboxRelPath = path.basename(targetPath);
+const sourceDir = path.dirname(sourcePath);
+if (!fs.existsSync(sourceDir) || !fs.statSync(sourceDir).isDirectory()) {
+  die(`Source directory not found: ${sourceDir}`);
+}
+if (!fs.existsSync(sourcePath)) {
+  fs.writeFileSync(sourcePath, "", "utf-8");
+} else if (!fs.statSync(sourcePath).isFile()) {
+  die(`Not a regular file: ${sourcePath}`);
 }
 
 function probePort(port) {
@@ -135,85 +140,42 @@ const MIME = {
 
 const MAX_BODY_BYTES = 16 * 1024 * 1024;
 
-/** Map of relPath → mtime string */
-const fileVersions = new Map();
 const sseClients = new Set();
 let changeSerial = 0;
+let sourceVersion = "";
 
-function orgFilesInDir() {
-  if (!isDir) return [inboxRelPath];
+function readSource() {
   try {
-    return fs.readdirSync(dirPath)
-      .filter(f => f.endsWith(".org"))
-      .sort();
-  } catch {
-    return [];
-  }
-}
-
-function resolveRelPath(relPath) {
-  const abs = path.resolve(dirPath, relPath);
-  // Guard against path traversal
-  if (!abs.startsWith(dirPath + path.sep) && abs !== dirPath) return null;
-  if (!abs.endsWith(".org")) return null;
-  return abs;
-}
-
-function readAllFiles() {
-  const result = {};
-  const seen = new Set();
-  for (const rel of orgFilesInDir()) {
-    const abs = path.join(dirPath, rel);
-    try {
-      const content = fs.readFileSync(abs, "utf-8");
-      const version = String(fs.statSync(abs).mtimeMs);
-      seen.add(rel);
-      fileVersions.set(rel, version);
-      result[rel] = { content, version };
-    } catch {
-      // Skip unreadable files
+    const content = fs.readFileSync(sourcePath, "utf-8");
+    const version = String(fs.statSync(sourcePath).mtimeMs);
+    sourceVersion = version;
+    return { content, version };
+  } catch (e) {
+    if (e.code === "ENOENT") {
+      sourceVersion = "";
+      return { content: "", version: "" };
     }
+    throw e;
   }
-  for (const rel of [...fileVersions.keys()]) {
-    if (!seen.has(rel)) fileVersions.delete(rel);
-  }
-  return result;
 }
 
 function combinedVersion() {
   return String(changeSerial);
 }
 
-function currentOrgFileVersions() {
-  const next = new Map();
-  for (const rel of orgFilesInDir()) {
-    const abs = path.join(dirPath, rel);
-    try {
-      next.set(rel, String(fs.statSync(abs).mtimeMs));
-    } catch {
-      // Skip files that disappeared between readdir and stat.
-    }
+function currentSourceVersion() {
+  try {
+    return String(fs.statSync(sourcePath).mtimeMs);
+  } catch (e) {
+    if (e.code === "ENOENT") return "";
+    throw e;
   }
-  return next;
 }
 
-function versionsDiffer(next) {
-  if (next.size !== fileVersions.size) return true;
-  for (const [rel, version] of next) {
-    if (fileVersions.get(rel) !== version) return true;
-  }
-  return false;
-}
-
-function replaceFileVersions(next) {
-  fileVersions.clear();
-  for (const [rel, version] of next) fileVersions.set(rel, version);
-}
-
-function syncFileVersionsFromDisk() {
-  const next = currentOrgFileVersions();
-  if (!versionsDiffer(next)) return false;
-  replaceFileVersions(next);
+function syncSourceVersionFromDisk() {
+  const next = currentSourceVersion();
+  if (next === sourceVersion) return false;
+  sourceVersion = next;
   return true;
 }
 
@@ -230,13 +192,12 @@ function broadcast(version) {
 
 let watchTimer = null;
 function startWatcher() {
-  const watchTarget = isDir ? dirPath : path.join(dirPath, inboxRelPath);
   try {
-    fs.watch(watchTarget, { recursive: false }, () => {
+    fs.watch(sourcePath, { recursive: false }, () => {
       if (watchTimer) clearTimeout(watchTimer);
       watchTimer = setTimeout(() => {
         try {
-          if (syncFileVersionsFromDisk()) broadcastChange();
+          if (syncSourceVersionFromDisk()) broadcastChange();
         } catch {}
       }, 100);
     });
@@ -246,7 +207,7 @@ function startWatcher() {
 }
 
 // Seed initial versions
-readAllFiles();
+readSource();
 startWatcher();
 
 function serveStatic(req, res) {
@@ -301,9 +262,8 @@ const server = http.createServer(async (req, res) => {
 
   if (url === "/api/source" && req.method === "GET") {
     try {
-      const files = readAllFiles();
-      const body = JSON.stringify({ files, inbox: inboxRelPath });
-      console.log(`mediant: read  ${new Date().toISOString()}  ${Object.keys(files).length} file(s)`);
+      const body = JSON.stringify(readSource());
+      console.log(`mediant: read  ${new Date().toISOString()}  ${sourcePath}`);
       res.writeHead(200, {
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "no-store",
@@ -325,23 +285,18 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(400); res.end("invalid JSON");
         return;
       }
-      const { path: relPath, content, version } = payload;
-      if (typeof relPath !== "string" || typeof content !== "string" || typeof version !== "string") {
-        res.writeHead(400); res.end("missing path, content, or version");
-        return;
-      }
-      const absPath = resolveRelPath(relPath);
-      if (!absPath) {
-        res.writeHead(400); res.end("invalid path");
+      const { content, version } = payload;
+      if (typeof content !== "string" || typeof version !== "string") {
+        res.writeHead(400); res.end("missing content or version");
         return;
       }
 
       // Check for conflicts. A missing file may only be created by a client
       // that observed it as missing (`version: ""`); stale clients must not
       // overwrite a newly-created file or resurrect a deleted one.
-      const fileExists = fs.existsSync(absPath);
+      const fileExists = fs.existsSync(sourcePath);
       if (fileExists) {
-        const onDisk = String(fs.statSync(absPath).mtimeMs);
+        const onDisk = String(fs.statSync(sourcePath).mtimeMs);
         if (version !== onDisk) {
           res.writeHead(409, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ version: onDisk }));
@@ -353,11 +308,11 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      fs.writeFileSync(absPath, content, "utf-8");
-      const newVersion = String(fs.statSync(absPath).mtimeMs);
-      fileVersions.set(relPath, newVersion);
+      fs.writeFileSync(sourcePath, content, "utf-8");
+      const newVersion = String(fs.statSync(sourcePath).mtimeMs);
+      sourceVersion = newVersion;
       const combined = combinedVersion();
-      console.log(`mediant: write ${new Date().toISOString()}  ${relPath}  ${content.length} bytes`);
+      console.log(`mediant: write ${new Date().toISOString()}  ${sourcePath}  ${content.length} bytes`);
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ version: newVersion, combined }));
     } catch (e) {
@@ -398,12 +353,7 @@ server.on("error", (e) => {
 
 server.listen(args.port, "127.0.0.1", () => {
   if (!process.env.MEDIANT_CHILD) {
-    if (isDir) {
-      console.log(`mediant: serving directory ${dirPath}`);
-      console.log(`mediant: inbox → ${inboxRelPath}`);
-    } else {
-      console.log(`mediant: serving ${path.join(dirPath, inboxRelPath)}`);
-    }
+    console.log(`mediant: serving ${sourcePath}`);
     console.log(`mediant: http://localhost:${args.port}`);
   }
 });

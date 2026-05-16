@@ -807,11 +807,8 @@ function makeMockResponse(status: number, body = "") {
   };
 }
 
-function makeServerGetResponse(source: string, version: string, fileName = "source.org") {
-  const body = JSON.stringify({
-    files: { [fileName]: { content: source, version } },
-    inbox: fileName,
-  });
+function makeServerGetResponse(source: string, version: string) {
+  const body = JSON.stringify({ content: source, version });
   return makeMockResponse(200, body);
 }
 

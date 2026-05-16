@@ -2,15 +2,15 @@
 
 ## Project overview
 
-Mediant is a minimal Org-mode parser and agenda viewer. It parses a focused subset of Org syntax and renders a rolling agenda in HTML/CSS, with a 7-day default and optional 30-day month-ahead view. It runs in two modes: a **static mode** where users paste Org content into a textarea (localStorage-backed), and a **server mode** where a local Node CLI (`mediant <file.org | dir>`) serves the UI, reads all `.org` files from the target, and streams changes over `/api/source` + SSE. No framework dependencies.
+Mediant is a minimal Org-mode parser and agenda viewer. It parses a focused subset of Org syntax and renders a rolling agenda in HTML/CSS, with a 7-day default and optional 30-day month-ahead view. It runs in two modes: a **static mode** where users paste Org content into a textarea (localStorage-backed), and a **server mode** where a local Node CLI (`mediant [file.org | dir]`) serves the UI against one source file (`Mediant.org` by default) and streams changes over `/api/source` + SSE. No framework dependencies.
 
 ## Architecture
 
 Three clearly separated stages — do not collapse them:
 
 ```
-  .org files → Parser (org/) → Agenda (agenda/)    → UI (ui/)
-              OrgEntry[]       AgendaWeek            HTML/CSS
+  .org file → Parser (org/) → Agenda (agenda/)    → UI (ui/)
+             OrgEntry[]       AgendaWeek            HTML/CSS
                                AgendaDay[]
                                DeadlineItem[]
                                OverdueItem[]
@@ -37,8 +37,8 @@ Three clearly separated stages — do not collapse them:
 | `src/ui/notifications.ts` | Browser notification preference, permission request, and timer scheduling for timed events happening today. Notifications fire 1 hour before the start time and are rescheduled on render. |
 | `src/i18n.ts` | English, Norwegian, Italian, and German UI strings, locale detection, and locale persistence (`mediant-locale`). |
 | `src/ui/style.css` | All styles. CSS grid layout with content-width time column. |
-| `src/main.ts` | Entry point. Probes `/api/source` on boot; if present, enters server mode (hydrates from all served `.org` files, tracks per-file versions, subscribes to `/api/events` for external file changes). Otherwise shows the textarea input screen backed by localStorage. Owns global keyboard shortcuts, tag-filter state, quick-capture overlay, checkbox completion toggles, add-item & edit-item panels, and the "This occurrence" section that writes exception properties via the drawer helpers. |
-| `server/cli.mjs` | Node CLI + HTTP server. `mediant <file.org \| dir> [--port N] [--daemon]`. Single-file mode serves one file as both source and inbox. Directory mode serves all `.org` files in the directory; new entries are captured to `inbox.org`. `GET /api/source` returns `{ files: { [relPath]: { content, version } }, inbox }`. `PUT /api/source` takes JSON `{ path, content, version }`; version mismatch → 409. `GET /api/events` SSE backed by `fs.watch` (debounced). Node built-ins only, no deps. |
+| `src/main.ts` | Entry point. Probes `/api/source` on boot; if present, enters server mode (hydrates from the served source file, tracks its version, subscribes to `/api/events` for external file changes). Otherwise shows the textarea input screen backed by localStorage. Owns global keyboard shortcuts, tag-filter state, quick-capture overlay, checkbox completion toggles, add-item & edit-item panels, and the "This occurrence" section that writes exception properties via the drawer helpers. |
+| `server/cli.mjs` | Node CLI + HTTP server. `mediant [file.org \| dir] [--port N] [--daemon]`. With no target it uses `./Mediant.org`; with a directory target it uses `Mediant.org` inside that directory. `GET /api/source` returns `{ content, version }`. `PUT /api/source` takes JSON `{ content, version }`; version mismatch → 409. `GET /api/events` SSE backed by `fs.watch` (debounced). Node built-ins only, no deps. |
 | `elisp/mediant-org-agenda.el` | Optional Emacs Org agenda integration. Global minor mode that runs on `org-agenda-finalize-hook`, reads Mediant exception properties from source headings, filters cancelled/cutoff occurrences, inserts moved synthetic agenda lines, and renders exception notes. |
 | `elisp/mediant-org-agenda-test.el` | ERT tests for the optional Org agenda integration. Uses temporary Org files and real `org-agenda-list` generation to verify exception display behavior. |
 
@@ -49,7 +49,7 @@ npm test              # run all tests (vitest)
 npm run test:watch    # vitest in watch mode
 npx vite              # dev server (serves index.html)
 npm run build         # build dist/ for the server to serve
-npm start <file.org | dir>  # build + start the local server against a file or directory
+npm start [file.org | dir]  # build + start the local server against one source file
 emacs --batch -L elisp -f batch-byte-compile elisp/mediant-org-agenda.el
                       # byte-compile the optional Org agenda integration
 emacs --batch -L elisp -l elisp/mediant-org-agenda-test.el -f ert-run-tests-batch-and-exit
@@ -66,10 +66,10 @@ emacs --batch -L elisp -l elisp/mediant-org-agenda-test.el -f ert-run-tests-batc
 ## Server mode
 
 - `server/cli.mjs` is a self-contained Node script — no dependencies beyond Node built-ins (`http`, `fs`, `child_process`, etc.). Do not add npm deps to it casually.
-- Version token is `mtimeMs` as a string, tracked per file in a `Map<relPath, version>`. `PUT /api/source` takes JSON `{ path, content, version }`; version mismatch → 409, client reloads from disk (disk wins).
-- In directory mode all `.org` files are served; `inbox` in the GET response names where new captures go (`inbox.org` by default). In single-file mode the one file is both the sole source and the inbox.
-- `fs.watch` fires multiple times per write on some platforms — the watcher is debounced 100 ms and only broadcasts on real file-set or `mtimeMs` changes.
-- SSE clients receive `data: <changeToken>\n\n`, a monotonic invalidation hint for the current server process. The client re-reads `/api/source` and ignores events that produce no per-file version changes.
+- Version token is `mtimeMs` as a string for the single source file. `PUT /api/source` takes JSON `{ content, version }`; version mismatch → 409, client reloads from disk (disk wins).
+- With no CLI target, the source is `./Mediant.org`. With a directory target, the source is `Mediant.org` inside that directory. Missing source files are created empty on startup.
+- `fs.watch` fires multiple times per write on some platforms — the watcher is debounced 100 ms and only broadcasts on real source-file `mtimeMs` changes.
+- SSE clients receive `data: <changeToken>\n\n`, a monotonic invalidation hint for the current server process. The client re-reads `/api/source` and ignores events that produce no source version change.
 - Server binds to `127.0.0.1` only. Auth is intentionally absent — the assumption is Tailscale or equivalent for remote access.
 - `--daemon` re-execs the same node script detached with `MEDIANT_CHILD=1` and the flag stripped, then the parent prints the PID and exits. Stop with `kill <pid>`.
 
@@ -135,7 +135,7 @@ See `ORG-SYNTAX.md` for the full breakdown of supported, gracefully ignored, and
 - **Add-item panel** — slide-in panel for creating TODO tasks and events. Defaults to Task; quick capture covers low-friction TODO entry. Date-header clicks open the panel pre-selected as Event with that day prefilled. New TODOs append under top-level `* Tasks`; new events append under top-level `* Events`. Generates Org text and appends to the active source (server file or localStorage).
 - **Edit-item panel** — same slide-in panel, opened from a per-item edit button. TODO/event type is locked after creation; the type selector is hidden in edit mode and the panel heading reads `Edit task` or `Edit event` accordingly. Rewrites the existing Org block in place, preserving body lines, and autosaves valid field changes immediately rather than requiring a Save button. Shows interactive checkbox toggles for TODO entries. When the clicked item is an occurrence of a repeating series, a **"This occurrence"** block appears alongside the **"Series"** fields, exposing skip/stop-repeat toggles, a move date/time field, a note field, and Clear override; these write `:EXCEPTION-<base>:` / `:EXCEPTION-NOTE-<base>:` via `upsertProperty` and `removeProperty` immediately. The base date passed through from the click (`data-base-date` on the clicked title) is always the **unshifted** slot, so writes stay stable even after a reschedule moves the occurrence to a different day.
 - **Shorthand date input** — add/edit date fields accept `D`/`DD`, `D/M`, `D/M/YY`, `D/M/YYYY`, `D mon`, `D mon YY`, `+N`, and weekday abbreviations in all four supported locales: `mon`..`sun` (EN), `man`..`søn` (NB), `lun`..`dom` (IT), `mo`..`so` (DE). Days and numeric months may be one or two digits. All locale abbreviations are recognized regardless of the active locale. Ambiguous forms without a year resolve to the next future occurrence, and 2-digit years are interpreted in the current century.
-- **Org source persistence** — in static mode, the textarea content is saved to `localStorage` (`mediant-org-source`). In server mode, the source is the file or directory passed to the CLI and localStorage is not used for it. Edits write back to the originating file; new captures go to the inbox file. All writes flow through `persistSource()` in `main.ts`, which dispatches to the active backend.
+- **Org source persistence** — in static mode, the textarea content is saved to `localStorage` (`mediant-org-source`). In server mode, the source is the single file selected by the CLI (`Mediant.org` by default) and localStorage is not used for it. Edits and new captures write back to that source file. All writes flow through `persistSource()` in `main.ts`, which dispatches to the active backend.
 
 ## Testing
 
@@ -150,8 +150,8 @@ Vitest currently covers twelve suites (369 tests), plus optional ERT coverage fo
 - `src/ui/__tests__/notifications.test.ts` — notification preference, permission handling, and scheduling behavior
 - `src/__tests__/i18n.test.ts` — locale detection (en/nb/it/de), stored locale preference, string lookup, and fallback behavior
 - `src/__tests__/main.test.ts` — browser-level integration for static mode, TODO toggles, series editing, occurrence exceptions, and persistence
-- `src/__tests__/main-directory.test.ts` — browser-level integration for directory server mode, origin-file writes, inbox captures, duplicate SSE reloads, and unrelated edit-queue preservation
-- `server/cli.test.ts` — CLI/server behavior for static serving, source API versioning (JSON format, per-file versions, 409 conflicts), SSE behavior, and directory mode (multi-file reads, missing-inbox writes, stale deletion conflicts, add/remove events)
+- `src/__tests__/main-server.test.ts` — browser-level integration for server mode single-source writes, captures, duplicate SSE reloads, and edit-queue preservation
+- `server/cli.test.ts` — CLI/server behavior for static serving, default `Mediant.org` selection, source API versioning (JSON format, 409 conflicts), SSE behavior, and directory targets resolving to one `Mediant.org` file
 - `elisp/mediant-org-agenda-test.el` — ERT coverage for the optional Org agenda integration using real temporary Org agenda generation
 
 Always run tests after changes to parser, timestamp, drawer, source-edit, agenda, rendering, notification, i18n, main integration, server logic, or the optional Elisp integration.

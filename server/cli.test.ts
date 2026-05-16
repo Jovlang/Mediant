@@ -39,29 +39,29 @@ afterAll(async () => {
 });
 
 describe("server/cli.mjs", () => {
-  it("serves all org files as JSON with per-file version info", async () => {
+  it("serves the Org source as JSON with version info", async () => {
     const server = await startServer("** TODO First\n");
     const response = await fetch(server.url("/api/source"));
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toMatch(/application\/json/);
     const data = await response.json();
-    expect(data.inbox).toBe("agenda.org");
-    expect(data.files["agenda.org"]).toBeDefined();
-    expect(data.files["agenda.org"].content).toBe("** TODO First\n");
-    expect(data.files["agenda.org"].version).toBeTruthy();
+    expect(data.content).toBe("** TODO First\n");
+    expect(data.version).toBeTruthy();
+    expect(data.files).toBeUndefined();
+    expect(data.inbox).toBeUndefined();
   });
 
   it("writes updates with JSON body and returns a new version", async () => {
     const server = await startServer("** TODO Before\n");
     const initial = await fetch(server.url("/api/source"));
     const initData = await initial.json();
-    const version = initData.files["agenda.org"].version;
+    const version = initData.version;
     expect(version).toBeTruthy();
 
     const put = await fetch(server.url("/api/source"), {
       method: "PUT",
       headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ path: "agenda.org", content: "** TODO After\n", version }),
+      body: JSON.stringify({ content: "** TODO After\n", version }),
     });
 
     expect(put.status).toBe(200);
@@ -71,15 +71,15 @@ describe("server/cli.mjs", () => {
 
     const reread = await fetch(server.url("/api/source"));
     const rereadData = await reread.json();
-    expect(rereadData.files["agenda.org"].content).toBe("** TODO After\n");
-    expect(rereadData.files["agenda.org"].version).toBe(putResult.version);
+    expect(rereadData.content).toBe("** TODO After\n");
+    expect(rereadData.version).toBe(putResult.version);
   });
 
   it("rejects stale version writes with 409 and keeps the on-disk content", async () => {
     const server = await startServer("** TODO Original\n");
     const initial = await fetch(server.url("/api/source"));
     const initData = await initial.json();
-    const staleVersion = initData.files["agenda.org"].version;
+    const staleVersion = initData.version;
     expect(staleVersion).toBeTruthy();
 
     await forceMtimeTick();
@@ -88,7 +88,7 @@ describe("server/cli.mjs", () => {
     const put = await fetch(server.url("/api/source"), {
       method: "PUT",
       headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ path: "agenda.org", content: "** TODO Client write\n", version: staleVersion }),
+      body: JSON.stringify({ content: "** TODO Client write\n", version: staleVersion }),
     });
 
     expect(put.status).toBe(409);
@@ -115,123 +115,41 @@ describe("server/cli.mjs", () => {
     await stream.close();
   });
 
-  it("directory mode: reads all org files and captures new entries to inbox.org", async () => {
-    const server = await startServerDir({
-      "work.org": "** TODO Work task\n",
-      "inbox.org": "** TODO Inbox task\n",
+  it("uses Mediant.org inside a directory target as the only source", async () => {
+    const server = await startServerInDirectory({
+      "Mediant.org": "** TODO Main task\n",
+      "work.org": "** TODO Ignored task\n",
     });
 
     const response = await fetch(server.url("/api/source"));
     const data = await response.json();
-    expect(data.inbox).toBe("inbox.org");
-    expect(data.files["work.org"]).toBeDefined();
-    expect(data.files["inbox.org"]).toBeDefined();
-    expect(data.files["work.org"].content).toBe("** TODO Work task\n");
+    expect(data.content).toBe("** TODO Main task\n");
+    expect(data.content).not.toContain("Ignored task");
 
-    // Write to inbox.org specifically
-    const inboxVersion = data.files["inbox.org"].version;
     const put = await fetch(server.url("/api/source"), {
       method: "PUT",
       headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify({
-        path: "inbox.org",
-        content: "** TODO Inbox task\n** TODO New capture\n",
-        version: inboxVersion,
+        content: "** TODO Main task\n** TODO New capture\n",
+        version: data.version,
       }),
     });
     expect(put.status).toBe(200);
 
-    const reread = await fetch(server.url("/api/source"));
-    const rereadData = await reread.json();
-    expect(rereadData.files["inbox.org"].content).toContain("New capture");
-    expect(rereadData.files["work.org"].content).toBe("** TODO Work task\n");
+    expect(await fs.readFile(path.join(server.dirPath, "Mediant.org"), "utf-8"))
+      .toContain("New capture");
+    expect(await fs.readFile(path.join(server.dirPath, "work.org"), "utf-8"))
+      .toBe("** TODO Ignored task\n");
   });
 
-  it("directory mode: rejects stale missing-inbox writes after inbox.org is created", async () => {
-    const server = await startServerDir({
-      "work.org": "** TODO Work task\n",
-    });
+  it("creates Mediant.org in the current directory when no target is given", async () => {
+    const server = await startServerDefault();
+    expect(await fs.readFile(server.orgPath, "utf-8")).toBe("");
 
-    const initial = await fetch(server.url("/api/source"));
-    const initialData = await initial.json();
-    expect(initialData.files["inbox.org"]).toBeUndefined();
-
-    const firstCreate = await fetch(server.url("/api/source"), {
-      method: "PUT",
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({
-        path: "inbox.org",
-        content: "** TODO First capture\n",
-        version: "",
-      }),
-    });
-    expect(firstCreate.status).toBe(200);
-
-    const staleCreate = await fetch(server.url("/api/source"), {
-      method: "PUT",
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({
-        path: "inbox.org",
-        content: "** TODO Stale capture\n",
-        version: "",
-      }),
-    });
-    expect(staleCreate.status).toBe(409);
-    expect(await fs.readFile(path.join(server.dirPath, "inbox.org"), "utf-8"))
-      .toBe("** TODO First capture\n");
-  });
-
-  it("directory mode: rejects stale writes that would resurrect deleted files", async () => {
-    const server = await startServerDir({
-      "work.org": "** TODO Work task\n",
-    });
-    const initial = await fetch(server.url("/api/source"));
-    const initialData = await initial.json();
-    const staleVersion = initialData.files["work.org"].version;
-
-    await fs.rm(path.join(server.dirPath, "work.org"));
-
-    const staleWrite = await fetch(server.url("/api/source"), {
-      method: "PUT",
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({
-        path: "work.org",
-        content: "** TODO Resurrected\n",
-        version: staleVersion,
-      }),
-    });
-    expect(staleWrite.status).toBe(409);
-    expect(existsSync(path.join(server.dirPath, "work.org"))).toBe(false);
-  });
-
-  it("directory mode: pushes SSE updates when org files are added and removed", async () => {
-    const server = await startServerDir({
-      "a.org": "** TODO A\n",
-    });
-    const stream = await openEventStream(server.port, "/api/events");
-
-    const initialVersion = await stream.nextEvent();
-    expect(initialVersion).toBeTruthy();
-
-    await forceMtimeTick();
-    await fs.writeFile(path.join(server.dirPath, "b.org"), "** TODO B\n", "utf-8");
-    const addedVersion = await stream.nextEvent();
-    expect(addedVersion).not.toBe(initialVersion);
-
-    const afterAdd = await fetch(server.url("/api/source"));
-    const afterAddData = await afterAdd.json();
-    expect(afterAddData.files["b.org"].content).toBe("** TODO B\n");
-
-    await forceMtimeTick();
-    await fs.rm(path.join(server.dirPath, "b.org"));
-    const removedVersion = await stream.nextEvent();
-    expect(removedVersion).not.toBe(addedVersion);
-
-    const afterRemove = await fetch(server.url("/api/source"));
-    const afterRemoveData = await afterRemove.json();
-    expect(afterRemoveData.files["b.org"]).toBeUndefined();
-
-    await stream.close();
+    const response = await fetch(server.url("/api/source"));
+    const data = await response.json();
+    expect(data.content).toBe("");
+    expect(data.version).toBeTruthy();
   });
 });
 
@@ -276,7 +194,7 @@ async function startServer(initialSource: string): Promise<{
   };
 }
 
-async function startServerDir(files: Record<string, string>): Promise<{
+async function startServerInDirectory(files: Record<string, string>): Promise<{
   port: number;
   dirPath: string;
   url: (pathname: string) => string;
@@ -314,6 +232,46 @@ async function startServerDir(files: Record<string, string>): Promise<{
   return {
     port,
     dirPath: tmpDir,
+    url: (pathname: string) => `http://127.0.0.1:${port}${pathname}`,
+  };
+}
+
+async function startServerDefault(): Promise<{
+  port: number;
+  orgPath: string;
+  url: (pathname: string) => string;
+}> {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "mediant-server-test-"));
+  const orgPath = path.join(tmpDir, "Mediant.org");
+
+  const port = await getFreePort();
+  const proc = spawn(process.execPath, [path.join(repoRoot, "server/cli.mjs"), "--port", String(port)], {
+    cwd: tmpDir,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  await waitForServerReady(proc, port);
+
+  let stopped = false;
+  const stop = async (): Promise<void> => {
+    if (stopped) return;
+    stopped = true;
+    proc.kill("SIGTERM");
+    await Promise.race([
+      onceExit(proc),
+      sleep(1_000),
+    ]);
+    if (proc.exitCode === null && !proc.killed) {
+      proc.kill("SIGKILL");
+      await onceExit(proc);
+    }
+    await fs.rm(tmpDir, { recursive: true, force: true });
+  };
+  runningServers.push(stop);
+
+  return {
+    port,
+    orgPath,
     url: (pathname: string) => `http://127.0.0.1:${port}${pathname}`,
   };
 }

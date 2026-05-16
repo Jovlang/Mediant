@@ -17,7 +17,7 @@ vi.mock("../ui/notifications.ts", () => ({
   scheduleNotifications: notificationMocks.scheduleNotifications,
 }));
 
-describe("main.ts directory server mode", () => {
+describe("main.ts server mode", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.unstubAllGlobals();
@@ -31,24 +31,19 @@ describe("main.ts directory server mode", () => {
     notificationMocks.setNotificationsEnabled.mockClear();
   });
 
-  it("writes existing edits to the origin file and new items to the inbox", async () => {
-    const serverFiles: Record<string, { content: string; version: string }> = {
-      "work.org": {
-        content: [
-          "** TODO Work task",
-          "SCHEDULED: <2026-04-20 Mon 11:00>",
-          "- [ ] Check result",
-          "",
-        ].join("\n"),
-        version: "w1",
-      },
-      "inbox.org": {
-        content: "* Tasks\n** TODO Inbox task\n",
-        version: "i1",
-      },
-    };
-    const putCalls: Array<{ path: string; content: string; version: string }> = [];
+  it("writes existing edits and new items to the single server source", async () => {
+    let serverSource = [
+      "** TODO Work task",
+      "SCHEDULED: <2026-04-20 Mon 11:00>",
+      "- [ ] Check result",
+      "",
+      "* Tasks",
+      "** TODO Inbox task",
+      "",
+    ].join("\n");
+    let serverVersion = "v1";
     let versionCounter = 1;
+    const putCalls: Array<{ content: string; version: string; path?: string }> = [];
 
     class FakeEventSource {
       onmessage: ((event: { data: string }) => void) | null = null;
@@ -60,42 +55,41 @@ describe("main.ts directory server mode", () => {
     vi.stubGlobal("fetch", vi.fn((input: string, init?: RequestInit) => {
       if (input !== "/api/source") throw new Error(`unexpected fetch: ${input}`);
       const method = init?.method ?? "GET";
-      if (method === "GET") return Promise.resolve(makeServerGetResponseFiles(serverFiles));
+      if (method === "GET") return Promise.resolve(makeServerGetResponse(serverSource, serverVersion));
       if (method === "PUT") {
         const bodyJson = JSON.parse(String(init?.body ?? "{}"));
         putCalls.push(bodyJson);
-        const nextVersion = `${bodyJson.path}-v${++versionCounter}`;
-        serverFiles[bodyJson.path] = { content: bodyJson.content, version: nextVersion };
-        return Promise.resolve(makePutResponse(nextVersion));
+        serverSource = bodyJson.content;
+        serverVersion = `v${++versionCounter}`;
+        return Promise.resolve(makePutResponse(serverVersion));
       }
       throw new Error(`unexpected method: ${method}`);
     }));
 
     await import("../main.ts");
     await waitFor(() => Array.from(document.querySelectorAll<HTMLElement>(".item-title")).some(
-      el => el.dataset.sourceFile === "work.org" && el.textContent?.includes("Work task"),
+      el => el.textContent?.includes("Work task"),
     ));
 
     const workTitle = Array.from(document.querySelectorAll<HTMLElement>(".item-title"))
-      .find(el => el.dataset.sourceFile === "work.org" && el.textContent?.includes("Work task")) ?? null;
+      .find(el => el.textContent?.includes("Work task")) ?? null;
     expect(workTitle).not.toBeNull();
     const workState = workTitle!.closest(".scheduled-item")?.querySelector<HTMLElement>(".item-state.is-toggleable");
     expect(workState).not.toBeNull();
-    expect(workState!.dataset.sourceFile).toBe("work.org");
     workState!.click();
     await waitFor(() => putCalls.length >= 1);
 
-    expect(putCalls[0].path).toBe("work.org");
-    expect(putCalls[0].version).toBe("w1");
+    expect(putCalls[0].path).toBeUndefined();
+    expect(putCalls[0].version).toBe("v1");
     expect(putCalls[0].content).toContain("** DONE Work task");
-    expect(serverFiles["inbox.org"].content).toContain("Inbox task");
+    expect(putCalls[0].content).toContain("** TODO Inbox task");
 
-    const checkbox = document.querySelector<HTMLElement>(".checkbox-item[data-source-file='work.org']");
+    const checkbox = document.querySelector<HTMLElement>(".checkbox-item");
     expect(checkbox).not.toBeNull();
     checkbox!.click();
     await waitFor(() => putCalls.length >= 2);
 
-    expect(putCalls[1].path).toBe("work.org");
+    expect(putCalls[1].path).toBeUndefined();
     expect(putCalls[1].content).toContain("- [X] Check result");
 
     document.querySelector<HTMLButtonElement>(".add-item-btn")!.click();
@@ -108,35 +102,19 @@ describe("main.ts directory server mode", () => {
     panel!.dispatchEvent(new Event("cancel", { cancelable: true }));
     await waitFor(() => putCalls.length >= 3);
 
-    expect(putCalls[2].path).toBe("inbox.org");
+    expect(putCalls[2].path).toBeUndefined();
     expect(putCalls[2].content).toContain("** TODO Inbox new");
     expect(putCalls[2].content).toContain("** TODO Inbox task");
   });
 
-  it("reloads duplicate SSE data without dropping unrelated queued edit saves", async () => {
-    const serverFiles: Record<string, { content: string; version: string }> = {
-      "work.org": {
-        content: [
-          "** TODO Work",
-          "SCHEDULED: <2026-04-20 Mon 11:00>",
-          "",
-        ].join("\n"),
-        version: "w1",
-      },
-      "other.org": {
-        content: [
-          "** TODO Other",
-          "SCHEDULED: <2026-04-20 Mon 12:00>",
-          "",
-        ].join("\n"),
-        version: "o1",
-      },
-      "inbox.org": {
-        content: "* Tasks\n",
-        version: "i1",
-      },
-    };
-    const putCalls: Array<{ body: string; path: string; version: string | null }> = [];
+  it("reloads duplicate SSE data without dropping queued edit saves", async () => {
+    let serverSource = [
+      "** TODO Work",
+      "SCHEDULED: <2026-04-20 Mon 11:00>",
+      "",
+    ].join("\n");
+    let serverVersion = "v1";
+    const putCalls: Array<{ body: string; version: string | null }> = [];
     let resolveFirstPut: (() => void) | null = null;
     const eventSources: Array<{ emit: (data: string) => void }> = [];
 
@@ -158,26 +136,29 @@ describe("main.ts directory server mode", () => {
     vi.stubGlobal("fetch", vi.fn((input: string, init?: RequestInit) => {
       if (input !== "/api/source") throw new Error(`unexpected fetch: ${input}`);
       const method = init?.method ?? "GET";
-      if (method === "GET") return Promise.resolve(makeServerGetResponseFiles(serverFiles));
+      if (method === "GET") return Promise.resolve(makeServerGetResponse(serverSource, serverVersion));
       if (method !== "PUT") throw new Error(`unexpected method: ${method}`);
 
       const bodyText = String(init?.body ?? "");
       const bodyJson = JSON.parse(bodyText);
       putCalls.push({
         body: bodyText,
-        path: bodyJson.path,
         version: bodyJson.version ?? null,
       });
 
       if (putCalls.length === 1) {
-        serverFiles[bodyJson.path] = { content: bodyJson.content, version: "w1a" };
         return new Promise((resolve) => {
-          resolveFirstPut = () => resolve(makePutResponse("w1a"));
+          resolveFirstPut = () => {
+            serverSource = bodyJson.content;
+            serverVersion = "v1a";
+            resolve(makePutResponse("v1a"));
+          };
         });
       }
 
-      serverFiles[bodyJson.path] = { content: bodyJson.content, version: "w2" };
-      return Promise.resolve(makePutResponse("w2"));
+      serverSource = bodyJson.content;
+      serverVersion = "v2";
+      return Promise.resolve(makePutResponse("v2"));
     }));
 
     await import("../main.ts");
@@ -188,7 +169,7 @@ describe("main.ts directory server mode", () => {
     await flush();
 
     const workTitle = Array.from(document.querySelectorAll<HTMLElement>(".scheduled-item .item-title"))
-      .find(el => el.dataset.sourceFile === "work.org" && el.textContent?.includes("Work")) ?? null;
+      .find(el => el.textContent?.includes("Work")) ?? null;
     expect(workTitle).not.toBeNull();
     workTitle!.click();
     await waitFor(() => document.querySelector(".add-panel.is-open") !== null);
@@ -200,33 +181,22 @@ describe("main.ts directory server mode", () => {
     titleInput!.dispatchEvent(new Event("input", { bubbles: true }));
     await flush();
     expect(putCalls).toHaveLength(1);
-    expect(putCalls[0].path).toBe("work.org");
-    expect(putCalls[0].version).toBe("w1");
+    expect(putCalls[0].version).toBe("v1");
 
     titleInput!.value = "Work two";
     titleInput!.dispatchEvent(new Event("input", { bubbles: true }));
     await flush();
     expect(putCalls).toHaveLength(1);
 
-    serverFiles["other.org"] = {
-      content: [
-        "** TODO Other external",
-        "SCHEDULED: <2026-04-20 Mon 12:00>",
-        "",
-      ].join("\n"),
-      version: "o2",
-    };
     eventSources[0].emit("stable");
-    await waitFor(() => Array.from(document.querySelectorAll<HTMLElement>(".scheduled-item .item-title")).some(
-      el => el.textContent?.includes("Other external"),
-    ));
+    await flush();
+    expect(putCalls).toHaveLength(1);
 
     expect(resolveFirstPut).not.toBeNull();
     resolveFirstPut!();
     await waitFor(() => putCalls.length === 2);
 
-    expect(putCalls[1].path).toBe("work.org");
-    expect(putCalls[1].version).toBe("w1a");
+    expect(putCalls[1].version).toBe("v1a");
     expect(JSON.parse(putCalls[1].body).content).toContain("** TODO Work two");
   });
 });
@@ -258,12 +228,8 @@ function makeMockResponse(status: number, body = "") {
   };
 }
 
-function makeServerGetResponseFiles(
-  files: Record<string, { content: string; version: string }>,
-  inbox = "inbox.org",
-) {
-  const body = JSON.stringify({ files, inbox });
-  return makeMockResponse(200, body);
+function makeServerGetResponse(source: string, version: string) {
+  return makeMockResponse(200, JSON.stringify({ content: source, version }));
 }
 
 function makePutResponse(version: string) {
