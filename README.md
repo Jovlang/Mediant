@@ -29,7 +29,7 @@ Org-mode is powerful because it stores rich personal information in ordinary tex
 
 You can also use Org-agenda to generate a schedule and a todo list sourced from your various Org files.
 
-However, Org-agenda requires Emacs. What if you want to comfortably view and edit your Org agenda on your phone?
+However, Org-agenda requires Emacs. What if you want to comfortably view and edit your agenda on your phone?
 
 Mediant exists for that layer.
 
