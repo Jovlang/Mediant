@@ -2,7 +2,7 @@
 
 A calm, focused web agenda for Org-mode files.
 
-Mediant gives a plain `.org` file a clean, readable interface.
+Mediant gives a plain `.org` file (or directory) a clean, readable interface.
 
 It is built around two simple ideas:
 
@@ -25,22 +25,15 @@ It is a web agenda UI for people who like plain text but want to check their wee
 
 ## Why Mediant exists
 
-Org-mode is powerful because it stores a rich variety of information in ordinary text files. You can edit them anywhere, version them, sync them, grep them, and keep them for decades.
+Org-mode is powerful because it stores rich personal information in ordinary text files. You can edit them anywhere, version them, sync them, grep them, and keep them for decades.
 
-But a plain text file is not always the best interface for answering simple daily questions:
+You can also use Org-agenda to generate a schedule and a todo list sourced from your various Org files.
 
-* What is urgent?
-* What is happening today?
-* What is overdue?
-* What is coming up this week?
-* Which deadlines are getting close?
-* What did I schedule but forget?
-* What could become relevant later?
-* What can I quickly capture on my phone?
+However, Org-agenda requires Emacs. What if you want to comfortably view and edit your Org agenda on your phone?
 
 Mediant exists for that layer.
 
-It keeps Org as the source of truth, then surfaces the agenda through a browser UI.
+It keeps Org as the source of truth, then renders the agenda in a browser UI.
 
 The goal is not to expose every possible Org feature, but to make the common personal-agenda workflow feel clear, fast, and calm.
 
@@ -48,11 +41,7 @@ The goal is not to expose every possible Org feature, but to make the common per
 
 ## The shape of the agenda
 
-Mediant does not treat every future item as one giant chronological stream.
-
-That flattening is often where agenda tools become noisy. Deadlines get buried between meetings. Undated ideas compete with real commitments. A task that is overdue appears beside a thought that merely might matter someday. The interface becomes a database dump instead of a usable daily surface.
-
-Mediant separates these things because they answer different questions.
+Mediant has three sections:
 
 ### Deadlines
 
@@ -90,9 +79,9 @@ It shows the shape of time, not every possible thing you could be doing.
 
 ### Someday
 
-Someday is for things that matter, but not yet.
+Someday is for things that matter, but not immediately.
 
-Undated TODO items without a timestamp, `SCHEDULED`, or `DEADLINE` appear here.
+Tasks without a date appear here.
 
 This section answers questions like:
 
@@ -101,19 +90,11 @@ This section answers questions like:
 * What should stay visible without demanding attention?
 * What have I captured, but not placed in time?
 
-Someday is not treated as a failed agenda item.
-
-It is a place for possible futures.
+It's a place for possible futures.
 
 ### Three spaces, three logics
 
-These sections intentionally follow different rules because they serve different purposes.
-
-Mediant tries to preserve that distinction rather than flattening everything into one list.
-
-The result is still one agenda, but not one undifferentiated stream.
-
-It is closer to a quiet daily surface:
+These sections intentionally follow different rules because they serve different purposes:
 
 * pressure at the top
 * plans in the middle
@@ -127,19 +108,14 @@ Mediant is designed for fast visual scanning.
 
 It gives you:
 
-* three agenda spaces with different semantics:
-  * deadlines for pressure
-  * calendar for commitments
-  * someday for possibilities
 * overdue items at the top
 * upcoming deadlines grouped by temporal urgency
 * scheduled tasks and timed events in the calendar
 * recurring tasks and events with per-occurrence exceptions
-* quick capture with a single key
-* lightweight add and edit panels
+* quick capture with keybindings
+* add and edit panels
 * autosaving field edits
 * tag and priority filtering
-* subtle handling of completed and skipped items
 * optional browser notifications for timed events
 * English, Norwegian, Italian, and German UI strings
 
@@ -154,10 +130,10 @@ Mediant is for “my stuff”.
 Mediant has three layers:
 
 ```text
-.org file → parser → agenda → UI
+.org files → parser → agenda → UI
 ```
 
-The `.org` file is the source of truth.
+The `.org` file or directory is the source of truth.
 
 The parser reads a practical subset of Org syntax into structured entries.
 
@@ -338,7 +314,7 @@ In server mode:
 
 * the browser loads all Org files from disk
 * UI edits are written back to the originating file
-* new captures always go to `inbox.org` (single-file mode: the file itself)
+* new captures always go to `inbox.org` (single-file mode: the file itself acts as inbox)
 * external edits are detected automatically
 * updates are pushed to the browser with Server-Sent Events
 * the files on disk are the source of truth
@@ -634,13 +610,13 @@ Write conflicts are rejected with `409`. The UI then reloads all files from disk
 Mediant is split into three main stages:
 
 ```text
-.org file → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
-            OrgEntry[]          Agenda model          HTML/CSS
+.org files → Parser (src/org/) → Agenda (src/agenda/) → UI (src/ui/)
+             OrgEntry[]          Agenda model          HTML/CSS
 ```
 
 ### Parser layer
 
-The parser reads Org source into structures that reflect the file:
+The parser reads Org source into structures that reflect each file:
 
 * headings
 * TODO state
@@ -766,7 +742,7 @@ Mediant uses browser `localStorage` for UI preferences and, in static mode, the 
 
 In static mode, the Org source lives in the browser.
 
-In server mode, the Org source lives in the file passed to the CLI. UI preferences are still browser-local.
+In server mode, the Org source lives in the file or directory passed to the CLI. UI preferences are still browser-local.
 
 ---
 
