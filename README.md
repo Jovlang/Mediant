@@ -4,7 +4,7 @@ A calm, focused agenda backed by one plain text file: `Mediant.org`.
 
 > Not every future thing is the same kind of thing.
 
-Mediant treats the agenda as three distinct spaces:
+The agenda has three spaces:
 
 * **Deadlines** — things that exert pressure
 * **Calendar** — things that have a place in time
