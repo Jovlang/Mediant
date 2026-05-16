@@ -191,23 +191,27 @@ This is useful for:
 
 ### Server mode
 
-Run Mediant against a real Org file:
+Run Mediant against a single Org file or an entire directory:
 
 ```sh
-mediant ~/org/todo.org
+mediant ~/org/todo.org       # single file
+mediant ~/org/               # all .org files in the directory
 ```
 
-Mediant starts a tiny Node server bound to `127.0.0.1`. The browser hydrates from the file, writes edits back to disk, and receives live updates when the file changes externally.
+Mediant starts a tiny Node server bound to `127.0.0.1`. The browser hydrates from disk, writes edits back, and receives live updates when files change externally.
 
-That means you can edit the same file from Emacs and see the browser UI update automatically.
+In directory mode, the agenda is built from every `.org` file in the directory. New entries — quick captures, add-panel items — are always written to `inbox.org` inside that directory. Edits to existing entries write back to the file they came from.
+
+That means you can edit any file from Emacs and see the browser UI update automatically.
 
 This is useful for:
 
 * using Org as the real storage format
+* keeping a multi-file org setup (work.org, personal.org, inbox.org, …) with one unified agenda view
 * combining Emacs editing with a browser agenda
 * local desktop use
 * mobile access through Tailscale, SSH tunnels, or a reverse proxy
-* syncing the file with Dropbox, Syncthing, git, Nextcloud, or anything else
+* syncing files with Dropbox, Syncthing, git, Nextcloud, or anything else
 
 Mediant does not include authentication. If you expose it beyond localhost, put it behind something you trust.
 
@@ -227,7 +231,7 @@ It does not try to own your workflow.
 
 The intended shape is smaller:
 
-> One plain file.
+> Your plain text files.
 > One focused agenda.
 > Different kinds of future separated into different spaces.
 
@@ -281,10 +285,11 @@ Build once:
 npm run build
 ```
 
-Run Mediant against an Org file:
+Run Mediant against an Org file or directory:
 
 ```sh
-node server/cli.mjs ~/org/todo.org
+node server/cli.mjs ~/org/todo.org        # single file
+node server/cli.mjs ~/org/                # directory
 ```
 
 By default, the server listens on:
@@ -296,13 +301,13 @@ http://localhost:4242
 Use another port:
 
 ```sh
-node server/cli.mjs ~/org/todo.org --port 7000
+node server/cli.mjs ~/org/ --port 7000
 ```
 
 Run in the background:
 
 ```sh
-node server/cli.mjs ~/org/todo.org --daemon
+node server/cli.mjs ~/org/ --daemon
 ```
 
 After installing globally or linking the package:
@@ -316,9 +321,9 @@ npm link
 You can run:
 
 ```sh
-mediant ~/org/todo.org
-mediant ~/org/todo.org --port 7000
-mediant ~/org/todo.org --daemon
+mediant ~/org/
+mediant ~/org/ --port 7000
+mediant ~/org/ --daemon
 ```
 
 A daemon prints its PID when it starts. Stop it with:
@@ -331,15 +336,16 @@ kill <pid>
 
 In server mode:
 
-* the browser loads the Org source from disk
-* UI edits are written back to the file
+* the browser loads all Org files from disk
+* UI edits are written back to the originating file
+* new captures always go to `inbox.org` (single-file mode: the file itself)
 * external edits are detected automatically
 * updates are pushed to the browser with Server-Sent Events
-* the file on disk is the source of truth
+* the files on disk are the source of truth
 
 Conflict strategy: **disk wins**.
 
-If the file changes underneath the browser, the server rejects the stale write with `409`, and the UI reloads from disk.
+If a file changes underneath the browser, the server rejects the stale write with `409`, and the UI reloads from disk.
 
 ### Security
 
@@ -611,15 +617,15 @@ To write those properties, use Mediant's edit panel or edit the property drawer 
 
 In server mode, Mediant exposes three endpoints on top of the static UI.
 
-| Method | Path          | Purpose                                                                           |
-| ------ | ------------- | --------------------------------------------------------------------------------- |
-| `GET`  | `/api/source` | Returns the file contents. Response header: `X-Version: <mtimeMs>`.               |
-| `PUT`  | `/api/source` | Writes the file. Accepts `If-Match: <version>`. Version mismatch returns `409`.   |
-| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <version>` when the file changes on disk. |
+| Method | Path          | Purpose                                                                                    |
+| ------ | ------------- | ------------------------------------------------------------------------------------------ |
+| `GET`  | `/api/source` | Returns JSON: `{ files: { [relPath]: { content, version } }, inbox: string }`.            |
+| `PUT`  | `/api/source` | Writes one file. Body JSON: `{ path, content, version }`. Version mismatch returns `409`. |
+| `GET`  | `/api/events` | Server-Sent Events stream. Emits `data: <combinedVersion>` when any file changes on disk. |
 
-The version is based on the file modification timestamp.
+The version for each file is its modification timestamp (milliseconds).
 
-Write conflicts are rejected. The UI then reloads from disk.
+Write conflicts are rejected with `409`. The UI then reloads all files from disk.
 
 ---
 
@@ -778,7 +784,6 @@ Current non-goals include:
 * timezone handling beyond local time
 * custom TODO keyword workflows
 * advanced state machines
-* multi-file agenda
 * export
 * collaborative editing
 * built-in authentication
