@@ -6,6 +6,19 @@ The dialect is intentionally narrow where broad Org compatibility would create a
 
 Every feature Mediant does support should parse correctly and round-trip without loss. Everything it does not support is either preserved verbatim or silently skipped — it never corrupts content it doesn't understand.
 
+In short: Mediant.org is an Org-readable agenda language. It borrows Org syntax where useful, preserves Org text where possible, and adds small Mediant-specific semantics only when they make real-world agenda editing better.
+
+## Dialect rules
+
+- Mediant may extend Org where the extension strengthens Mediant's agenda model.
+- Mediant should not chase Org features for compatibility alone.
+- One item should have one canonical temporal source.
+- Every editable UI field must map to one obvious source location.
+- Unknown Org should be preserved where possible, not interpreted.
+- Mediant may preserve more Org than it understands.
+- Mediant may understand more Org than it edits.
+- Mediant should only edit canonical, simple fields.
+
 ## Deliberate simplifications
 
 These are conscious design decisions, not gaps to be filled later:
@@ -254,13 +267,32 @@ SCHEDULED: <2026-04-27 ma. 17:00-18:00 +1w>
 A note-only exception is also valid when the occurrence still happens at its base time but needs one-off context:
 
 ```org
-** Folkeswing øvet :musikk:sosialt:trening:
+** Weekly dance class :music:social:fitness:
 <2026-04-08 Wed 18:00-21:00 +1w>
 :PROPERTIES:
 :SERIES-UNTIL: 2026-04-29
-:EXCEPTION-NOTE-2026-04-22: Siste gang dette semesteret
+:EXCEPTION-NOTE-2026-04-22: Last class of the semester
 :END:
 ```
+
+Semantics:
+
+- the heading is one recurring event series
+- the standalone timestamp is the canonical event timestamp
+- `+1w` expands weekly occurrences
+- `:SERIES-UNTIL:` limits the recurrence series
+- `:EXCEPTION-NOTE-YYYY-MM-DD:` attaches a note to one occurrence
+- the exception key is the base occurrence date, not the shifted or rendered date
+- the syntax is Mediant-specific but remains valid Org because it uses a normal property drawer
+
+Why this is allowed:
+
+- it models real life: recurring events have endings and per-occurrence notes
+- it keeps one canonical event source
+- it avoids arbitrary inline timestamp interpretation
+- it round-trips cleanly through Emacs
+- it is easier to show in Mediant's UI than generic Org agenda edge cases
+- it supports Mediant's core purpose: a calm agenda for real human schedules
 
 **`:EXCEPTION-YYYY-MM-DD: <override>`** — the behaviour override for a single occurrence. At most one per date. Override grammar (exact match; anything else is dropped silently):
 

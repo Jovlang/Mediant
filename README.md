@@ -220,13 +220,43 @@ Mediant can add its own syntax when the syntax models real calendar or task beha
 Recurrence exceptions are the model case. Plain Org repeaters describe an unbroken series, but real calendars need one-off changes: a skipped class, a shifted rehearsal, a final meeting note, or a semester cutoff. Mediant stores those changes next to the repeating entry in ordinary property drawers so the file stays Org-readable, while Mediant gives the properties agenda meaning:
 
 ```org
-** Folkeswing øvet :musikk:sosialt:trening:
+** Weekly dance class :music:social:fitness:
 <2026-04-08 Wed 18:00-21:00 +1w>
 :PROPERTIES:
 :SERIES-UNTIL: 2026-04-29
-:EXCEPTION-NOTE-2026-04-22: Siste gang dette semesteret
+:EXCEPTION-NOTE-2026-04-22: Last class of the semester
 :END:
 ```
+
+The semantics are intentionally direct:
+
+* the heading is one recurring event series
+* the standalone timestamp is the canonical event timestamp
+* `+1w` expands weekly occurrences
+* `:SERIES-UNTIL:` limits the recurrence series
+* `:EXCEPTION-NOTE-YYYY-MM-DD:` attaches a note to one occurrence
+* the exception key is the base occurrence date, not the shifted or rendered date
+* the syntax is Mediant-specific but remains valid Org because it uses a normal property drawer
+
+This is allowed because it models real life: recurring events have endings and per-occurrence notes. It keeps one canonical event source, avoids arbitrary inline timestamp interpretation, round-trips cleanly through Emacs, is easy to show in Mediant's UI, and supports Mediant's core purpose: a calm agenda for real human schedules.
+
+This is different from unsupported Org features. Tag inheritance creates derived state that is unclear to edit. Multiple timestamps create ambiguous source mappings. Inline timestamps in prose make the agenda depend on arbitrary body text. Full org-directory support turns Mediant into a database/indexer. Org-roam, backlinks, and custom agenda commands are outside the product model.
+
+The rule is:
+
+* Mediant may extend Org where the extension strengthens Mediant's agenda model.
+* Mediant should not chase Org features for compatibility alone.
+
+The invariants are:
+
+* one item should have one canonical temporal source
+* every editable UI field must map to one obvious source location
+* unknown Org should be preserved where possible, not interpreted
+* Mediant may preserve more Org than it understands
+* Mediant may understand more Org than it edits
+* Mediant should only edit canonical, simple fields
+
+In short: Mediant.org is an Org-readable agenda language. It borrows Org syntax where useful, preserves Org text where possible, and adds small Mediant-specific semantics only when they make real-world agenda editing better.
 
 ---
 
