@@ -209,6 +209,25 @@ The intended shape is smaller:
 > One focused agenda.
 > Different kinds of future separated into different spaces.
 
+### Mediant.org dialect
+
+Mediant.org is not merely a reduced subset of Org-mode. It is a deliberate Org-readable dialect designed around Mediant's agenda model.
+
+That means Mediant rejects broad Org compatibility when it would create ambiguous editing rules, overloaded source locations, or a DevTools-like UI. Features are not added just because Org-mode supports them.
+
+Mediant can add its own syntax when the syntax models real calendar or task behavior that the agenda needs, while preserving one clear source location and one clear UI meaning.
+
+Recurrence exceptions are the model case. Plain Org repeaters describe an unbroken series, but real calendars need one-off changes: a skipped class, a shifted rehearsal, a final meeting note, or a semester cutoff. Mediant stores those changes next to the repeating entry in ordinary property drawers so the file stays Org-readable, while Mediant gives the properties agenda meaning:
+
+```org
+** Folkeswing øvet :musikk:sosialt:trening:
+<2026-04-08 Wed 18:00-21:00 +1w>
+:PROPERTIES:
+:SERIES-UNTIL: 2026-04-29
+:EXCEPTION-NOTE-2026-04-22: Siste gang dette semesteret
+:END:
+```
+
 ---
 
 ## Getting started
@@ -462,7 +481,7 @@ Days and numeric months may be one or two digits. Ambiguous date forms without a
 
 ## Supported Org syntax
 
-Mediant reads and writes a deliberate subset of Org syntax. The key simplifications to know up front:
+Mediant reads and writes Mediant.org: a deliberate Org-readable dialect, not a generic attempt at full Org compatibility. The key simplifications to know up front:
 
 - **Two canonical entry types** — Mediant treats entries as either events or TODO tasks.
 - **Standalone timestamps only** — active timestamps are only recognised when they are the sole content of a line. Timestamps embedded in heading titles or body prose are not extracted into the agenda.

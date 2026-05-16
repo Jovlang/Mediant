@@ -75,6 +75,9 @@ emacs --batch -L elisp -l elisp/mediant-org-agenda-test.el -f ert-run-tests-batc
 
 ## Design principles
 
+- **Mediant.org is an Org-readable dialect, not just a subset.** The source should remain readable and editable as Org text, but Mediant's syntax choices serve Mediant's agenda model first.
+- **Do not chase broad Org compatibility.** Reject Org features when they would create ambiguous editing, multiple plausible source locations, or DevTools-like UI. Do not add a feature merely because Org-mode supports it.
+- **Add Mediant syntax only for agenda behavior.** A Mediant-specific extension is appropriate when it models real calendar/task behavior the app needs while preserving one clear source location and one clear UI meaning. Recurrence exceptions are the model: one repeating heading owns its per-occurrence changes in its property drawer.
 - **Parser types stay close to Org semantics.** `OrgEntry` mirrors the source. No display logic leaks in.
 - **Timestamps store strings, not Dates.** `date` is `"2026-04-07"`, times are `"15:15"`. Conversion happens via helpers in `timestamp.ts`.
 - **Recurrence expansion is always bounded.** `expandRecurrences()` and `expandOccurrences()` only generate occurrences within a given date range. Never expand globally.

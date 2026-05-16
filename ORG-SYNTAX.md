@@ -1,6 +1,10 @@
 # Org Syntax Reference
 
-Mediant reads and writes a deliberate subset of Org-mode. The subset is chosen for simplicity: every feature Mediant does support is parsed correctly and round-trips without loss, and everything it does not support is either preserved verbatim or silently skipped — it never corrupts content it doesn't understand.
+Mediant reads and writes Mediant.org: a deliberate Org-readable dialect designed for Mediant's agenda model. It is not merely a reduced subset of Org-mode.
+
+The dialect is intentionally narrow where broad Org compatibility would create ambiguous editing rules, overloaded source locations, or a DevTools-like UI. Features are not added just because Org-mode supports them. Mediant-specific syntax is acceptable when it models real calendar or task behavior that the agenda needs, while preserving one clear source location and one clear UI meaning.
+
+Every feature Mediant does support should parse correctly and round-trip without loss. Everything it does not support is either preserved verbatim or silently skipped — it never corrupts content it doesn't understand.
 
 ## Deliberate simplifications
 
@@ -231,6 +235,8 @@ When Mediant creates a new `:PROPERTIES:` drawer, it writes it in the Org-compat
 
 Standard Org repeaters (`+1w`, `+1m`, etc.) produce an unbroken series — every occurrence is identical except for the date. Mediant adds two property-drawer key families that let an entry with a repeating timestamp deviate from the base series on a single occurrence (skip it, shift it, move it, or pin a one-off note to it) without giving up the repeater.
 
+This is the model for Mediant.org dialect design: the feature is not present because Org-mode has a broad property system; it is present because real calendar series need local changes, and those changes have one clear source location (the repeating heading's property drawer) and one clear UI meaning (this occurrence is different from the base series).
+
 Both key families are keyed by the *unshifted* base occurrence date (`YYYY-MM-DD`) so the mapping stays stable even after a reschedule moves the occurrence to a different day.
 
 ```org
@@ -242,6 +248,17 @@ SCHEDULED: <2026-04-27 ma. 17:00-18:00 +1w>
 :EXCEPTION-NOTE-2026-05-04: Bring mat and water
 :EXCEPTION-2026-05-11: reschedule 2026-05-12 18:00
 :EXCEPTION-NOTE-2026-05-18: Long session today
+:END:
+```
+
+A note-only exception is also valid when the occurrence still happens at its base time but needs one-off context:
+
+```org
+** Folkeswing øvet :musikk:sosialt:trening:
+<2026-04-08 Wed 18:00-21:00 +1w>
+:PROPERTIES:
+:SERIES-UNTIL: 2026-04-29
+:EXCEPTION-NOTE-2026-04-22: Siste gang dette semesteret
 :END:
 ```
 
