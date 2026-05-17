@@ -74,7 +74,11 @@ DEADLINE: <2026-06-30 Tue>
 - [ ] Part IV — Choices
 - [ ] Part V — Two Selves
 
-** TODO Call the landlord :admin:
+** TODO [#C] Call the landlord :admin:
+** TODO Learn to make sourdough :personal:
+** TODO Watch the Herzog documentary :personal:
+** TODO Look into standing desk options :work:
+** TODO Write a letter to Grandma :personal:
 
 ** TODO [#A] Prepare birthday gift for Sam :personal:
 DEADLINE: <2026-05-24 Sun>
