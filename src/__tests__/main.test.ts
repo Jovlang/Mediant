@@ -393,6 +393,39 @@ describe("main.ts integration", () => {
     expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
       .toBe("Tue 8 Jun 2027");
 
+    // Norwegian month abbreviations (dots stripped by normalizer)
+    deadInput!.value = "15 mars 27";
+    deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
+      .toBe("Mon 15 Mar 2027");
+
+    deadInput!.value = "1 des.";
+    deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
+      .toBe("Tue 1 Dec 2026");
+
+    // Italian month abbreviations (gen = January)
+    deadInput!.value = "10 gen 27";
+    deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
+      .toBe("Sun 10 Jan 2027");
+
+    deadInput!.value = "20 giu";
+    deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
+      .toBe("Sat 20 Jun 2026");
+
+    // German month abbreviations (Mär diacritic stripped to mar)
+    deadInput!.value = "20 Mär 27";
+    deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
+      .toBe("Sat 20 Mar 2027");
+
+    deadInput!.value = "3 Dez";
+    deadInput!.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(document.querySelector<HTMLElement>("#add-dead")?.closest(".add-field")?.querySelector(".datetime-preview")?.textContent)
+      .toBe("Thu 3 Dec 2026");
+
     schedInput!.value = "21/";
     schedInput!.dispatchEvent(new Event("input", { bubbles: true }));
     expect(schedPreview?.textContent).toBe("");

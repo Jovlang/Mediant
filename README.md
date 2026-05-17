@@ -423,6 +423,25 @@ Add and edit fields accept a few shorthand forms:
 
 Days and numeric months may be one or two digits. Ambiguous date forms without a year resolve to the next future occurrence. Two-digit years are interpreted in the current century.
 
+Month name tokens are recognised in all four languages regardless of the active locale:
+
+| Month     | English | Norwegian | Italian | German |
+| --------- | ------- | --------- | ------- | ------ |
+| January   | `jan`   | `jan.`    | `gen`   | `jan`  |
+| February  | `feb`   | `feb.`    | `feb`   | `feb`  |
+| March     | `mar`   | `mars`    | `mar`   | `mär`  |
+| April     | `apr`   | `apr.`    | `apr`   | `apr`  |
+| May       | `may`   | `mai`     | `mag`   | `mai`  |
+| June      | `jun`   | `juni`    | `giu`   | `jun`  |
+| July      | `jul`   | `juli`    | `lug`   | `jul`  |
+| August    | `aug`   | `aug.`    | `ago`   | `aug`  |
+| September | `sep`   | `sep.`    | `set`   | `sep`  |
+| October   | `oct`   | `okt.`    | `ott`   | `okt`  |
+| November  | `nov`   | `nov.`    | `nov`   | `nov`  |
+| December  | `dec`   | `des.`    | `dic`   | `dez`  |
+
+Norwegian trailing dots are optional. German `mär` and `märz` are matched after diacritic stripping.
+
 ---
 
 ## Mediant.org syntax

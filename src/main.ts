@@ -1237,7 +1237,7 @@ function expandDate(raw: string): string {
         .replace(/\p{M}/gu, "")
         .replace(/\.$/, "");
     const monthIndexes: Readonly<Record<string, number>> = {
-      jan: 1,
+      jan: 1, gen: 1,
       feb: 2,
       mar: 3, mars: 3,
       apr: 4,
