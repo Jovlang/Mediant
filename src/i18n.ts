@@ -143,7 +143,7 @@ const messages = {
     couldNotSaveTask: "Could not save task.",
 
     // Input screen
-    someday: "Tasks",
+    someday: "Someday",
 
     appTitle: "Mediant",
     loadAgenda: "Load agenda",
@@ -278,7 +278,7 @@ const messages = {
     quickTaskCapture: "Legg til oppgave",
     couldNotSaveTask: "Kunne ikke lagre oppgaven.",
 
-    someday: "Oppgaver",
+    someday: "Når det passer",
 
     appTitle: "Mediant",
     loadAgenda: "Last inn agenda",
@@ -412,7 +412,7 @@ const messages = {
     quickTaskCapture: "Acquisizione rapida attività",
     couldNotSaveTask: "Impossibile salvare l'attività.",
 
-    someday: "Attività",
+    someday: "Un giorno",
 
     appTitle: "Mediant",
     loadAgenda: "Carica agenda",
@@ -546,7 +546,7 @@ const messages = {
     quickTaskCapture: "Schnelle Aufgabenerfassung",
     couldNotSaveTask: "Aufgabe konnte nicht gespeichert werden.",
 
-    someday: "Aufgaben",
+    someday: "Irgendwann",
 
     appTitle: "Mediant",
     loadAgenda: "Agenda laden",
