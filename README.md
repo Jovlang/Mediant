@@ -6,7 +6,11 @@ A calm, focused agenda backed by one plain text file: `Mediant.org`.
 
 ![Mediant](Mediant.png)
 
-The agenda has three spaces:
+Mediant is not an enterprise productivity platform for collaborative stakeholder alignment workflows.
+
+It's your agenda.
+
+Mediant has three spaces:
 
 * **Deadlines** — things that exert pressure
 * **Calendar** — things that have a place in time
