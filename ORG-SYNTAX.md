@@ -93,7 +93,7 @@ DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
 
 - `TODO` and `DONE` are recognized as state keywords. They must appear immediately after the stars+space.
 - Other keywords (WAITING, NEXT, CANCELLED, etc.) are treated as part of the heading title.
-- DONE items are parsed fully. In the v1 agenda, they are rendered as dimmed grey in the agenda view.
+- DONE items are parsed fully. When enabled, they are rendered as dimmed grey in the agenda view.
 
 ### Priority cookies
 
@@ -104,7 +104,7 @@ DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
 
 - `[#A]`, `[#B]`, `[#C]` immediately after the TODO state (or at the start of the heading remainder if no TODO keyword).
 - Parsed into `priority` on the entry (`"A" | "B" | "C" | null`) and stripped from the title.
-- Rendered in the agenda as a small colored badge (A = red, B = amber, C = blue) prefixed to the item title.
+- Rendered in the agenda as a colored badge (A = red !!!, B = amber !!, C = blue !) prefixed to the item title.
 - Only the letters `A`, `B`, and `C` are recognized. Other letters (e.g. `[#D]`) are treated as part of the title.
 
 ### Tags
@@ -425,7 +425,7 @@ CLOSED: [2026-04-07 Tue 14:00]
 *bold* /italic/ ~code~ =verbatim= +strikethrough+
 ```
 
-- Preserved as-is in body text. No rendering of markup in v1.
+- Preserved as-is in body text. No rendering of markup. 
 
 ### Lists (plain)
 
