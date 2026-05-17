@@ -48,6 +48,9 @@ SCHEDULED: <2026-05-25 Mon>
 - [ ] Compare accommodation
 - [ ] Buy travel insurance
 
+** TODO [#C] Book flights :personal:travel:
+SCHEDULED: <2026-05-21 to.>
+
 ** TODO Pay quarterly tax :finance:admin:
 DEADLINE: <2026-07-31 Fri> SCHEDULED: <2026-07-01 Wed>
 
@@ -119,9 +122,6 @@ DEADLINE: <2026-05-24 Sun>
   Bistro on Canal Street — reservation under "Jordan".
   * Reminder: bring the book you borrowed
 #+end_src
-
-** [#C] Book flights :personal:travel:
-<2026-05-21 Thu>
 
 ** Spanish class :learning:language:
 <2026-05-20 Wed 19:00-20:30 +1w>
