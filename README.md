@@ -501,7 +501,6 @@ Everything Mediant does not recognise is preserved verbatim where possible. For 
 | SCHEDULED        | `SCHEDULED: <2026-04-14 Tue 12:00>`         |
 | DEADLINE         | `DEADLINE: <2026-05-05 Tue>`                |
 | Checkbox lists   | `- [ ] Pending` / `- [X] Done`              |
-| Progress cookies | `** TODO Task [2/3]` / `** TODO Task [66%]` (treated as text) |
 | Body text        | `#+begin_src description` block             |
 
 ---
@@ -803,6 +802,8 @@ In server mode, the Mediant.org source lives in the file passed to the CLI, or `
 * timezone handling beyond local time
 * custom TODO keyword workflows
 * advanced state machines
+* tag inheritance
+* inline timestamps
 * export
 * collaborative editing
 * built-in authentication
