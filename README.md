@@ -571,6 +571,34 @@ The integration is display-only. It does not add Emacs commands for creating or 
 
 To write those properties, use Mediant's edit panel or edit the property drawer by hand.
 
+### Org capture templates
+
+The bundled capture templates let you add entries to Mediant.org from anywhere in Emacs using the standard `org-capture` interface (`C-c c`).
+
+Enable them with:
+
+```elisp
+(add-to-list 'load-path "/path/to/Mediant/elisp")
+(load "mediant-capture-templates")
+```
+
+`org-directory` must be set before loading so the file path to `Mediant.org` can be resolved.
+
+The templates registered are:
+
+| Key | Name                        | Target section | Planning |
+| --- | --------------------------- | -------------- | -------- |
+| `t` | Todo                        | Tasks          | none |
+| `d` | Todo with deadline          | Tasks          | `DEADLINE:` |
+| `s` | Scheduled todo              | Tasks          | `SCHEDULED:` |
+| `b` | Scheduled todo with deadline | Tasks         | `DEADLINE: … SCHEDULED:` |
+| `e` | Event                       | Events         | standalone active timestamp |
+| `w` | Weekly event                | Events         | repeating timestamp (`+1w`) |
+| `m` | Monthly event               | Events         | repeating timestamp (`+1m`) |
+| `y` | Yearly event                | Events         | repeating timestamp (`+1y`) |
+
+Each date-bearing template prompts for a date using `org-read-date` and produces a timestamp in the format Mediant expects.
+
 ---
 
 ## API
@@ -678,7 +706,8 @@ server/
   cli.mjs               — Node CLI and HTTP server using built-in modules only
 
 elisp/
-  mediant-org-agenda.el — Optional Org agenda display integration
+  mediant-org-agenda.el          — Optional Org agenda display integration
+  mediant-capture-templates.el   — Optional Org capture templates for Mediant.org entries
 
 index.html              — Minimal browser shell
 ```
