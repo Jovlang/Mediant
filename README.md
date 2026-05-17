@@ -4,6 +4,8 @@ A calm, focused agenda backed by one plain text file: `Mediant.org`.
 
 > Not every future thing is the same kind of thing.
 
+![Mediant](Mediant.png)
+
 The agenda has three spaces:
 
 * **Deadlines** — things that exert pressure
@@ -173,6 +175,18 @@ This is useful for:
 * syncing Mediant.org with Dropbox, Syncthing, git, Nextcloud, or anything else
 
 Mediant does not include authentication. If you expose it beyond localhost, put it behind something you trust.
+
+## Example file
+
+The repository includes a `Mediant.org` that exercises every canonical construct. You can load it directly in server mode or paste its contents into the textarea in static mode.
+
+It covers:
+
+- Tasks under `* Tasks`: `TODO` and `DONE` headings; `[#A]`/`[#B]`/`[#C]` priority cookies; `DEADLINE:`, `SCHEDULED:`, and both on one planning line; checkbox lists with `[X]`/`[ ]` items; `#+begin_src description` blocks (including a line that would be misread as a planning keyword outside the block); `DONE` with a preserved `:LOGBOOK:` drawer; a recurring scheduled task with `:SERIES-UNTIL:`
+- Events under `* Events`: timed events with and without description blocks; all-day events; events with `[#A]`/`[#C]` priority cookies; repeating events using all three repeater marks (`+`, `.+`, `++`); `:SERIES-UNTIL:` on a repeating series; all four exception override forms (`cancelled`, `shift`, `reschedule YYYY-MM-DD HH:MM-HH:MM`, and `reschedule YYYY-MM-DD HH:MM`); `:EXCEPTION-NOTE-…:` standalone and combined with an override
+- Gracefully ignored constructs: a plain `:PROPERTIES:` drawer with a non-Mediant key; a `:LOGBOOK:` drawer; `# comments`; an Org table; plain list items; an inactive timestamp
+
+---
 
 ## Getting started
 

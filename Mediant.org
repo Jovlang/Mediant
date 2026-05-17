@@ -1,0 +1,157 @@
+#+title: Mediant Example
+#+author: Mediant
+#+startup: show2levels
+
+# This file demonstrates every canonical Mediant.org construct.
+# It is a valid Org file and opens correctly in Emacs Org-mode.
+
+* Tasks
+** TODO [#A] Submit expense report :work:finance:
+DEADLINE: <2026-05-22 Fri>
+#+begin_src description
+  Attach all receipts from the Amsterdam trip.
+  Submit via the finance portal before close of business.
+#+end_src
+
+** TODO [#B] Draft project proposal :work:
+DEADLINE: <2026-05-29 Fri> SCHEDULED: <2026-05-20 Wed>
+- [ ] Executive summary
+- [X] Background section
+- [ ] Budget breakdown
+- [ ] Risk register
+
+** TODO Review pull requests :work:
+SCHEDULED: <2026-05-18 Mon>
+
+** DONE Onboard new hire :work:hr:
+DEADLINE: <2026-05-16 Sat>
+#+begin_src description
+  Completed laptop setup and access provisioning.
+#+end_src
+
+** TODO Book annual check-up :health:admin:
+DEADLINE: <2026-05-31 Sun>
+- [ ] Call GP surgery
+- [ ] Confirm fasting blood panel
+- [ ] Book follow-up if needed
+
+** TODO Renew passport :personal:admin:
+DEADLINE: <2026-06-15 Mon>
+#+begin_src description
+  Form available at the post office or online.
+  SCHEDULED: <2026-05-20> this line is plain description text, not a planning line.
+#+end_src
+
+** TODO [#B] Plan summer trip :personal:travel:
+SCHEDULED: <2026-05-25 Mon>
+- [X] Choose destination
+- [ ] Compare accommodation
+- [ ] Buy travel insurance
+
+** TODO Pay quarterly tax :finance:admin:
+DEADLINE: <2026-07-31 Fri> SCHEDULED: <2026-07-01 Wed>
+
+** TODO Review monthly budget :finance:
+SCHEDULED: <2026-06-01 Mon ++1m>
+:PROPERTIES:
+:SERIES-UNTIL: 2027-01-01
+:END:
+- [ ] Export bank statement
+- [ ] Categorise transactions
+- [ ] Update savings forecast
+
+** DONE Pay rent :finance:
+DEADLINE: <2026-05-01 Fri>
+:LOGBOOK:
+CLOCK: [2026-05-01 Fri 09:00]--[2026-05-01 Fri 09:05] =>  0:05
+:END:
+
+** TODO Finish "Thinking, Fast and Slow" :learning:reading:
+DEADLINE: <2026-06-30 Tue>
+- [X] Part I — Two Systems
+- [X] Part II — Heuristics and Biases
+- [ ] Part III — Overconfidence
+- [ ] Part IV — Choices
+- [ ] Part V — Two Selves
+
+** TODO Call the landlord :admin:
+
+** TODO [#A] Prepare birthday gift for Sam :personal:
+DEADLINE: <2026-05-24 Sun>
+
+* Events
+** Team check-in :work:meetings:
+<2026-05-19 Tue 10:00-11:00>
+#+begin_src description
+  Weekly sync with the full team.
+  Agenda: sprint review, blockers, upcoming milestones.
+#+end_src
+
+** [#A] Quarterly planning :work:
+<2026-05-20 Wed 14:00-16:00>
+
+** Yoga :health:fitness:
+<2026-05-19 Tue 07:00-08:00 +1w>
+:PROPERTIES:
+:SERIES-UNTIL: 2026-08-01
+:EXCEPTION-2026-05-19: shift +30m
+:EXCEPTION-NOTE-2026-05-19: Studio opens late — start at 07:30
+:EXCEPTION-2026-05-26: cancelled
+:EXCEPTION-NOTE-2026-05-26: Bank holiday — class cancelled
+:EXCEPTION-2026-06-02: reschedule 2026-06-03 07:00-08:00
+:EXCEPTION-NOTE-2026-06-09: Bring extra water — hot room session
+:END:
+
+** Run in the park :health:outdoors:
+<2026-05-18 Mon 06:30-07:15 .+3d>
+#+begin_src description
+  5 km easy pace around the reservoir.
+  Target heart rate: zone 2.
+#+end_src
+
+** Lunch with Alex :personal:social:
+<2026-05-23 Sat 12:30-14:00>
+#+begin_src description
+  Bistro on Canal Street — reservation under "Jordan".
+  * Reminder: bring the book you borrowed
+#+end_src
+
+** [#C] Book flights :personal:travel:
+<2026-05-21 Thu>
+
+** Spanish class :learning:language:
+<2026-05-20 Wed 19:00-20:30 +1w>
+:PROPERTIES:
+:SERIES-UNTIL: 2026-07-15
+:EXCEPTION-NOTE-2026-05-27: Bring vocabulary list from unit 4
+:EXCEPTION-2026-06-03: cancelled
+:EXCEPTION-NOTE-2026-06-03: Public holiday — no class
+:EXCEPTION-2026-06-10: reschedule 2026-06-11 19:00
+:END:
+#+begin_src description
+  Online via video call — link in the calendar invite.
+#+end_src
+
+** Reading group :learning:social:
+<2026-05-28 Thu 18:30-20:00 ++2w>
+#+begin_src description
+  Hosted this month at Sarah's.
+  Bring: a passage you found striking and a question for discussion.
+#+end_src
+
+** Ideas
+:PROPERTIES:
+:CATEGORY: inbox
+:END:
+# This property drawer is gracefully ignored (only Mediant keys are read).
+# The heading has no timestamp and no TODO state — it is plain text to Mediant.
+
+| Idea         | Status  |
+|--------------+---------|
+| Blog post    | Draft   |
+| Side project | Parked  |
+
+- Some plain list items below the table.
+- These are treated as body text and preserved verbatim.
+
+[2026-05-10 Sun] — inactive timestamp on its own line; preserved, not an agenda item.
