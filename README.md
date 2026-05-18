@@ -101,6 +101,7 @@ It gives you:
 * optional upcoming deadlines grouped by temporal urgency
 * scheduled tasks, deadline tasks, and timed events in the calendar
 * recurring tasks and events with per-occurrence exceptions
+* someday section for undated tasks
 * quick capture with keybindings
 * add and edit panels
 * autosaving field edits
