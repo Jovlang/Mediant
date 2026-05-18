@@ -520,7 +520,7 @@ Everything Mediant does not recognise is preserved verbatim where possible. For 
 
 ## Mediant-specific syntax extensions
 
-Mediant adds two small extensions on top of ordinary Org property drawers:
+Mediant adds two small extensions to the Org format:
 
 * recurrence exceptions
 * series truncation
