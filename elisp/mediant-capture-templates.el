@@ -24,13 +24,8 @@
 ;;
 ;;   (add-to-list 'load-path "/path/to/Mediant/elisp")
 ;;   (load "mediant-capture-templates")
-;;
-;; org-directory must be set before loading so Mediant.org can be located.
 
 ;;; Code:
-
-
-(defvar mediant-file (expand-file-name "Mediant.org" org-directory))
 
 (defvar org-time-was-given)
 (defvar org-end-time-was-given)
@@ -48,7 +43,8 @@ PROMPT overrides the default minibuffer prompt."
             ">")))
 
 (with-eval-after-load 'org-capture
-  (dolist (template
+  (let ((mediant-file (expand-file-name "Mediant.org" org-directory)))
+    (dolist (template
            `(("t" "Someday task" entry
               (file+headline ,mediant-file "Tasks")
               "* TODO %?\n")
@@ -90,5 +86,8 @@ PROMPT overrides the default minibuffer prompt."
               (file+headline ,mediant-file "Events")
               (function ,(lambda ()
                            (concat "* %?\n" (mediant--read-timestamp "+1y" "Yearly: ") "\n"))))))
-    (setf (alist-get (car template) org-capture-templates nil nil #'equal)
-          (cdr template))))
+      (add-to-list 'org-capture-templates template t))))
+
+(provide 'mediant-capture-templates)
+
+;;; mediant-capture-templates.el ends here

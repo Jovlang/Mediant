@@ -42,7 +42,8 @@ Three clearly separated stages — do not collapse them:
 | `server/cli.mjs` | Node CLI + HTTP server. `mediant [file.org \| dir] [--port N] [--daemon]`. With no target it uses `./Mediant.org`; with a directory target it uses `Mediant.org` inside that directory. `GET /api/source` returns `{ content, version }`. `PUT /api/source` takes JSON `{ content, version }`; version mismatch → 409. `GET /api/events` SSE backed by `fs.watch` (debounced). Node built-ins only, no deps. |
 | `elisp/mediant-org-agenda.el` | Optional Emacs Org agenda integration. Global minor mode that runs on `org-agenda-finalize-hook`, reads Mediant exception properties from source headings, filters cancelled/cutoff occurrences, inserts moved synthetic agenda lines, and renders exception notes. |
 | `elisp/mediant-org-agenda-test.el` | ERT tests for the optional Org agenda integration. Uses temporary Org files and real `org-agenda-list` generation to verify exception display behavior. |
-| `elisp/mediant-capture-templates.el` | Optional Org capture templates for Mediant.org. Defines `org-better-agenda--read-timestamp` (wraps `org-read-date`, formats an active timestamp string with optional repeater) and registers eight `org-capture` templates under `with-eval-after-load 'org-capture`: `t` (todo), `d` (deadline todo), `s` (scheduled todo), `b` (deadline+scheduled todo), `e` (event), `w`/`m`/`y` (weekly/monthly/yearly recurring event). Templates append under `* Tasks` or `* Events` in `(expand-file-name "Mediant.org" org-directory)`. `org-directory` must be set before the file is loaded. |
+| `elisp/mediant-capture-templates.el` | Optional Org capture templates for Mediant.org. Defines `mediant--read-timestamp` (wraps `org-read-date`, formats an active timestamp string with optional repeater) and registers eight `org-capture` templates under `with-eval-after-load 'org-capture`: `t` (someday task), `d` (deadline task), `s` (scheduled task), `b` (deadline+scheduled task), `e` (event), `w`/`m`/`y` (weekly/monthly/yearly recurring event). Templates append under `* Tasks` or `* Events` in `(expand-file-name "Mediant.org" org-directory)`, evaluated lazily at `org-capture` load time. |
+| `elisp/mediant-capture-templates-test.el` | ERT tests for the capture templates. Covers `mediant--read-timestamp` output format (date-only, with time, repeater, end time, custom prompt) and template registration (all keys present, correct order, correct target headings, correct file path). |
 
 ## Commands
 
@@ -56,6 +57,8 @@ emacs --batch -L elisp -f batch-byte-compile elisp/mediant-org-agenda.el
                       # byte-compile the optional Org agenda integration
 emacs --batch -L elisp -l elisp/mediant-org-agenda-test.el -f ert-run-tests-batch-and-exit
                       # run ERT tests for the optional Org agenda integration
+emacs --batch -L elisp -l elisp/mediant-capture-templates-test.el -f ert-run-tests-batch-and-exit
+                      # run ERT tests for the capture templates
 ```
 
 ## Change workflow
