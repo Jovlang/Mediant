@@ -29,13 +29,16 @@
 
 ;;; Code:
 
-(defvar org-time-was-given nil)
-(defvar org-end-time-was-given nil)
 
-(defun org-better-agenda--read-timestamp (&optional repeater prompt)
-  "Prompt for a date and return an active timestamp string.
+(defvar mediant-file (expand-file-name "Mediant.org" org-directory))
+
+(defvar org-time-was-given)
+(defvar org-end-time-was-given)
+
+(defun mediant--read-timestamp (&optional repeater prompt)
+  "Prompt for a date/time and return an active Org timestamp string.
 If REPEATER (e.g. \"+1w\") is non-nil, embed it inside the brackets.
-PROMPT overrides the minibuffer prompt string."
+PROMPT overrides the default minibuffer prompt."
   (let ((time (org-read-date nil t nil (or prompt "Date: "))))
     (concat "<" (format-time-string
                  (if org-time-was-given "%Y-%m-%d %a %H:%M" "%Y-%m-%d %a")
@@ -45,47 +48,47 @@ PROMPT overrides the minibuffer prompt string."
             ">")))
 
 (with-eval-after-load 'org-capture
-  (let ((mediant-file (expand-file-name "Mediant.org" org-directory)))
-    (dolist (template
-             `(("t" "Someday task" entry
-                (file+headline ,mediant-file "Tasks")
-                "* TODO %?\n")
-               ("d" "Task with deadline" entry
-                (file+headline ,mediant-file "Tasks")
-                (function ,(lambda ()
-                             (concat "* TODO %?\nDEADLINE: "
-                                     (org-better-agenda--read-timestamp nil "Deadline: ")
-                                     "\n"))))
-               ("s" "Scheduled task" entry
-                (file+headline ,mediant-file "Tasks")
-                (function ,(lambda ()
-                             (concat "* TODO %?\nSCHEDULED: "
-                                     (org-better-agenda--read-timestamp nil "Scheduled: ")
-                                     "\n"))))
-               ;; Note: DEADLINE and SCHEDULED must be on the same line (separated
-               ;; by a space), in that order, for Mediant (and Org agenda) to
-               ;; parse them as planning info.
-               ("b" "Scheduled task with deadline" entry
-                (file+headline ,mediant-file "Tasks")
-                (function ,(lambda ()
-                             (let ((deadline (org-better-agenda--read-timestamp nil "Deadline: "))
-                                   (scheduled (org-better-agenda--read-timestamp nil "Scheduled: ")))
-                               (concat "* TODO %?\nDEADLINE: " deadline
-                                       " SCHEDULED: " scheduled "\n")))))
-               ("e" "Event" entry
-                (file+headline ,mediant-file "Events")
-                (function ,(lambda ()
-                             (concat "* %?\n" (org-better-agenda--read-timestamp nil "Event: ") "\n"))))
-               ("w" "Weekly event" entry
-                (file+headline ,mediant-file "Events")
-                (function ,(lambda ()
-                             (concat "* %?\n" (org-better-agenda--read-timestamp "+1w" "Weekly: ") "\n"))))
-               ("m" "Monthly event" entry
-                (file+headline ,mediant-file "Events")
-                (function ,(lambda ()
-                             (concat "* %?\n" (org-better-agenda--read-timestamp "+1m" "Monthly: ") "\n"))))
-               ("y" "Yearly event" entry
-                (file+headline ,mediant-file "Events")
-                (function ,(lambda ()
-                             (concat "* %?\n" (org-better-agenda--read-timestamp "+1y" "Yearly: ") "\n"))))))
-      (add-to-list 'org-capture-templates template t))))
+  (dolist (template
+           `(("t" "Someday task" entry
+              (file+headline ,mediant-file "Tasks")
+              "* TODO %?\n")
+             ("d" "Task with deadline" entry
+              (file+headline ,mediant-file "Tasks")
+              (function ,(lambda ()
+                           (concat "* TODO %?\nDEADLINE: "
+                                   (mediant--read-timestamp nil "Deadline: ")
+                                   "\n"))))
+             ("s" "Scheduled task" entry
+              (file+headline ,mediant-file "Tasks")
+              (function ,(lambda ()
+                           (concat "* TODO %?\nSCHEDULED: "
+                                   (mediant--read-timestamp nil "Scheduled: ")
+                                   "\n"))))
+             ;; Note: DEADLINE and SCHEDULED must be on the same line (separated
+             ;; by a space), in that order, for Mediant (and Org agenda) to
+             ;; parse them as planning info.
+             ("b" "Scheduled task with deadline" entry
+              (file+headline ,mediant-file "Tasks")
+              (function ,(lambda ()
+                           (let ((deadline (mediant--read-timestamp nil "Deadline: "))
+                                 (scheduled (mediant--read-timestamp nil "Scheduled: ")))
+                             (concat "* TODO %?\nDEADLINE: " deadline
+                                     " SCHEDULED: " scheduled "\n")))))
+             ("e" "Event" entry
+              (file+headline ,mediant-file "Events")
+              (function ,(lambda ()
+                           (concat "* %?\n" (mediant--read-timestamp nil "Event: ") "\n"))))
+             ("w" "Weekly event" entry
+              (file+headline ,mediant-file "Events")
+              (function ,(lambda ()
+                           (concat "* %?\n" (mediant--read-timestamp "+1w" "Weekly: ") "\n"))))
+             ("m" "Monthly event" entry
+              (file+headline ,mediant-file "Events")
+              (function ,(lambda ()
+                           (concat "* %?\n" (mediant--read-timestamp "+1m" "Monthly: ") "\n"))))
+             ("y" "Yearly event" entry
+              (file+headline ,mediant-file "Events")
+              (function ,(lambda ()
+                           (concat "* %?\n" (mediant--read-timestamp "+1y" "Yearly: ") "\n"))))))
+    (setf (alist-get (car template) org-capture-templates nil nil #'equal)
+          (cdr template))))
