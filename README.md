@@ -633,14 +633,14 @@ The templates registered are:
 
 | Key | Name                        | Target section | Planning |
 | --- | --------------------------- | -------------- | -------- |
-| `t` | Todo                        | Tasks          | none |
-| `d` | Todo with deadline          | Tasks          | `DEADLINE:` |
-| `s` | Scheduled todo              | Tasks          | `SCHEDULED:` |
-| `b` | Scheduled todo with deadline | Tasks         | `DEADLINE: … SCHEDULED:` |
-| `e` | Event                       | Events         | standalone active timestamp |
-| `w` | Weekly event                | Events         | repeating timestamp (`+1w`) |
-| `m` | Monthly event               | Events         | repeating timestamp (`+1m`) |
-| `y` | Yearly event                | Events         | repeating timestamp (`+1y`) |
+| `t` | Someday task                 | Tasks         | none |
+| `d` | Task with deadline           | Tasks         | `DEADLINE:` |
+| `s` | Scheduled task               | Tasks         | `SCHEDULED:` |
+| `b` | Scheduled task with deadline | Tasks         | `DEADLINE: … SCHEDULED:` |
+| `e` | Event                        | Events        | standalone active timestamp |
+| `w` | Weekly event                 | Events        | repeating timestamp (`+1w`) |
+| `m` | Monthly event                | Events        | repeating timestamp (`+1m`) |
+| `y` | Yearly event                 | Events        | repeating timestamp (`+1y`) |
 
 Each date-bearing template prompts for a date using `org-read-date` and produces a timestamp in the format Mediant expects.
 
