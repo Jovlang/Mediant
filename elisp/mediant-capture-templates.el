@@ -29,6 +29,9 @@
 
 ;;; Code:
 
+(defvar org-time-was-given nil)
+(defvar org-end-time-was-given nil)
+
 (defun org-better-agenda--read-timestamp (&optional repeater prompt)
   "Prompt for a date and return an active timestamp string.
 If REPEATER (e.g. \"+1w\") is non-nil, embed it inside the brackets.
