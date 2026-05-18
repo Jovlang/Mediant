@@ -11,10 +11,10 @@
 ;; Events sections of a Mediant.org file.
 ;;
 ;; Templates:
-;;   t  Todo                         — plain TODO heading
-;;   d  Todo with deadline           — TODO with DEADLINE
-;;   s  Scheduled todo               — TODO with SCHEDULED
-;;   b  Scheduled todo with deadline — TODO with DEADLINE and SCHEDULED
+;;   t  Someday task                 — plain TODO heading
+;;   d  Task with deadline           — TODO with DEADLINE
+;;   s  Scheduled task               — TODO with SCHEDULED
+;;   b  Scheduled task with deadline — TODO with DEADLINE and SCHEDULED
 ;;   e  Event                        — plain heading with a standalone timestamp
 ;;   w  Weekly event                 — event with a +1w repeating timestamp
 ;;   m  Monthly event                — event with a +1m repeating timestamp
@@ -44,16 +44,16 @@ PROMPT overrides the minibuffer prompt string."
 (with-eval-after-load 'org-capture
   (let ((mediant-file (expand-file-name "Mediant.org" org-directory)))
     (dolist (template
-             `(("t" "Todo" entry
+             `(("t" "Someday task" entry
                 (file+headline ,mediant-file "Tasks")
                 "* TODO %?\n")
-               ("d" "Todo with deadline" entry
+               ("d" "Task with deadline" entry
                 (file+headline ,mediant-file "Tasks")
                 (function ,(lambda ()
                              (concat "* TODO %?\nDEADLINE: "
                                      (org-better-agenda--read-timestamp nil "Deadline: ")
                                      "\n"))))
-               ("s" "Scheduled todo" entry
+               ("s" "Scheduled task" entry
                 (file+headline ,mediant-file "Tasks")
                 (function ,(lambda ()
                              (concat "* TODO %?\nSCHEDULED: "
@@ -62,7 +62,7 @@ PROMPT overrides the minibuffer prompt string."
                ;; Note: DEADLINE and SCHEDULED must be on the same line (separated
                ;; by a space), in that order, for Mediant (and Org agenda) to
                ;; parse them as planning info.
-               ("b" "Scheduled todo with deadline" entry
+               ("b" "Scheduled task with deadline" entry
                 (file+headline ,mediant-file "Tasks")
                 (function ,(lambda ()
                              (let ((deadline (org-better-agenda--read-timestamp nil "Deadline: "))

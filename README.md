@@ -114,6 +114,14 @@ Mediant is for "my stuff".
 
 ---
 
+## The Mediant dialect of Org
+
+Mediant intentionally supports only a minimal subset of Emacs Org-mode.
+
+Org-mode is enormous, and trying to parse all of it would turn Mediant into a second Org implementation. That is not the goal.
+
+For predictable results, add items to `Mediant.org` through Mediant itself or through the included Org capture templates. You can still edit the file by hand, but Mediant only promises to understand the subset it documents.
+
 ## The basic model
 
 Mediant has three layers:
