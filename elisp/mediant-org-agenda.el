@@ -420,6 +420,58 @@ If LINE has no visible time, prefix a compact START marker."
             'kept)
            (t 'kept)))))))
 
+(defun mediant-org-agenda--grid-line-p ()
+  "Return non-nil if the current line is an Org agenda time-grid line.
+Grid lines carry `time-of-day' but no `org-marker'.  Text properties may
+sit past the category prefix, so we scan the full line width."
+  (and (mediant-org-agenda--line-property 'time-of-day)
+       (not (mediant-org-agenda--line-property 'org-marker))
+       (not (mediant-org-agenda--line-property 'org-hd-marker))
+       (not (get-text-property (line-beginning-position) 'org-agenda-date-header))
+       (not (get-text-property (line-beginning-position) 'mediant-org-agenda-synthetic))))
+
+(defun mediant-org-agenda--clean-orphan-grid ()
+  "Remove time-grid lines from day sections with no remaining timed entries.
+`org-agenda-add-time-grid-maybe' runs before the finalize hook, so grid lines
+for a day whose only timed entry was suppressed must be cleaned up manually."
+  (let (delete-regions)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (when (get-text-property (line-beginning-position) 'org-agenda-date-header)
+          (let ((section-end (save-excursion
+                               (forward-line 1)
+                               (while (and (not (eobp))
+                                          (not (get-text-property
+                                                (line-beginning-position)
+                                                'org-agenda-date-header)))
+                                 (forward-line 1))
+                               (point)))
+                (has-timed nil)
+                (grid-regions nil))
+            (save-excursion
+              (forward-line 1)
+              (while (< (point) section-end)
+                (cond
+                 ((mediant-org-agenda--grid-line-p)
+                  (push (cons (line-beginning-position)
+                              (min (point-max) (1+ (line-end-position))))
+                        grid-regions))
+                 ((or (and (mediant-org-agenda--line-property 'time-of-day)
+                           (mediant-org-agenda--line-property 'org-marker))
+                      (get-text-property (line-beginning-position)
+                                         'mediant-org-agenda-synthetic))
+                  (setq has-timed t)))
+                (forward-line 1)))
+            (mediant-org-agenda--log
+             "clean-orphan-grid: day section has-timed=%s grid-lines=%d"
+             has-timed (length grid-regions))
+            (unless has-timed
+              (setq delete-regions (nconc delete-regions grid-regions)))))
+        (forward-line 1)))
+    (dolist (r (sort delete-regions (lambda (a b) (> (car a) (car b)))))
+      (delete-region (car r) (cdr r)))))
+
 (defun mediant-org-agenda--remove-empty-day-headers ()
   "Remove day header lines whose sections have no remaining event lines.
 Only called when `org-agenda-show-all-dates' is nil."
@@ -460,6 +512,7 @@ Only called when `org-agenda-show-all-dates' is nil."
             (unless (eq result 'deleted)
               (forward-line 1)))))
       (mediant-org-agenda--insert-moved-lines insertions)
+      (mediant-org-agenda--clean-orphan-grid)
       (unless org-agenda-show-all-dates
         (mediant-org-agenda--remove-empty-day-headers)))))
 
