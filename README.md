@@ -36,7 +36,7 @@ Mediant has three core sections.
 
 Deadlines are things that exert pressure.
 
-Overdue items and approaching deadlines appear together in one combined overview at the top. Overdue rows are always part of this section. Upcoming deadline rows are optional; deadline tasks still appear on their calendar day when those rows are hidden.
+Overdue items and approaching deadlines appear together in one combined overview at the top. Overdue rows are always part of this section. Upcoming deadlines can be shown either here or in the calendar.
 
 This section answers questions like:
 
@@ -47,13 +47,15 @@ This section answers questions like:
 
 Deadlines have gravity.
 
-They are calendar items with pressure attached: they live on the calendar, and the overview duplicates them when you want to scan urgency directly.
+They are calendar items with pressure attached: they can live at the top for urgency scanning, or on their calendar day when you want the agenda to carry them.
 
 ### Calendar
 
 The calendar shows things that already have a place in time.
 
 Scheduled tasks, deadline tasks, timed events, all-day events, and recurring occurrences appear inside the active date range.
+
+If one task has both `SCHEDULED:` and `DEADLINE:`, the scheduled appearance always stays in the calendar. The upcoming deadline appearance is shown either at the top or in the calendar; overdue deadlines remain visible in both places.
 
 This section answers questions like:
 
@@ -98,7 +100,7 @@ Mediant is designed for fast visual scanning.
 It gives you:
 
 * overdue items at the top
-* optional upcoming deadlines grouped by temporal urgency without repeating the same deadline in the calendar
+* optional upcoming deadlines grouped by temporal urgency or shown on their calendar day
 * scheduled tasks, deadline tasks, and timed events in the calendar
 * recurring tasks and events with per-occurrence exceptions
 * someday section for undated tasks
@@ -145,7 +147,7 @@ Parsing is about the source dialect. Agenda classification is about what the int
 
 ## Two ways to use it
 
-Mediant can run in two modes.
+Mediant can run in two modes. They share the same parser and UI, but they store the Org source differently.
 
 ### Static mode
 
@@ -153,7 +155,7 @@ Paste Mediant.org dialect content into the browser.
 
 Everything stays in `localStorage`.
 
-There is no server, no account, no database, and no install step beyond hosting the static files.
+There is no server, no account, no database, and no install step beyond hosting the static files. The browser stores the pasted source in `localStorage` and does not write to a disk file.
 
 This is useful for:
 
@@ -794,7 +796,7 @@ Mediant uses browser `localStorage` for UI preferences and, in static mode, the 
 | `mediant-hide-tags`       | Whether agenda tag labels are hidden.                      |
 | `mediant-hide-empty-days` | Whether empty days are hidden.                             |
 | `mediant-hide-completed`  | Whether DONE entries and skipped occurrences are hidden.   |
-| `mediant-hide-deadlines`  | Whether optional deadline overview rows are hidden.        |
+| `mediant-hide-deadlines`  | Deadline placement preference: top overview or calendar.  |
 | `mediant-month-ahead`     | Whether the agenda shows 30 days instead of 7.             |
 | `mediant-notifications`   | Whether browser reminders are enabled.                     |
 | `mediant-locale`          | Selected UI locale: `en`, `nb`, `it`, or `de`.             |
