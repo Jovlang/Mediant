@@ -87,12 +87,15 @@ function renderAgendaBase(
 
   // Days card (the visible date range in one container, divided by thin rules)
   const daysCard = el("section", "days-card");
+  const calendarWeek = hasDeadlines
+    ? removeCalendarDeadlineDuplicates(week, deadlines)
+    : week;
   const filteredWeek: AgendaDay[] = hideCompleted
-    ? week.map(day => ({
+    ? calendarWeek.map(day => ({
         date: day.date,
         items: day.items.filter(item => item.entry.todo !== "DONE" && !item.skipped),
       }))
-    : [...week];
+    : [...calendarWeek];
   const visibleDays = options.hideEmptyDays
     ? filteredWeek.filter(day => day.items.length > 0)
     : filteredWeek;
@@ -111,6 +114,33 @@ function renderAgendaBase(
     container.appendChild(renderSomeday(visibleSomeday));
   }
 
+}
+
+function removeCalendarDeadlineDuplicates(
+  week: readonly AgendaDay[],
+  deadlines: readonly DeadlineItem[],
+): readonly AgendaDay[] {
+  if (deadlines.length === 0) return week;
+
+  return week.map(day => {
+    const items = day.items.filter(item => !isDeadlineShownInOverview(item, deadlines));
+    return items.length === day.items.length ? day : { date: day.date, items };
+  });
+}
+
+function isDeadlineShownInOverview(
+  item: AgendaItem,
+  deadlines: readonly DeadlineItem[],
+): boolean {
+  if (item.category !== "deadline") return false;
+
+  return deadlines.some(deadline =>
+    deadline.daysUntil >= 0
+    && deadline.entry === item.entry
+    && deadline.sourceTimestamp === item.sourceTimestamp
+    && deadline.baseDate === item.baseDate
+    && deadline.dueDate.getTime() === item.date.getTime()
+  );
 }
 
 // ── Header ───────────────────────────────────────────────────────────

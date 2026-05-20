@@ -57,7 +57,7 @@ A task is a `TODO` or `DONE` heading. It may be undated, or it may be followed i
 DEADLINE: <2026-04-10 Fri> SCHEDULED: <2026-04-07 Tue>
 ```
 
-`DEADLINE:` places the task on its calendar day and feeds the combined deadline/overdue overview. Overdue rows are always shown when present; upcoming deadline rows can be hidden. `SCHEDULED:` places the task on the calendar. With both present, the same task can appear as both a deadline item and a scheduled task.
+`DEADLINE:` places the task on its calendar day and feeds the combined deadline/overdue overview. Overdue rows are always shown when present and stay visible in the calendar. Upcoming deadline rows can be hidden; when they are shown in the overview, the matching deadline appearance is suppressed from the calendar. `SCHEDULED:` always places the task on the calendar. With both present, the scheduled appearance remains visible even when the deadline appearance is shown only in the overview.
 
 ---
 

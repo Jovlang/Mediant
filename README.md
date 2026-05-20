@@ -98,7 +98,7 @@ Mediant is designed for fast visual scanning.
 It gives you:
 
 * overdue items at the top
-* optional upcoming deadlines grouped by temporal urgency
+* optional upcoming deadlines grouped by temporal urgency without repeating the same deadline in the calendar
 * scheduled tasks, deadline tasks, and timed events in the calendar
 * recurring tasks and events with per-occurrence exceptions
 * someday section for undated tasks

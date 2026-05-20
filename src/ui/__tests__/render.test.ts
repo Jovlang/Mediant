@@ -370,6 +370,124 @@ describe("renderAgenda", () => {
     expect(toggle?.classList.contains("is-on")).toBe(true);
   });
 
+  it("deduplicates only the upcoming deadline appearance when overview shows it", () => {
+    const container = document.createElement("div");
+    const entry = makeEntry({ title: "Prepare application", todo: "TODO", sourceLineNumber: 42 });
+    const scheduledTimestamp = makeTimestamp("2026-04-20");
+    const deadlineTimestamp = makeTimestamp("2026-04-22");
+    const week = makeWeek([
+      [
+        makeItem({
+          entry,
+          date: new Date(2026, 3, 20),
+          category: "scheduled",
+          sourceTimestamp: scheduledTimestamp,
+        }),
+      ],
+      [],
+      [
+        makeItem({
+          entry,
+          date: new Date(2026, 3, 22),
+          category: "deadline",
+          sourceTimestamp: deadlineTimestamp,
+        }),
+      ],
+      [],
+      [],
+      [],
+      [],
+    ]);
+    const deadlines: DeadlineItem[] = [
+      makeDeadlineItem({
+        entry,
+        dueDate: new Date(2026, 3, 22),
+        daysUntil: 2,
+        sourceTimestamp: deadlineTimestamp,
+      }),
+    ];
+
+    renderAgenda(container, week, deadlines, [], [], new Date(2026, 3, 20, 9, 0));
+
+    expect(container.querySelectorAll(".temporal-gravity-section .deadline-item")).toHaveLength(1);
+    expect(container.querySelectorAll(".days-card .scheduled-item")).toHaveLength(1);
+    expect(container.querySelectorAll(".days-card .day-deadline-item")).toHaveLength(0);
+    expect(container.querySelector(".days-card .scheduled-item .item-title")?.textContent).toBe("Prepare application");
+  });
+
+  it("keeps upcoming deadline appearances in the calendar when overview deadlines are hidden", () => {
+    const container = document.createElement("div");
+    const entry = makeEntry({ title: "Renew license", todo: "TODO", sourceLineNumber: 43 });
+    const deadlineTimestamp = makeTimestamp("2026-04-22");
+    const week = makeWeek([
+      [],
+      [],
+      [
+        makeItem({
+          entry,
+          date: new Date(2026, 3, 22),
+          category: "deadline",
+          sourceTimestamp: deadlineTimestamp,
+        }),
+      ],
+      [],
+      [],
+      [],
+      [],
+    ]);
+    const deadlines: DeadlineItem[] = [
+      makeDeadlineItem({
+        entry,
+        dueDate: new Date(2026, 3, 22),
+        daysUntil: 2,
+        sourceTimestamp: deadlineTimestamp,
+      }),
+    ];
+
+    renderAgenda(container, week, deadlines, [], [], new Date(2026, 3, 20, 9, 0), {
+      hideDeadlines: true,
+    });
+
+    expect(container.querySelectorAll(".temporal-gravity-section .deadline-item")).toHaveLength(0);
+    expect(container.querySelectorAll(".days-card .day-deadline-item")).toHaveLength(1);
+  });
+
+  it("keeps overdue deadline appearances in the calendar and overdue overview", () => {
+    const container = document.createElement("div");
+    const entry = makeEntry({ title: "Pay invoice", todo: "TODO", sourceLineNumber: 44 });
+    const deadlineTimestamp = makeTimestamp("2026-04-18");
+    const week = makeWeek([
+      [
+        makeItem({
+          entry,
+          date: new Date(2026, 3, 18),
+          category: "deadline",
+          sourceTimestamp: deadlineTimestamp,
+        }),
+      ],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+    ], new Date(2026, 3, 18));
+    const overdue: OverdueItem[] = [{
+      entry,
+      dueDate: new Date(2026, 3, 18),
+      daysOverdue: 2,
+      kind: "deadline",
+      sourceTimestamp: deadlineTimestamp,
+      baseDate: null,
+      instanceNote: null,
+    }];
+
+    renderAgenda(container, week, [], overdue, [], new Date(2026, 3, 20, 9, 0));
+
+    expect(container.querySelectorAll(".temporal-gravity-section .overdue-item.is-deadline")).toHaveLength(1);
+    expect(container.querySelectorAll(".days-card .day-deadline-item")).toHaveLength(1);
+  });
+
   it("hides agenda tag labels when requested", () => {
     const container = document.createElement("div");
     const week = makeWeek([
@@ -797,6 +915,21 @@ function makeItem(overrides: Partial<AgendaItem> & {
     instanceNote: overrides.instanceNote ?? null,
     override: overrides.override ?? null,
     skipped: overrides.skipped ?? false,
+  };
+}
+
+function makeDeadlineItem(overrides: Partial<DeadlineItem> & {
+  entry: DeadlineItem["entry"];
+  dueDate: Date;
+  sourceTimestamp: DeadlineItem["sourceTimestamp"];
+}): DeadlineItem {
+  return {
+    entry: overrides.entry,
+    dueDate: overrides.dueDate,
+    daysUntil: overrides.daysUntil ?? 0,
+    sourceTimestamp: overrides.sourceTimestamp,
+    baseDate: overrides.baseDate ?? null,
+    instanceNote: overrides.instanceNote ?? null,
   };
 }
 
