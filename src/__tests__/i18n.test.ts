@@ -22,6 +22,23 @@ describe("i18n", () => {
     expect(getLocale()).toBe("nb");
   });
 
+  it("localizes deadline placement toggle labels", () => {
+    expect(t("showDeadlines")).toBe("Show deadlines at top");
+    expect(t("hideDeadlines")).toBe("Show deadlines in calendar");
+
+    setLocale("nb");
+    expect(t("showDeadlines")).toBe("Vis frister øverst");
+    expect(t("hideDeadlines")).toBe("Vis frister i kalenderen");
+
+    setLocale("it");
+    expect(t("showDeadlines")).toBe("Mostra scadenze in alto");
+    expect(t("hideDeadlines")).toBe("Mostra scadenze nel calendario");
+
+    setLocale("de");
+    expect(t("showDeadlines")).toBe("Fristen oben anzeigen");
+    expect(t("hideDeadlines")).toBe("Fristen im Kalender anzeigen");
+  });
+
   it("interpolates parameters", () => {
     expect(t("addEventOn", { date: "Mon 6 May" })).toBe("Add event on Mon 6 May");
     setLocale("nb");

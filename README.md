@@ -422,7 +422,7 @@ These changes are stored as ordinary Org properties, so the file remains valid O
 | `q` | Open quick capture                |
 | `h` | Toggle hide empty days            |
 | `d` | Toggle hide completed and skipped |
-| `u` | Toggle hide upcoming deadlines    |
+| `u` | Toggle deadline placement         |
 | `m` | Toggle month-ahead view           |
 | `x` | Clear active tag filters          |
 
