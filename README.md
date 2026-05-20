@@ -47,15 +47,11 @@ This section answers questions like:
 
 Deadlines have gravity.
 
-They are calendar items with pressure attached: they can live at the top for urgency scanning, or on their calendar day when you want the agenda to carry them.
-
 ### Calendar
 
-The calendar shows things that already have a place in time.
+The calendar shows scheduled tasks and events within the active date range.
 
-Scheduled tasks, deadline tasks, timed events, all-day events, and recurring occurrences appear inside the active date range.
-
-If one task has both `SCHEDULED:` and `DEADLINE:`, the scheduled appearance always stays in the calendar. The upcoming deadline appearance is shown either at the top or in the calendar; overdue deadlines remain visible in both places.
+If one task has both `SCHEDULED:` and `DEADLINE:`, the scheduled appearance always stays in the calendar. The upcoming deadline appearance is shown either at the top or in the calendar, according to setting; overdue deadlines are visible in both places.
 
 This section answers questions like:
 
@@ -63,10 +59,6 @@ This section answers questions like:
 * What happens tomorrow?
 * When do I actually need to be somewhere?
 * What have I committed to on specific days?
-
-The calendar is about commitment and structure.
-
-It shows the shape of time, not every possible thing you could be doing.
 
 ### Someday
 
@@ -100,15 +92,15 @@ Mediant is designed for fast visual scanning.
 It gives you:
 
 * overdue items at the top
-* optional upcoming deadlines grouped by temporal urgency or shown on their calendar day
-* scheduled tasks, deadline tasks, and timed events in the calendar
+* upcoming deadlines grouped by temporal urgency or shown on their calendar day
+* scheduled tasks and events in the calendar
 * recurring tasks and events with per-occurrence exceptions
 * someday section for undated tasks
 * quick capture with keybindings
 * add and edit panels
 * autosaving field edits
 * tag and priority filtering
-* optional browser notifications for timed events
+* optional browser notifications for scheduled tasks and events
 * English, Norwegian, Italian, and German UI strings
 
 The interface tries to stay quiet. Features are available, but they should not make the default view feel like a dashboard, a team workspace, or a database admin panel.
