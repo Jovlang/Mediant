@@ -50,6 +50,12 @@ TIMESTAMP defaults to a weekly 2026-04-21 17:00 timestamp."
    (or timestamp "<2026-04-21 Tue 17:00 +1w>")
    "\n"))
 
+(defun mediant-org-agenda-test--insert-agenda-line (line)
+  "Insert LINE plus a newline and return the line start position."
+  (let ((start (point)))
+    (insert line "\n")
+    start))
+
 (ert-deftest mediant-org-agenda-test-cancelled-recurring-occurrence-disappears ()
   (let ((text (mediant-org-agenda-test--agenda-text
                (mediant-org-agenda-test--active-event
@@ -209,6 +215,29 @@ TIMESTAMP defaults to a weekly 2026-04-21 17:00 timestamp."
                1)))
     (should (string-match-p "17:00[.]+ Yoga" text))
     (should-not (string-match-p "↪" text))))
+
+(ert-deftest mediant-org-agenda-test-orphan-time-grid-is-removed ()
+  (with-temp-buffer
+    (let ((orphan-header (mediant-org-agenda-test--insert-agenda-line
+                          "Tuesday    28 April 2026"))
+          (orphan-grid (mediant-org-agenda-test--insert-agenda-line
+                        "agenda       ORPHAN-GRID"))
+          (kept-header (mediant-org-agenda-test--insert-agenda-line
+                        "Wednesday  29 April 2026"))
+          (kept-grid (mediant-org-agenda-test--insert-agenda-line
+                      "agenda       KEPT-GRID"))
+          (kept-event (mediant-org-agenda-test--insert-agenda-line
+                       "  17:00...... Yoga")))
+      (put-text-property orphan-header (1+ orphan-header) 'org-agenda-date-header t)
+      (put-text-property (+ orphan-grid 13) (+ orphan-grid 24) 'time-of-day 1700)
+      (put-text-property kept-header (1+ kept-header) 'org-agenda-date-header t)
+      (put-text-property (+ kept-grid 13) (+ kept-grid 22) 'time-of-day 1700)
+      (put-text-property (+ kept-event 2) (+ kept-event 7) 'time-of-day 1700)
+      (put-text-property (+ kept-event 2) (+ kept-event 3) 'org-marker (point-marker))
+      (mediant-org-agenda--clean-orphan-grid)
+      (should-not (string-match-p "ORPHAN-GRID" (buffer-string)))
+      (should (string-match-p "KEPT-GRID" (buffer-string)))
+      (should (string-match-p "17:00[.]+ Yoga" (buffer-string))))))
 
 (provide 'mediant-org-agenda-test)
 
