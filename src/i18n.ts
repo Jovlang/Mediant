@@ -13,8 +13,8 @@ const messages = {
     next7Days: "Next 7 days",
     prev30Days: "Previous 30 days",
     next30Days: "Next 30 days",
-    addLabel: "+Add",
-    addAria: "Add item",
+    addLabel: "Write",
+    addAria: "Write a note",
     settings: "Settings",
     viewOnGitHub: "View on GitHub",
 
@@ -158,8 +158,8 @@ const messages = {
     next7Days: "Neste 7 dager",
     prev30Days: "Forrige 30 dager",
     next30Days: "Neste 30 dager",
-    addLabel: "+Legg til",
-    addAria: "Legg til oppføring",
+    addLabel: "Skriv",
+    addAria: "Skriv en notis",
     settings: "Innstillinger",
     viewOnGitHub: "Se på GitHub",
 
@@ -292,8 +292,8 @@ const messages = {
     next7Days: "Prossimi 7 giorni",
     prev30Days: "30 giorni precedenti",
     next30Days: "Prossimi 30 giorni",
-    addLabel: "+Aggiungi",
-    addAria: "Aggiungi elemento",
+    addLabel: "Scrivi",
+    addAria: "Scrivi una nota",
     settings: "Impostazioni",
     viewOnGitHub: "Vedi su GitHub",
 
@@ -426,8 +426,8 @@ const messages = {
     next7Days: "Nächste 7 Tage",
     prev30Days: "Vorherige 30 Tage",
     next30Days: "Nächste 30 Tage",
-    addLabel: "+Hinzufügen",
-    addAria: "Element hinzufügen",
+    addLabel: "Schreiben",
+    addAria: "Notiz schreiben",
     settings: "Einstellungen",
     viewOnGitHub: "Auf GitHub ansehen",
 
