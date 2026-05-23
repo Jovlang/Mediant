@@ -515,11 +515,15 @@ body {
   font-family: var(--font-mono);
   font-size: 0.84rem;
   font-weight: 650;
-  color: var(--deadline-urgency-critical);
+  color: color-mix(in srgb, var(--deadline-urgency-caution) 40%, var(--deadline-urgency-calm));
   text-align: right;
   cursor: pointer;
   user-select: none;
   transition: text-shadow 120ms ease;
+}
+
+.overdue-item.is-deadline .item-time {
+  color: var(--deadline-urgency-critical);
 }
 
 .overdue-item .item-time:hover {
