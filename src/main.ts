@@ -2424,7 +2424,7 @@ function render(): void {
   const today = new Date();
   const dayCount = monthAhead ? MONTH_AHEAD_DAYS : 7;
   const week = generateAgenda(entries, currentStart, dayCount);
-  const deadlines = collectDeadlines(entries, today);
+  const deadlines = collectDeadlines(entries, today).filter(d => d.daysUntil <= MONTH_AHEAD_DAYS);
   const overdue = collectOverdueItems(entries, today);
   const someday = collectSomedayItems(entries);
   const filteredWeek = filterWeekByTags(week);

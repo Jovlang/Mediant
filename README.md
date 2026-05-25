@@ -36,7 +36,7 @@ Mediant has three core sections.
 
 Deadlines are things that exert pressure.
 
-Overdue items and approaching deadlines appear together in one combined overview at the top. Overdue rows are always part of this section. Upcoming deadlines can be shown either here or in the calendar.
+Overdue items and approaching deadlines appear together in one combined overview at the top. Overdue rows are always part of this section. Upcoming deadlines within the next 30 days can be shown either here or in the calendar.
 
 This section answers questions like:
 
