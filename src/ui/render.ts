@@ -390,7 +390,8 @@ function renderDay(day: AgendaDay, today: Date): HTMLElement {
   // Header
   const header = el("header", "day-header");
   const label = el("span", "date-label");
-  const dayText = `${DAY_NAMES[day.date.getDay()]} ${formatDayMonth(day.date)}`;
+  const yearSuffix = day.date.getFullYear() !== today.getFullYear() ? ` ${day.date.getFullYear()}` : "";
+  const dayText = `${DAY_NAMES[day.date.getDay()]} ${formatDayMonth(day.date)}${yearSuffix}`;
   label.textContent = dayText;
   label.dataset.action = "add-on-date";
   label.dataset.date = formatDateKey(day.date);
