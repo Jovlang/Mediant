@@ -933,7 +933,7 @@ body {
 
 .checkbox-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.35rem;
   font-size: 0.75rem;
   color: var(--text);
@@ -956,6 +956,10 @@ body {
   flex-shrink: 0;
   position: relative;
   transition: border-color 120ms ease;
+}
+
+.checkbox-item .checkbox-icon {
+  margin-top: 0.2rem;
 }
 
 .checkbox-checked .checkbox-icon {
